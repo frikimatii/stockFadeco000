@@ -1,7 +1,9 @@
 
 import tkinter as tk 
-from tkinter import ttk
-from funciones import mostrar_datos, actualizar_pieza, eliminar_pieza
+from tkinter import ttk ,messagebox
+from funciones import mostrar_datos, actualizar_pieza, eliminar_pieza, mover_piezas_a_stock_pulidas
+from piezas_aluminio import crear_pestana_aluminio
+from fundidor import ventana_fundidor
 
 def crear_pestana(notebook, texto):
     frame = ttk.Frame(notebook)
@@ -13,13 +15,15 @@ piezas_pedefinida = ["teletubi", "cuchilla", "motor", "vela", "planchada", "braz
 
 root = tk.Tk()
 root.title("Mostrar Datos de la Base De Datos")
-
+root.iconbitmap("img/FLogo.ico")
 notebook = ttk.Notebook(root)
 
+
+ventana_fundidor(notebook)
+crear_pestana_aluminio(notebook)  
 pestania1 = crear_pestana(notebook, "Piezas 330")
 pestania2 = crear_pestana(notebook, "Piezas 300")
 pestania3 = crear_pestana(notebook, "Piezas 250")
-pestania4 = crear_pestana(notebook, "Piezas De Aluminio")
 
 
 # ______________________piezas 300______________________________________________________
@@ -41,15 +45,17 @@ tree1.heading("Cantidad", text="Cantidad")
 tree1.column("#0", width=0, stretch=tk.NO)
 tree1.column("Pieza", anchor=tk.W, width=170)
 tree1.column("Cantidad", anchor=tk.W, width=90)
-tree1.config(height=15)
+tree1.config(height=20)
 tree1.grid(row=3, column=0, pady=5, padx=5, sticky="nsew")
+
+
 # Mostrar Resultados
 res2 = ttk.Label(frame300, text="Resultado")
 res2.grid(row=4, column=0, padx=5, pady=5)
 
 # Actualizar Cantidad
 div = ttk.Frame(pestania2)
-div.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+div.grid(row=0, column=1, padx=10, pady=10, sticky="n")
 
 titulo_agregar = ttk.Label(div, text="Agregar Piezas", font=("Arial", 16, "bold"),)
 titulo_agregar.grid(row=0, column=1, padx=5, pady=5)
@@ -114,7 +120,7 @@ tree3.heading("Cantidad", text="Cantidad")
 tree3.column("#0", width=0, stretch=tk.NO)
 tree3.column("Pieza", anchor=tk.W, width=170)
 tree3.column("Cantidad", anchor=tk.W, width=90)
-tree3.config(height=15)
+tree3.config(height=20)
 tree3.grid(row=3, column=0, pady=5, padx=5, sticky="nsew")
 # Mostrar Resultados
 res3 = ttk.Label(frame250, text="Resultado")
@@ -187,7 +193,7 @@ tree2.heading("Cantidad", text="Cantidad")
 tree2.column("#0", width=0, stretch=tk.NO)
 tree2.column("Pieza", anchor=tk.W, width=170)
 tree2.column("Cantidad", anchor=tk.W, width=90)
-tree2.config(height=15)
+tree2.config(height=20)
 tree2.grid(row=3, column=0, pady=5, padx=5, sticky="nsew")
 # Mostrar Resultados
 
@@ -242,25 +248,6 @@ boton_eliminar330.grid(row=8, column=1, padx=5, pady=5, sticky="se")
 
 separador2 = ttk.Separator(div, orient="horizontal")
 separador2.grid(row=9, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
-
-#__________________________________________________Piezas de aluminio____________________________________________________   
-
-
-aluminio = ttk.Frame(pestania4)
-aluminio.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-aluminio.grid_rowconfigure(1, weight=1)
-aluminio.grid_columnconfigure(0, weight=1)
-
-label_agregar_aluminio = ttk.Label(aluminio, text="HOla")
-label_agregar_aluminio.grid(row=0, column=0, padx=5, pady=5,sticky="ne")
-
-
-
-
-
-
-
-
 
 
 notebook.pack()
