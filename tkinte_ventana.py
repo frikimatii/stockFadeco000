@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk ,messagebox
 from funciones import mostrar_datos, actualizar_pieza, eliminar_pieza, mover_piezas_a_stock_pulidas
 from piezas_aluminio import crear_pestana_aluminio
+from stock_chapa import crear_pestana_chapa
 from fundidor import ventana_fundidor
 
 def crear_pestana(notebook, texto):
@@ -19,6 +20,7 @@ root.iconbitmap("img/FLogo.ico")
 notebook = ttk.Notebook(root)
 
 
+crear_pestana_chapa(notebook)
 ventana_fundidor(notebook)
 crear_pestana_aluminio(notebook)  
 pestania1 = crear_pestana(notebook, "Piezas 330")

@@ -13,7 +13,6 @@ def mostrar_datos(tree1, table):
     for dato in datos:
         tree1.insert("", "end", values=dato)
         
-        
 def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, tree):
     actualizar_pieza = lista_predefinida.get()
     entrada_actualizar = entrada_cantidad.get()
@@ -43,9 +42,8 @@ def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, t
     else:
         res.config(text="La cantidad ingresada no es un número válido")
 
-
 def eliminar_pieza(lista_predefinida_eliminar, entrada_cantidad_eliminar, res, table, funcion, tree):
-
+ 
     pieza_eliminar = lista_predefinida_eliminar.get()
     cantidad_eliminar = entrada_cantidad_eliminar.get()
 
@@ -136,7 +134,6 @@ def enviar_piezas_a_pulido(pieza, cantidad, tabla, tree, newtable):
     
     print(f"{cantidad_ingresada} pieza(s) de {pieza_seleccionada} han sido enviadas a pulido.")
 
-
 def mover_piezas_a_stock_pulidas(pieza, cantidad, tabla_carmelo, tabla_stock_pulidas, tree_carmelo, tree_stock_pulidas):
     pieza_seleccionada = pieza.get()
     cantidad_ingresada = cantidad.get()
@@ -195,6 +192,64 @@ def mover_piezas_a_stock_pulidas(pieza, cantidad, tabla_carmelo, tabla_stock_pul
     
     print(f"{cantidad_ingresada} pieza(s) de {pieza_seleccionada} han sido movidas a Stock Pulidas.")
 
+#funciones de stock de chapas _________________________________________________
+base_inox_330 = ["chapa_pincipal_330", "lateral_L_330", "lateral_R_330", "varilla_330", "planchuela_330", "portaeje", "arandela" ]
 
 
+def mostrar_datos_chapa(tree1, table):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT piezas, cantidad, modelo, tipo_de_base FROM {table}")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tree1.get_children():
+        tree1.delete(item)
+    for dato in datos:
+        tree1.insert("", "end", values=dato)
 
+
+def consulta_de_piezas(tabla, tipo_de_base, modelo, subtitulo):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT piezas, cantidad FROM chapa WHERE tipo_de_base = ? AND modelo = ? ", (tipo_de_base, modelo))
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for dato in datos:
+        tabla.insert("", "end", values=dato)
+        
+    subtitulo_text = f"Mostrando {tipo_de_base} {modelo}"
+    subtitulo.config(text=subtitulo_text)
+
+def consulta_cabezales(tabla, tipo_de_base, modelo, subtitulo):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad FROM chapa WHERE tipo_de_base = ? AND modelo = ? AND piezas IN ('chapa_U_cabezal', 'tapa_cabezal', 'bandeja_cabezal')", (tipo_de_base, modelo))
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for dato in datos:
+        tabla.insert("", "end", values=dato)
+        
+    subtitulo_text = f"Mostrando {tipo_de_base} {modelo}"
+    subtitulo.config(text=subtitulo_text)
+    
+    
+def stock_chapa(tabla, tipo_de_base, subtitulo):
+    conn =sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad, modelo FROM chapa WHERE tipo_de_base = ?", (tipo_de_base, ))
+    datos = cursor.fetchall()
+    conn.close()
+    
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for dato in datos:
+        tabla.insert("", "end", values=dato)
+        
+    subtitulo_text = f"Mostrando {tipo_de_base}"
+    subtitulo.config(text=subtitulo_text)
+    
+    
