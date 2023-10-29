@@ -1,29 +1,31 @@
-import tkinter as tk
+def calcular_maquinas_acero_330():
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")  # Reemplaza con el nombre de tu base de datos
+        cursor = conn.cursor()
 
-def agregar_accion():
-    accion = entrada_accion.get()
-    if accion:
-        lista_acciones.insert(tk.END, accion)
-        entrada_accion.delete(0, tk.END)
+        # Define la estructura de una máquina de acero 330
+        maquina_acero_330 = {
+            "chapa_principal_330": 1,
+            "lateral_L_330": 1,
+            "lateral_R_330": 1,
+            "varilla_330": 1,
+            "planchuela_330": 1,
+            "portaeje": 1
+        }
 
-def borrar_accion():
-    seleccion = lista_acciones.curselection()
-    if seleccion:
-        lista_acciones.delete(seleccion)
+        # Consulta las cantidades de las piezas en la base de datos
+        cantidades = {}
+        for pieza, cantidad in maquina_acero_330.items():
+            cursor.execute("SELECT cantidad FROM chapa WHERE piezas = ?", (pieza,))
+            resultado = cursor.fetchone()
+            if resultado is not None:
+                cantidad_disponible = resultado[0]
+                cantidades[pieza] = cantidad_disponible
 
-root = tk.Tk()
-root.title("Registro de Acciones")
+        # Calcula la cantidad máxima de máquinas que se pueden armar
+        cantidad_maquinas = min(cantidades.values()) // min(maquina_acero_330.values())
 
-entrada_accion = tk.Entry(root, width=40)
-entrada_accion.pack(pady=10)
-
-boton_agregar = tk.Button(root, text="Agregar Acción", command=agregar_accion)
-boton_agregar.pack()
-
-boton_borrar = tk.Button(root, text="Borrar Acción", command=borrar_accion)
-boton_borrar.pack()
-
-lista_acciones = tk.Listbox(root, width=50)
-lista_acciones.pack()
-
-root.mainloop()
+        return cantidad_maquinas
+    except sqlite3.Error as e:
+        print("ERROR EN LA BASE DE DATOS:", e)
+        return 0  # En caso de error, devuelve 0 máquinas
