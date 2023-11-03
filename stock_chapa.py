@@ -10,16 +10,13 @@ from funciones import (
     stock_chapa,
     agregar_pieza_chapas,
     eliminar_pieza_chapas,
-    agregar_portaeje,
-    eliminar_portaeje,
     sort_column,
-    calcular_maquinas,
     agregar_piezas_faltantes,
     eliminar_piezas_faltante,
-    ensamble_de_maquinas_soldadas
-    
+    mostrar_stock_soldador,
+    calcular_maquinas_posibles,
+    eliminar_base_ingreso_soldador
 )
-
 
 
 piezas_pedefinida_chapas_base = [
@@ -30,45 +27,51 @@ piezas_pedefinida_chapas_base = [
     "lateral_L_300",
     "lateral_R_300",
 ]
+base_inox_330 = {
+    "chapa_principal_330": 1,
+    "lateral_L_330": 1,
+    "lateral_R_330": 1
+}
 
-base_inox_330 = [
-    ("chapa_principal_330", 1),
-    ("lateral_L_330", 1),
-    ("lateral_R_330", 1),
-    ("varilla_330", 1),
-    ("planchuela_330", 1),
-    ("portaeje", 1),
-    ("arandela", 1)
-]
+base_inox_300 = {
+    "chapa_principal_300": 1,
+    "lateral_L_300": 1,
+    "lateral_R_300": 1
+}
 
-base_inox_300 = [
-    ("chapa_principal_300", 1),
-    ("lateral_L_300", 1),
-    ("lateral_R_300", 1),
-    ("varilla_300", 1),
-    ("planchuela_300", 1),
-    ("portaeje", 1),
-    ("arandela", 1)
-]
+base_pintada_330 = {
+    "chapa_principal_330": 1,
+    "lateral_L_330": 1,
+    "lateral_R_330": 1
+}
 
-base_pintada_330 = [
-    ("chapa_principal_330", 1),
-    ("lateral_L_330", 1),
-    ("lateral_R_330", 1),
-    ("varilla_330", 1),
-    ("planchuela_330", 1),
-    ("portaeje", 1),
-    ("arandela", 1)
-]
+base_pintada_300 = {
+    "chapa_principal_300": 1,
+    "lateral_L_300": 1,
+    "lateral_R_300": 1
+}
 
-base_pintada_300 = [
-    ("chapa_principal_300", 1),
-    ("lateral_L_300", 1),
-    ("lateral_R_300", 1),
-    ("varilla_300", 1),
-    ("planchuela_300", 1),
-    ("portaeje", 1),
-    ("arandela", 1)
+
+piezas_faltante_330 ={
+    "planchuela_330",
+    "varilla_330",
+    "portaeje",
+    "arandela"
+}
+
+
+piezas_faltante_300 ={
+    "planchuela_300",
+    "varilla_300",
+    "portaeje",
+    "arandela"
+}
+
+tipos_de_bases = [
+    "Inox 330",
+    "Inox 300",
+    "Pintada 330",
+    "Pintada 300"
 ]
 
 cabezal_final = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
@@ -80,10 +83,59 @@ piezas_restante = [
     "varilla_300",
     "portaeje",
     "arandela"]
+#------------------------------------------------------------------------
+bases_dict = {
+    "Inox 330": {
+        "chapa_principal": "chapa_principal_330",
+        "lateral_L": "lateral_L_330",
+        "lateral_R": "lateral_R_330",
+        "planchuela": "planchuela_330",
+        "varilla": "varilla_330",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    },
+    "Inox 300": {
+        "chapa_principal": "chapa_principal_300",
+        "lateral_L": "lateral_L_300",
+        "lateral_R": "lateral_R_300",
+        "planchuela": "planchuela_300",
+        "varilla": "varilla_300",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    },
+    "Pintada 330": {
+        "chapa_principal": "chapa_principal_330",
+        "lateral_L": "lateral_L_330",
+        "lateral_R": "lateral_R_330",
+        "planchuela": "planchuela_330",
+        "varilla": "varilla_330",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    },
+    "Pintada 300": {
+        "chapa_principal": "chapa_principal_300",
+        "lateral_L": "lateral_L_300",
+        "lateral_R": "lateral_R_300",
+        "planchuela": "planchuela_300",
+        "varilla": "varilla_300",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    }
+}
 
-pieza_faltante = ["portaeje", "arandela"]
+cabezales_inox = {
+    "chapa_U_cabezal",
+    "tapa_cabezal",
+    "bandeja_cabezal"
+}
 
+cabezales_pintada = {
+    "chapa_U_cabezal",
+    "tapa_cabezal",
+    "bandeja_cabezal"
+}
 
+print(bases_dict["Inox 330"]['portaeje'])
 def crear_pestana_chapa(notebook):
     pestana_chapa = ttk.Frame(notebook)
     pestana_chapa.grid(
@@ -326,7 +378,8 @@ def crear_pestana_chapa(notebook):
     ttk.Label(box3, text="Soldador", font=("Arial", 17, "bold")).grid(row=5, column=1, padx=5, pady=5, sticky="e")    
     
     ttk.Label(box3, text="Stock Del Soldador").grid(row=6, column=0, padx=5, sticky="e")
-    btn_stock_soldador = ttk.Button(box3, text="Stock").grid(row=6, column=1, padx=5, sticky="w")
+    btn_stock_soldador = ttk.Button(box3, text="Stock", command= lambda: mostrar_stock_soldador(tabla_chapa))
+    btn_stock_soldador.grid(row=6, column=1, padx=5, sticky="w")
     
     ttk.Separator(box3, orient="horizontal").grid(row=7, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
     
@@ -335,12 +388,101 @@ def crear_pestana_chapa(notebook):
     caja_botones = ttk.Frame(box3)
     caja_botones.grid(row=9, column=0)
     
-    tipo_base_acero = "acero"
-    tipo_base_pintura = "pintura"
+  
+# Botones para calcular máquinas posibles
+    btn_i_330 = ttk.Button(caja_botones, text="Inox 330", command=lambda: calcular_maquinas_posibles(base_inox_330, "acero", "330", lista_acciones))
+    btn_i_330.grid(row=1, column=0)
 
-    btn_i_330 = ttk.Button(caja_botones, text="Inox 330", command=lambda: ensamble_de_maquinas_soldadas(base_inox_330, "acero 330", lista_acciones, tipo_base_acero)).grid(row=1, column=0)
-    btn_i_300 = ttk.Button(caja_botones, text="Inox 300", command=lambda: ensamble_de_maquinas_soldadas(base_inox_300, "acero 300", lista_acciones, tipo_base_acero)).grid(row=1, column=1)
-    btn_p_330 = ttk.Button(caja_botones, text="Pint 330", command=lambda: ensamble_de_maquinas_soldadas(base_pintada_330, "pintada 330", lista_acciones, tipo_base_pintura)).grid(row=1, column=2)
-    btn_p_300 = ttk.Button(caja_botones, text="Pint 300", command=lambda: ensamble_de_maquinas_soldadas(base_pintada_300, "pintada 300", lista_acciones, tipo_base_pintura)).grid(row=1, column=3)
+    btn_i_300 = ttk.Button(caja_botones, text="Inox 300", command=lambda: calcular_maquinas_posibles(base_inox_300, "acero", "300", lista_acciones))
+    btn_i_300.grid(row=1, column=1)
+
+    btn_p_330 = ttk.Button(caja_botones, text="Pint 330", command=lambda: calcular_maquinas_posibles(base_pintada_330, "pintura", "330", lista_acciones))
+    btn_p_330.grid(row=1, column=2)
+
+    btn_p_300 = ttk.Button(caja_botones, text="Pint 300", command=lambda: calcular_maquinas_posibles(base_pintada_300, "pintura", "300", lista_acciones))
+    btn_p_300.grid(row=1, column=3)
     
     ttk.Separator(box3, orient="horizontal").grid(row=10, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+  
+  #______________________soldador_________________________________________
+    entrega_base = ttk.Frame(box3)
+    entrega_base.grid(row=11, column=0)
+    
+    ttk.Label(entrega_base, text="Entregas al Soldador").grid(row=0, column=0)
+    
+    tipos_de_bases = list(bases_dict.keys())
+    
+    ttk.Label(entrega_base, text="Tipo De Base:").grid(row=1, column=0)
+    combocaja_soldador = ttk.Combobox(entrega_base, values=tipos_de_bases, state="readonly" )
+    combocaja_soldador.grid(row=1, column=1)
+    
+    ttk.Label(entrega_base, text="Cantidad:").grid(row=2, column=0)
+    entrada_cantidad_soldador = ttk.Entry(entrega_base)
+    entrada_cantidad_soldador.grid(row=2, column=1)
+    
+    btn_entrega_soldador = ttk.Button(entrega_base, text="Enviar Al Soldador", command=lambda: eliminar_base_ingreso_soldador(combocaja_soldador, entrada_cantidad_soldador))
+    btn_entrega_soldador.grid(row=3, column=1)
+    
+    resibidas_base = ttk.Frame(box3)
+    resibidas_base.grid(row=11, column=1)
+    
+    ttk.Label(resibidas_base, text="Bases Terminadas").grid(row=0, column=0)
+    
+    ttk.Label(resibidas_base, text="Tipo De Base:").grid(row=1, column=0)
+    combocaja_terminadas = ttk.Combobox(resibidas_base, values=tipos_de_bases, state="readonly")
+    combocaja_terminadas.grid(row=1, column=1)
+    
+    ttk.Label(resibidas_base, text="Cantidad:").grid(row=2, column=0)
+    entrada_cantidad = ttk.Entry(resibidas_base)
+    entrada_cantidad.grid(row=2, column=1)
+    
+    btn_entrega_soldador = ttk.Button(resibidas_base, text="Bases Terminadas")
+    btn_entrega_soldador.grid(row=3, column=1)
+    
+    ttk.Separator(box3, orient="horizontal").grid(row=12, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+  
+    ttk.Label(box3, text="Envios a Pintura", font=("Arial", 17, "bold")).grid(row=13, column=1, padx=5, pady=5, sticky="e")   
+    
+    base_a_pintura = ttk.Frame(box3)
+    base_a_pintura.grid(row=14,column=0)
+    
+    ttk.Label(base_a_pintura,text="Envios Bases a Pintura").grid(row=0, column=0)
+    
+    tipo_var_ce = tk.IntVar()
+    tipo_var_ce.set(1)
+    acero_radio_eliminar = tk.Radiobutton(base_a_pintura, text="330", variable=tipo_var_ce, value=1)
+    acero_radio_eliminar.grid(row=1, column=0)
+    
+    entrada_cantidad_base = ttk.Entry(base_a_pintura, width=10)
+    entrada_cantidad_base.grid(row=2, column=0)
+    
+    btn_pintura_enviar_base = ttk.Button(base_a_pintura, text="enviar")
+    btn_pintura_enviar_base.grid(row=3, column=0)
+    
+    chapa_radio_eliminar = tk.Radiobutton(base_a_pintura, text="300", variable=tipo_var_ce, value=2)
+    chapa_radio_eliminar.grid(row=1, column=1)
+    
+    entrada_cantidad_base = ttk.Entry(base_a_pintura, width=10)
+    entrada_cantidad_base.grid(row=2, column=1)
+    
+    btn_pintura_enviar_base = ttk.Button(base_a_pintura, text="enviar")
+    btn_pintura_enviar_base.grid(row=3, column=1)
+    
+    #9)()()()())()()()()()()()()()()()()()()()()()()()()()()()()()()()
+    
+    cabezal_a_pintura = ttk.Frame(box3)
+    cabezal_a_pintura.grid(row=14, column=1)
+    
+    ttk.Label(cabezal_a_pintura,text="Envios Cabezales a Pintura").grid(row=0, column=0)
+    
+    ttk.Label(cabezal_a_pintura, text="Cantidad De Cabezales:").grid(row=1, column=0)
+    entrada_cantidad = ttk.Entry(cabezal_a_pintura)
+    entrada_cantidad.grid(row=1, column=1)
+    
+    btn_entrega_soldador = ttk.Button(cabezal_a_pintura, text="Envios A Pintura")
+    btn_entrega_soldador.grid(row=2, column=1)
+    
+    ttk.Separator(box3, orient="horizontal").grid(row=15, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+
+
+    

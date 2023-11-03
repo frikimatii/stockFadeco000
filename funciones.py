@@ -461,7 +461,7 @@ def eliminar_piezas_faltante(pieza_seleccionada, cantidad_eliminar, arbol, lista
                     conn.commit()
                     conn.close()
                     mostrar_datos(arbol, tabla)
-                    lista_acciones.insert(0, f"Eliminación exitosa: Usted eliminó {cantidad_eliminar} de {pieza_seleccionada,}")
+                    lista_acciones.insert(0, f"Eliminación exitosa: Usted eliminó {cantidad_eliminar} de {pieza_seleccionada}")
                 else:
                     lista_acciones.insert(0, "No hay suficiente cantidad para eliminar.")
             else:
@@ -469,32 +469,129 @@ def eliminar_piezas_faltante(pieza_seleccionada, cantidad_eliminar, arbol, lista
     else:
         lista_acciones.insert(0, "La cantidad ingresada no es un número válido")
 
-def ensamble_de_maquinas_soldadas(base_modelo, tipo, lista_acciones, tipo_base):
+def mostrar_stock_soldador(tabla):
     try:
         conn = sqlite3.connect("basedatospiezas.db")
         cursor = conn.cursor()
 
+        cursor.execute("SELECT modelo, tipo, cantidad FROM soldador_stock WHERE cantidad > 0")
+        stock_disponible = cursor.fetchall()
+
+        # Limpiar la tabla antes de llenarla
+        tabla.delete(*tabla.get_children())
+
+        if stock_disponible:
+            for modelo, tipo, cantidad in stock_disponible:
+                tabla.insert("", "end", values=("Soldador", cantidad, modelo, tipo))
+        else:
+            print("No hay stock disponible para el soldador.")
+
+        conn.close()
+
+    except sqlite3.Error as e:
+        print(f"Error en la base de datos: {e}")
+
+def calcular_maquinas_posibles(base_modelo, tipo_base, modelo, lista_acciones):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        
         cantidades = {}
 
-        for pieza, cantidad in base_modelo:
-            cursor.execute("SELECT cantidad FROM chapa WHERE piezas = ? AND tipo_de_base = ? AND modelo = ?", (pieza, tipo_base, tipo))
+        for pieza, cantidad in base_modelo.items():
+            cursor.execute("SELECT cantidad FROM chapa WHERE tipo_de_base = ? AND modelo = ? AND piezas = ?", (tipo_base, modelo, pieza))
             resultado = cursor.fetchone()
 
             if resultado is not None:
                 cantidad_disponible = resultado[0]
-                if cantidad_disponible < cantidad:
-                    lista_acciones.insert(0, f"No hay suficientes {pieza} de tipo {tipo_base} para armar esta máquina.")
-                    return 0
                 cantidades[pieza] = cantidad_disponible
 
         if len(cantidades) == len(base_modelo):
-            cantidad_maquinas = min(cantidades.values()) // min([cantidad for _, cantidad in base_modelo])
-            lista_acciones.insert(0, f"Se pueden armar {cantidad_maquinas} máquinas de tipo {tipo} con base {tipo_base}.")
-            return cantidad_maquinas
+            cantidad_bases = min(cantidades.values()) // min(base_modelo.values())
+            lista_acciones.insert(0, f"Se pueden armar {cantidad_bases} máquinas.")
         else:
-            lista_acciones.insert(0, f"Algunas piezas de tipo {tipo} con base {tipo_base} no están disponibles en la base de datos.")
-            return 0
+            lista_acciones.insert(0, "No hay piezas suficientes para armar las máquinas.")
+            
+        conn.close()
 
     except sqlite3.Error as e:
-        lista_acciones.insert(0, f"Error en la base de datos: {e}")
-        return 0
+        print(f"Error en la base de datos: {e}")
+        lista_acciones.insert(0, "Error en la base de datos.")
+
+def eliminar_base_ingreso_soldador(combocaja_soldador, entrada_cantidad_soldador):
+    tipo_base = combocaja_soldador.get()
+    cantidad = int(entrada_cantidad_soldador.get())
+    
+    bases_dict = {
+    "Inox 330": {
+        "chapa_principal": "chapa_principal_330",
+        "lateral_L": "lateral_L_330",
+        "lateral_R": "lateral_R_330",
+        "planchuela": "planchuela_330",
+        "varilla": "varilla_330",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    },
+    "Inox 300": {
+        "chapa_principal": "chapa_principal_300",
+        "lateral_L": "lateral_L_300",
+        "lateral_R": "lateral_R_300",
+        "planchuela": "planchuela_300",
+        "varilla": "varilla_300",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    },
+    "Pintada 330": {
+        "chapa_principal": "chapa_principal_330",
+        "lateral_L": "lateral_L_330",
+        "lateral_R": "lateral_R_330",
+        "planchuela": "planchuela_330",
+        "varilla": "varilla_330",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    },
+    "Pintada 300": {
+        "chapa_principal": "chapa_principal_300",
+        "lateral_L": "lateral_L_300",
+        "lateral_R": "lateral_R_300",
+        "planchuela": "planchuela_300",
+        "varilla": "varilla_300",
+        "portaeje": "portaeje",
+        "arandela": "arandela"
+    }
+}
+
+    
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    
+    modelo = tipo_base
+    if tipo_base == "Inox 330":
+        portaeje = bases_dict["Inox 330"]['portaeje']
+        arandela = bases_dict["Inox 330"]['arandela']
+        print("eliejiste inox330")
+        cursor.execute(f"UPDATE chapa SET cantidad = cantidad - {cantidad} WHERE piezas = '{portaeje}'")
+        cursor.execute(f"UPDATE chapa SET cantidad = cantidad - {cantidad} WHERE piezas = '{arandela}'")
+
+    elif tipo_base == "Inox 300":
+        print(bases_dict["Inox 300"])
+        cursor.execute("update")
+        
+        
+    elif tipo_base == "Pintada 330":
+        print(bases_dict["Pintada 330"])
+
+        print("elijiste pintada 330")
+        
+        
+    else:
+        print("elegitte pintada 300")
+        print(bases_dict["Pintada 300"])
+
+    conn.commit()
+    conn.close()
+    
+
+    mensaje = f"Se ha Eliminado {cantidad} unidades de piezas de chapar en la tabla correspondiente a {tipo_base}, ({modelo})"    
+    print(f"hola {tipo_base}, y {cantidad}")
+    
