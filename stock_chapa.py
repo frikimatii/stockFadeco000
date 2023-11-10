@@ -15,7 +15,8 @@ from funciones import (
     eliminar_piezas_faltante,
     mostrar_stock_soldador,
     calcular_maquinas_posibles,
-    eliminar_base_ingreso_soldador
+    eliminar_cantidad_de_piezas,
+    bases_soldador_terminadas
 )
 
 
@@ -134,8 +135,6 @@ cabezales_pintada = {
     "tapa_cabezal",
     "bandeja_cabezal"
 }
-
-print(bases_dict["Inox 330"]['portaeje'])
 def crear_pestana_chapa(notebook):
     pestana_chapa = ttk.Frame(notebook)
     pestana_chapa.grid(
@@ -420,7 +419,7 @@ def crear_pestana_chapa(notebook):
     entrada_cantidad_soldador = ttk.Entry(entrega_base)
     entrada_cantidad_soldador.grid(row=2, column=1)
     
-    btn_entrega_soldador = ttk.Button(entrega_base, text="Enviar Al Soldador", command=lambda: eliminar_base_ingreso_soldador(combocaja_soldador, entrada_cantidad_soldador))
+    btn_entrega_soldador = ttk.Button(entrega_base, text="Enviar Al Soldador", command=lambda: eliminar_cantidad_de_piezas(combocaja_soldador.get(), entrada_cantidad_soldador.get(), tabla_chapa, subtitulo, lista_acciones))
     btn_entrega_soldador.grid(row=3, column=1)
     
     resibidas_base = ttk.Frame(box3)
@@ -433,10 +432,10 @@ def crear_pestana_chapa(notebook):
     combocaja_terminadas.grid(row=1, column=1)
     
     ttk.Label(resibidas_base, text="Cantidad:").grid(row=2, column=0)
-    entrada_cantidad = ttk.Entry(resibidas_base)
-    entrada_cantidad.grid(row=2, column=1)
+    entrada_cantidad_terminadas = ttk.Entry(resibidas_base)
+    entrada_cantidad_terminadas.grid(row=2, column=1)
     
-    btn_entrega_soldador = ttk.Button(resibidas_base, text="Bases Terminadas")
+    btn_entrega_soldador = ttk.Button(resibidas_base, text="Bases Terminadas", command= lambda: bases_soldador_terminadas(combocaja_terminadas.get(), entrada_cantidad_terminadas.get(), lista_acciones, tabla_chapa))
     btn_entrega_soldador.grid(row=3, column=1)
     
     ttk.Separator(box3, orient="horizontal").grid(row=12, column=0, columnspan=2, sticky="ew", padx=10, pady=10)

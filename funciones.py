@@ -220,14 +220,17 @@ def mostrar_datos_chapa(tree1, table, subtitulo):
 def consulta_de_piezas(tabla, tipo_de_base, modelo, subtitulo):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
-    cursor.execute(f"SELECT piezas, cantidad FROM chapa WHERE tipo_de_base = ? AND modelo = ? ", (tipo_de_base, modelo))
+    cursor.execute(
+    "SELECT piezas, cantidad FROM chapa WHERE tipo_de_base = 'acero_dulce' AND modelo IN (?, ?) UNION SELECT piezas, cantidad FROM chapa WHERE tipo_de_base = ? AND modelo = ?;",
+    ('pieza', modelo, tipo_de_base, modelo)
+    )
     datos = cursor.fetchall()
     conn.close()
     for item in tabla.get_children():
         tabla.delete(item)
     for dato in datos:
         tabla.insert("", "end", values=dato)
-        
+
     subtitulo_text = f"Mostrando {tipo_de_base} {modelo}"
     subtitulo.config(text=subtitulo_text)
 
@@ -474,7 +477,7 @@ def mostrar_stock_soldador(tabla):
         conn = sqlite3.connect("basedatospiezas.db")
         cursor = conn.cursor()
 
-        cursor.execute("SELECT modelo, tipo, cantidad FROM soldador_stock WHERE cantidad > 0")
+        cursor.execute("SELECT modelo, tipo , cantidad FROM soldador_stock ")
         stock_disponible = cursor.fetchall()
 
         # Limpiar la tabla antes de llenarla
@@ -518,80 +521,449 @@ def calcular_maquinas_posibles(base_modelo, tipo_base, modelo, lista_acciones):
         print(f"Error en la base de datos: {e}")
         lista_acciones.insert(0, "Error en la base de datos.")
 
-def eliminar_base_ingreso_soldador(combocaja_soldador, entrada_cantidad_soldador):
-    tipo_base = combocaja_soldador.get()
-    cantidad = int(entrada_cantidad_soldador.get())
-    
-    bases_dict = {
-    "Inox 330": {
-        "chapa_principal": "chapa_principal_330",
-        "lateral_L": "lateral_L_330",
-        "lateral_R": "lateral_R_330",
-        "planchuela": "planchuela_330",
-        "varilla": "varilla_330",
-        "portaeje": "portaeje",
-        "arandela": "arandela"
-    },
-    "Inox 300": {
-        "chapa_principal": "chapa_principal_300",
-        "lateral_L": "lateral_L_300",
-        "lateral_R": "lateral_R_300",
-        "planchuela": "planchuela_300",
-        "varilla": "varilla_300",
-        "portaeje": "portaeje",
-        "arandela": "arandela"
-    },
-    "Pintada 330": {
-        "chapa_principal": "chapa_principal_330",
-        "lateral_L": "lateral_L_330",
-        "lateral_R": "lateral_R_330",
-        "planchuela": "planchuela_330",
-        "varilla": "varilla_330",
-        "portaeje": "portaeje",
-        "arandela": "arandela"
-    },
-    "Pintada 300": {
-        "chapa_principal": "chapa_principal_300",
-        "lateral_L": "lateral_L_300",
-        "lateral_R": "lateral_R_300",
-        "planchuela": "planchuela_300",
-        "varilla": "varilla_300",
-        "portaeje": "portaeje",
-        "arandela": "arandela"
-    }
-}
+def is_positive_integer(value):
+    try:
+        num = int(value)
+        return num >= 0
+    except ValueError:
+        return False
 
-    
+def eliminar_cantidad_de_piezas(combocaja_soldador, entrada_cantidad_soldador, tabla, subtitulo, lista_acciones):
+    cantidad_str = entrada_cantidad_soldador
+    tipo = combocaja_soldador
+
+    # Verifica si la cantidad ingresada es un número
+    if not cantidad_str.isdigit():
+        mensaje_error = "Error: La cantidad debe ser un número entero."
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+        return
+
+    cantidad = int(cantidad_str)  # Convierte la cantidad a un entero
+
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
-    
-    modelo = tipo_base
-    if tipo_base == "Inox 330":
-        portaeje = bases_dict["Inox 330"]['portaeje']
-        arandela = bases_dict["Inox 330"]['arandela']
-        print("eliejiste inox330")
-        cursor.execute(f"UPDATE chapa SET cantidad = cantidad - {cantidad} WHERE piezas = '{portaeje}'")
-        cursor.execute(f"UPDATE chapa SET cantidad = cantidad - {cantidad} WHERE piezas = '{arandela}'")
 
-    elif tipo_base == "Inox 300":
-        print(bases_dict["Inox 300"])
-        cursor.execute("update")
-        
-        
-    elif tipo_base == "Pintada 330":
-        print(bases_dict["Pintada 330"])
+    # Obtiene información sobre la cantidad actual de las piezas
+    cantidad_actual_por_pieza = {}
 
-        print("elijiste pintada 330")
-        
-        
-    else:
-        print("elegitte pintada 300")
-        print(bases_dict["Pintada 300"])
+    if tipo == "Inox 330":
+        lista_1 = ['chapa_principal_330', 'lateral_L_330', 'lateral_R_330']
+        lista_2 = ['planchuela_330', 'varilla_330']
+        lista_3 = ['arandela', 'portaeje']
 
-    conn.commit()
+        for pieza in lista_1:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero' AND modelo = 330 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_2:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 330 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_3:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        # Verifica si es posible eliminar la cantidad deseada de todas las piezas
+        eliminacion_posible = all(cantidad_actual_por_pieza[pieza] >= cantidad for pieza in lista_1 + lista_2 + lista_3)
+
+        if not eliminacion_posible:
+            mensaje_error = "Error: No es posible eliminar la cantidad deseada de piezas."
+            print(mensaje_error)
+            lista_acciones.insert(0, mensaje_error)
+            return
+
+        # Si la eliminación es posible, procede con la actualización
+        for pieza in lista_1:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero' AND modelo = 330 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_2:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 330 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_3:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (cantidad_restante, pieza))
+            
+        cursor.execute("UPDATE soldador_stock SET cantidad = cantidad + ? WHERE modelo = '330' AND tipo = 'inox'", (cantidad,))
+        lista_acciones.insert(0, f"Se envio {cantidad} bases al soldador")
+        conn.commit()
+        consulta_de_piezas(tabla, "acero", "330", subtitulo)
+
+    elif tipo == "Inox 300":
+        lista_1 = ['chapa_principal_300', 'lateral_L_300', 'lateral_R_300']
+        lista_2 = ['planchuela_300', 'varilla_300']
+        lista_3 = ['arandela', 'portaeje']
+
+        for pieza in lista_1:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero' AND modelo = 300 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_2:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 300 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_3:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        # Verifica si es posible eliminar la cantidad deseada de todas las piezas
+        eliminacion_posible = all(cantidad_actual_por_pieza[pieza] >= cantidad for pieza in lista_1 + lista_2 + lista_3)
+
+        if not eliminacion_posible:
+            mensaje_error = "Error: No es posible eliminar la cantidad deseada de piezas."
+            print(mensaje_error)
+            lista_acciones.insert(0, mensaje_error)
+            return
+
+        # Si la eliminación es posible, procede con la actualización
+        for pieza in lista_1:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero' AND modelo = 300 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_2:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 300 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_3:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (cantidad_restante, pieza))
+            
+        cursor.execute("UPDATE soldador_stock SET cantidad = cantidad + ? WHERE modelo = '300' AND tipo = 'inox'", (cantidad,))
+        lista_acciones.insert(0, f"Se envio {cantidad} bases al soldador")
+        conn.commit()
+        consulta_de_piezas(tabla, "acero", "300", subtitulo)
+
+    elif tipo == "Pintada 330":
+        lista_1 = ['chapa_principal_330', 'lateral_L_330', 'lateral_R_330']
+        lista_2 = ['planchuela_330', 'varilla_330']
+        lista_3 = ['arandela', 'portaeje']
+
+        for pieza in lista_1:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'pintura' AND modelo = 330 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_2:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 330 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_3:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        # Verifica si es posible eliminar la cantidad deseada de todas las piezas
+        eliminacion_posible = all(cantidad_actual_por_pieza[pieza] >= cantidad for pieza in lista_1 + lista_2 + lista_3)
+
+        if not eliminacion_posible:
+            mensaje_error = "Error: No es posible eliminar la cantidad deseada de piezas."
+            print(mensaje_error)
+            lista_acciones.insert(0, mensaje_error)
+            return
+
+        # Si la eliminación es posible, procede con la actualización
+        for pieza in lista_1:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'pintura' AND modelo = 330 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_2:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 330 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_3:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (cantidad_restante, pieza))
+            
+        cursor.execute("UPDATE soldador_stock SET cantidad = cantidad + ? WHERE modelo = '330' AND tipo = 'pintada'", (cantidad,))
+        lista_acciones.insert(0, f"Se envio {cantidad} bases al soldador")
+        conn.commit()
+        consulta_de_piezas(tabla, "pintura", "330", subtitulo)
+
+    elif tipo == "Pintada 300":
+        lista_1 = ['chapa_principal_300', 'lateral_L_300', 'lateral_R_300']
+        lista_2 = ['planchuela_300', 'varilla_300']
+        lista_3 = ['arandela', 'portaeje']
+
+        for pieza in lista_1:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'pintura' AND modelo = 300 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_2:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 300 AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_3:
+            cursor.execute("""
+            SELECT cantidad FROM chapa
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (pieza,))
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        # Verifica si es posible eliminar la cantidad deseada de todas las piezas
+        eliminacion_posible = all(cantidad_actual_por_pieza[pieza] >= cantidad for pieza in lista_1 + lista_2 + lista_3)
+
+        if not eliminacion_posible:
+            mensaje_error = "Error: No es posible eliminar la cantidad deseada de piezas."
+            print(mensaje_error)
+            lista_acciones.insert(0, mensaje_error)
+            return
+
+        # Si la eliminación es posible, procede con la actualización
+        for pieza in lista_1:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'pintura' AND modelo = 300 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_2:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 300 AND piezas = ?
+            """, (cantidad_restante, pieza))
+
+        for pieza in lista_3:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute("""
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE modelo = 'pieza' AND piezas = ?
+            """, (cantidad_restante, pieza))
+            
+        cursor.execute("UPDATE soldador_stock SET cantidad = cantidad + ? WHERE modelo = '300' AND tipo = 'pintada'", (cantidad,))
+        lista_acciones.insert(0, f"Se envio {cantidad} bases al soldador")
+        conn.commit()
+        consulta_de_piezas(tabla, "pintura", "300", subtitulo)
+
     conn.close()
-    
 
-    mensaje = f"Se ha Eliminado {cantidad} unidades de piezas de chapar en la tabla correspondiente a {tipo_base}, ({modelo})"    
-    print(f"hola {tipo_base}, y {cantidad}")
-    
+def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas, lista_acciones, tabla_chapa):
+    tipo = combocaja_terminadas
+    cantidad_str = entrada_cantidad_terminadas
+
+    # Verifica si la cantidad ingresada es un número
+    if not cantidad_str.isdigit():
+        mensaje_error = "Error: La cantidad debe ser un número entero."
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+        return
+
+    cantidad = int(cantidad_str)  # Convierte la cantidad a un entero
+
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    try:
+        if tipo == "Inox 330":
+            # Obtén la cantidad actual de la base de datos para Inox 330
+            cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'inox' AND modelo = '330'")
+            cantidad_actual = cursor.fetchone()[0]
+
+            # Verifica si hay suficientes bases disponibles
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de Inox 330 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos
+            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cursor.execute("""
+                UPDATE soldador_stock
+                SET cantidad = ?
+                WHERE tipo = 'inox' AND modelo = '330'
+            """, (nueva_cantidad,))
+
+            # Muestra un mensaje de éxito y agrega la acción a la lista
+            mensaje_exito = f"Se han terminado {cantidad} bases de Inox 330."
+            print(mensaje_exito)
+            lista_acciones.insert(0, mensaje_exito)
+            mostrar_stock_soldador(tabla_chapa)
+
+        elif tipo == "Inox 300":
+            # Obtén la cantidad actual de la base de datos para Inox 330
+            cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'inox' AND modelo = '300'")
+            cantidad_actual = cursor.fetchone()[0]
+
+            # Verifica si hay suficientes bases disponibles
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de Inox 330 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos
+            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cursor.execute("""
+                UPDATE soldador_stock
+                SET cantidad = ?
+                WHERE tipo = 'inox' AND modelo = '300'
+            """, (nueva_cantidad,))
+
+            # Muestra un mensaje de éxito y agrega la acción a la lista
+            mensaje_exito = f"Se han terminado {cantidad} bases de Inox 300."
+            print(mensaje_exito)
+            lista_acciones.insert(0, mensaje_exito)
+            mostrar_stock_soldador(tabla_chapa)
+
+        elif tipo == "Pintada 330":
+            # Obtén la cantidad actual de la base de datos para Inox 330
+            cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'pintada' AND modelo = '330'")
+            cantidad_actual = cursor.fetchone()[0]
+
+            # Verifica si hay suficientes bases disponibles
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de Pintada 330 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos
+            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cursor.execute("""
+                UPDATE soldador_stock
+                SET cantidad = ?
+                WHERE tipo = 'pintada' AND modelo = '330'
+            """, (nueva_cantidad,))
+
+            # Muestra un mensaje de éxito y agrega la acción a la lista
+            mensaje_exito = f"Se han terminado {cantidad} bases de Pintada 330."
+            print(mensaje_exito)
+            lista_acciones.insert(0, mensaje_exito)
+            mostrar_stock_soldador(tabla_chapa)
+
+        elif tipo == "Pintada 300":
+            # Obtén la cantidad actual de la base de datos para Inox 330
+            cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'pintada' AND modelo = '300'")
+            cantidad_actual = cursor.fetchone()[0]
+
+            # Verifica si hay suficientes bases disponibles
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de Pintada 300 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos
+            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cursor.execute("""
+                UPDATE soldador_stock
+                SET cantidad = ?
+                WHERE tipo = 'pintada' AND modelo = '300'
+            """, (nueva_cantidad,))
+
+            # Muestra un mensaje de éxito y agrega la acción a la lista
+            mensaje_exito = f"Se han terminado {cantidad} bases de Pintada 300."
+            print(mensaje_exito)
+            lista_acciones.insert(0, mensaje_exito)
+            mostrar_stock_soldador(tabla_chapa)
+
+
+        # Guarda los cambios en la base de datos
+        conn.commit()
+
+    except Exception as e:
+        # Manejo de errores
+        mensaje_error = f"Error: {e}"
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+
+    finally:
+        # Cierra la conexión a la base de datos
+        conn.close()
