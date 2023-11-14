@@ -1,0 +1,46 @@
+es codigo pertenese a la envido de pintura tanto com base y tanto como cabezales 
+cogido TTK sin funciones
+
+
+
+    base_a_pintura = ttk.Frame(box3)
+    base_a_pintura.grid(row=14,column=0)
+    
+    ttk.Label(base_a_pintura,text="Envios Bases a Pintura").grid(row=0, column=0)
+    
+    tipo_var_ce = tk.IntVar()
+    tipo_var_ce.set(1)
+    acero_radio_eliminar = tk.Radiobutton(base_a_pintura, text="330", variable=tipo_var_ce, value=1)
+    acero_radio_eliminar.grid(row=1, column=0)
+    
+    entrada_cantidad_base = ttk.Entry(base_a_pintura, width=10)
+    entrada_cantidad_base.grid(row=2, column=0)
+    
+    btn_pintura_enviar_base = ttk.Button(base_a_pintura, text="enviar")
+    btn_pintura_enviar_base.grid(row=3, column=0)
+    
+    chapa_radio_eliminar = tk.Radiobutton(base_a_pintura, text="300", variable=tipo_var_ce, value=2)
+    chapa_radio_eliminar.grid(row=1, column=1)
+    
+    entrada_cantidad_base = ttk.Entry(base_a_pintura, width=10)
+    entrada_cantidad_base.grid(row=2, column=1)
+    
+    btn_pintura_enviar_base = ttk.Button(base_a_pintura, text="enviar")
+    btn_pintura_enviar_base.grid(row=3, column=1)
+    
+    #9()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+    
+    cabezal_a_pintura = ttk.Frame(box3)
+    cabezal_a_pintura.grid(row=14, column=1)
+    
+    ttk.Label(cabezal_a_pintura,text="Envios Cabezales a Pintura").grid(row=0, column=0)
+    
+    ttk.Label(cabezal_a_pintura, text="Cantidad De Cabezales:").grid(row=1, column=0)
+    entrada_cantidad = ttk.Entry(cabezal_a_pintura)
+    entrada_cantidad.grid(row=1, column=1)
+    
+    btn_entrega_soldador = ttk.Button(cabezal_a_pintura, text="Envios A Pintura")
+    btn_entrega_soldador.grid(row=2, column=1)
+    
+    ttk.Separator(box3, orient="horizontal").grid(row=15, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+

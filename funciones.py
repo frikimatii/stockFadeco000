@@ -46,11 +46,11 @@ def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, t
                 conn.commit()
                 conn.close()
                 mostrar_datos(tree, table)  # Llama a la función para mostrar los datos actualizados
-                res.config(text=f"Carga exitosa: Usted cargó {entrada_actualizar} {actualizar_pieza}:")
+                res.insert(0, f"Carga exitosa: Usted cargó {entrada_actualizar} {actualizar_pieza}:")
             else:
-                res.config(text=f"La Pieza {actualizar_pieza} no se puede modificar")
+                res.insert(0, f"La Pieza {actualizar_pieza} no se puede modificar")
     else:
-        res.config(text="La cantidad ingresada no es un número válido")
+        res.insert(0, "La cantidad ingresada no es un número válido")
 
 def eliminar_pieza(lista_predefinida_eliminar, entrada_cantidad_eliminar, res, table, funcion, tree):
  
@@ -76,14 +76,14 @@ def eliminar_pieza(lista_predefinida_eliminar, entrada_cantidad_eliminar, res, t
             nueva_cantidad = cantidad_actual - cantidad_eliminar
             if nueva_cantidad >= 0:
                 cursor.execute(f"UPDATE {table} SET cantidad=? WHERE piezas=?", (nueva_cantidad, pieza_eliminar))
-                res.config(text=f" Descarga exitosa: se elimino {pieza_eliminar} {cantidad_eliminar}")
+                res.insert(0, f" Descarga exitosa: se elimino {pieza_eliminar} {cantidad_eliminar}")
 
             else:
-                res.config(text=f"No se puede eliminar la pieza {pieza_eliminar}")
+                res.insert(0, f"No se puede eliminar la pieza {pieza_eliminar}")
         else:
-            res.config(text=f"No hay suficiente {pieza_eliminar} en el stock")
+            res.insert(0, f"No hay suficiente {pieza_eliminar} en el stock")
     else:
-        res.config(text=f"La pieza {pieza_eliminar} no se puede eliminar")
+        res.insert(0, f"La pieza {pieza_eliminar} no se puede eliminar")
 
     conn.commit()
     conn.close()
@@ -853,22 +853,37 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
         if tipo == "Inox 330":
             # Obtén la cantidad actual de la base de datos para Inox 330
             cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'inox' AND modelo = '330'")
-            cantidad_actual = cursor.fetchone()[0]
+            cantidad_actual = cursor.fetchone()
 
             # Verifica si hay suficientes bases disponibles
+            if cantidad_actual is None:
+                mensaje_error = "No hay registros para Inox 330 en la base de datos."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            cantidad_actual = cantidad_actual[0]
+
             if cantidad_actual < cantidad:
                 mensaje_error = f"No hay suficientes bases de Inox 330 disponibles. Cantidad actual: {cantidad_actual}."
                 print(mensaje_error)
                 lista_acciones.insert(0, mensaje_error)
                 return
 
-            # Actualiza la cantidad en la base de datos
-            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            # Actualiza la cantidad en la base de datos soldador_stock
+            nueva_cantidad_soldador = max(0, cantidad_actual - cantidad)
             cursor.execute("""
                 UPDATE soldador_stock
                 SET cantidad = ?
                 WHERE tipo = 'inox' AND modelo = '330'
-            """, (nueva_cantidad,))
+            """, (nueva_cantidad_soldador,))
+
+            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            cursor.execute("""
+                UPDATE bases_cabezales_brutos
+                SET cantidad = cantidad + ?
+                WHERE piezas = 'inox_330'
+            """, (cantidad,))
 
             # Muestra un mensaje de éxito y agrega la acción a la lista
             mensaje_exito = f"Se han terminado {cantidad} bases de Inox 330."
@@ -876,51 +891,80 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
             lista_acciones.insert(0, mensaje_exito)
             mostrar_stock_soldador(tabla_chapa)
 
-        elif tipo == "Inox 300":
-            # Obtén la cantidad actual de la base de datos para Inox 330
+        if tipo == "Inox 300":
+            # Obtén la cantidad actual de la base de datos para Inox 300
             cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'inox' AND modelo = '300'")
-            cantidad_actual = cursor.fetchone()[0]
+            cantidad_actual = cursor.fetchone()
 
             # Verifica si hay suficientes bases disponibles
-            if cantidad_actual < cantidad:
-                mensaje_error = f"No hay suficientes bases de Inox 330 disponibles. Cantidad actual: {cantidad_actual}."
+            if cantidad_actual is None:
+                mensaje_error = "No hay registros para Inox 300 en la base de datos."
                 print(mensaje_error)
                 lista_acciones.insert(0, mensaje_error)
                 return
 
-            # Actualiza la cantidad en la base de datos
-            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cantidad_actual = cantidad_actual[0]
+
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de Inox 300 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos soldador_stock
+            nueva_cantidad_soldador = max(0, cantidad_actual - cantidad)
             cursor.execute("""
                 UPDATE soldador_stock
                 SET cantidad = ?
                 WHERE tipo = 'inox' AND modelo = '300'
-            """, (nueva_cantidad,))
+            """, (nueva_cantidad_soldador,))
+
+            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            cursor.execute("""
+                UPDATE bases_cabezales_brutos
+                SET cantidad = cantidad + ?
+                WHERE piezas = 'inox_300'
+            """, (cantidad,))
 
             # Muestra un mensaje de éxito y agrega la acción a la lista
             mensaje_exito = f"Se han terminado {cantidad} bases de Inox 300."
             print(mensaje_exito)
             lista_acciones.insert(0, mensaje_exito)
             mostrar_stock_soldador(tabla_chapa)
-
         elif tipo == "Pintada 330":
-            # Obtén la cantidad actual de la base de datos para Inox 330
+               # Obtén la cantidad actual de la base de datos para Inox 330
             cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'pintada' AND modelo = '330'")
-            cantidad_actual = cursor.fetchone()[0]
+            cantidad_actual = cursor.fetchone()
 
             # Verifica si hay suficientes bases disponibles
-            if cantidad_actual < cantidad:
-                mensaje_error = f"No hay suficientes bases de Pintada 330 disponibles. Cantidad actual: {cantidad_actual}."
+            if cantidad_actual is None:
+                mensaje_error = "No hay registros para pintada 330 en la base de datos."
                 print(mensaje_error)
                 lista_acciones.insert(0, mensaje_error)
                 return
 
-            # Actualiza la cantidad en la base de datos
-            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cantidad_actual = cantidad_actual[0]
+
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de pintada 330 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos soldador_stock
+            nueva_cantidad_soldador = max(0, cantidad_actual - cantidad)
             cursor.execute("""
                 UPDATE soldador_stock
                 SET cantidad = ?
-                WHERE tipo = 'pintada' AND modelo = '330'
-            """, (nueva_cantidad,))
+                WHERE tipo = 'pintura' AND modelo = '330'
+            """, (nueva_cantidad_soldador,))
+
+            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            cursor.execute("""
+                UPDATE bases_cabezales_brutos
+                SET cantidad = cantidad + ?
+                WHERE piezas = 'Pintada_330'
+            """, (cantidad,))
 
             # Muestra un mensaje de éxito y agrega la acción a la lista
             mensaje_exito = f"Se han terminado {cantidad} bases de Pintada 330."
@@ -929,31 +973,45 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
             mostrar_stock_soldador(tabla_chapa)
 
         elif tipo == "Pintada 300":
-            # Obtén la cantidad actual de la base de datos para Inox 330
+               # Obtén la cantidad actual de la base de datos para Inox 300
             cursor.execute("SELECT cantidad FROM soldador_stock WHERE tipo = 'pintada' AND modelo = '300'")
-            cantidad_actual = cursor.fetchone()[0]
+            cantidad_actual = cursor.fetchone()
 
             # Verifica si hay suficientes bases disponibles
-            if cantidad_actual < cantidad:
-                mensaje_error = f"No hay suficientes bases de Pintada 300 disponibles. Cantidad actual: {cantidad_actual}."
+            if cantidad_actual is None:
+                mensaje_error = "No hay registros para pintada 300 en la base de datos."
                 print(mensaje_error)
                 lista_acciones.insert(0, mensaje_error)
                 return
 
-            # Actualiza la cantidad en la base de datos
-            nueva_cantidad = max(0, cantidad_actual - cantidad)
+            cantidad_actual = cantidad_actual[0]
+
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de pintada 300 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos soldador_stock
+            nueva_cantidad_soldador = max(0, cantidad_actual - cantidad)
             cursor.execute("""
                 UPDATE soldador_stock
                 SET cantidad = ?
-                WHERE tipo = 'pintada' AND modelo = '300'
-            """, (nueva_cantidad,))
+                WHERE tipo = 'pintura' AND modelo = '300'
+            """, (nueva_cantidad_soldador,))
+
+            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            cursor.execute("""
+                UPDATE bases_cabezales_brutos
+                SET cantidad = cantidad + ?
+                WHERE piezas = 'Pintada_300'
+            """, (cantidad,))
 
             # Muestra un mensaje de éxito y agrega la acción a la lista
             mensaje_exito = f"Se han terminado {cantidad} bases de Pintada 300."
             print(mensaje_exito)
             lista_acciones.insert(0, mensaje_exito)
             mostrar_stock_soldador(tabla_chapa)
-
 
         # Guarda los cambios en la base de datos
         conn.commit()
@@ -967,3 +1025,114 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
     finally:
         # Cierra la conexión a la base de datos
         conn.close()
+
+def armado_de_cabezales(opcion_seleccionada, entrada_cantidad, lista_acciones,subtitulo, tabla_chapa):
+    tipo_material = opcion_seleccionada.get()
+
+    # Mapea el valor del tipo de material a una cadena
+    if tipo_material == 1:
+        tipo_material = "acero"
+    elif tipo_material == 2:
+        tipo_material = "pintura"
+    else:
+        # Maneja el caso en que el valor no sea 1 ni 2
+        mensaje_error = "Error: Tipo de material no válido."
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+        return
+
+    # Lista de piezas necesarias para el armado de cabezales
+    piezas = ['chapa_U_cabezal', 'tapa_cabezal', 'bandeja_cabezal']
+
+    # Verifica si la cantidad ingresada es un número
+    cantidad_str = entrada_cantidad.get()
+    if not cantidad_str.isdigit():
+        mensaje_error = "Error: La cantidad debe ser un número entero."
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+        return
+
+    cantidad_eliminar = int(cantidad_str)
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    try:
+        # Itera sobre las piezas y muestra un mensaje por cada una
+        for pieza in piezas:
+            print(f"Se necesitan {cantidad_eliminar} unidades de {pieza} de tipo {tipo_material}.")
+            cursor.execute("SELECT cantidad FROM chapa WHERE piezas = ? AND tipo_de_base = ?", (pieza, tipo_material,))
+            cantidad_actual = cursor.fetchone()
+
+            if cantidad_actual is not None:
+                cantidad_actual = cantidad_actual[0]
+                if cantidad_eliminar <= cantidad_actual:
+                    nueva_cantidad = cantidad_actual - cantidad_eliminar
+                    cursor.execute("UPDATE chapa SET cantidad=? WHERE piezas=? AND tipo_de_base = ?", (nueva_cantidad, pieza, tipo_material,))
+
+                else:
+                    lista_acciones.insert(0, f"No hay suficientes unidades de {pieza} en el stock")
+
+            else:
+                lista_acciones.insert(0, f"No se puede eliminar {pieza}, no existe en el stock")
+                
+        consulta_cabezales(tabla_chapa, tipo_material, "cabezal", subtitulo)
+        cursor.execute("UPDATE bases_cabezales_brutos SET cantidad = cantidad + ? WHERE modelo = 'all' AND tipo = ? ", (cantidad_str, tipo_material))
+        lista_acciones.insert(0, f"se agregego {cantidad_str} cantidad a la cabezales terminados")
+        # Muestra un mensaje de éxito y agrega la acción a la lista
+        mensaje_exito = f"Se han eliminado {cantidad_eliminar} unidades de {tipo_material}."
+        print(mensaje_exito)
+        lista_acciones.insert(0, mensaje_exito)
+
+    except Exception as e:
+        # Manejo de errores
+        mensaje_error = f"Error: {e}"
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+
+    finally:
+        # Cierra la conexión a la base de datos
+        conn.commit()
+        conn.close()
+        
+def mostrar_bases_en_bruto(tree1, subtitulo):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad, modelo FROM bases_cabezales_brutos WHERE modelo = '330' OR modelo = '300' ")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tree1.get_children():
+        tree1.delete(item)
+    for dato in datos:
+        tree1.insert("", "end", values=dato)
+    
+    subtitulo_text = "Bases En Bruto"
+    subtitulo.config(text=subtitulo_text)
+
+def mostrar_cabezales_en_bruto(tree1, subtitulo):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad FROM bases_cabezales_brutos WHERE modelo = 'all' ")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tree1.get_children():
+        tree1.delete(item)
+    for dato in datos:
+        tree1.insert("", "end", values=dato)
+        
+    subtitulo_text = "Cabezales en Bruto"
+    subtitulo.config(text=subtitulo_text)
+    
+#--------------------------------funciiones de piezas fundidor ---------------------------------------------------------
+
+def mostrar_datos_materias(material, tabla, res):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad FROM piezas_del_fundicion WHERE material = ? ", (material, ))
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for dato in datos:
+        tabla.insert("", "end", values=dato)
+    res.insert(0, f"Stock de {material}")
+    

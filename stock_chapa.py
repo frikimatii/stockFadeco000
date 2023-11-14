@@ -16,7 +16,10 @@ from funciones import (
     mostrar_stock_soldador,
     calcular_maquinas_posibles,
     eliminar_cantidad_de_piezas,
-    bases_soldador_terminadas
+    bases_soldador_terminadas,
+    armado_de_cabezales,
+    mostrar_cabezales_en_bruto,
+    mostrar_bases_en_bruto,
 )
 
 
@@ -174,9 +177,7 @@ def crear_pestana_chapa(notebook):
     box2 = ttk.Frame(pestana_chapa)
     box2.grid(row=0, column=1, padx=5, pady=5, sticky="ne")
 
-    titulo = ttk.Label(box2, text="Stock de Chapas", font=("Arial", 17, "bold")).grid(
-        row=0, column=1, padx=5, pady=5, sticky="e"
-    )
+    titulo = ttk.Label(box2, text="Stock de Chapas", font=("Arial", 17, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="e")
     ttk.Label(box2, text="Total de Piezas").grid(row=1, column=0, padx=5, sticky="e")
     btn_stock = ttk.Button(
         box2,
@@ -440,48 +441,47 @@ def crear_pestana_chapa(notebook):
     
     ttk.Separator(box3, orient="horizontal").grid(row=12, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
   
-    ttk.Label(box3, text="Envios a Pintura", font=("Arial", 17, "bold")).grid(row=13, column=1, padx=5, pady=5, sticky="e")   
+  
+    #_______________________datosFinales_________________________________
     
-    base_a_pintura = ttk.Frame(box3)
-    base_a_pintura.grid(row=14,column=0)
+    datos_finales = ttk.Frame(box3)
+    datos_finales.grid(row=14, column=0)
     
-    ttk.Label(base_a_pintura,text="Envios Bases a Pintura").grid(row=0, column=0)
+    boton_consulta_cabezales = ttk.Button(datos_finales, text="Consulta de Cabezales", command= lambda: mostrar_cabezales_en_bruto(tabla_chapa, subtitulo))
+    boton_consulta_cabezales.grid(row=0, column=1)
     
-    tipo_var_ce = tk.IntVar()
-    tipo_var_ce.set(1)
-    acero_radio_eliminar = tk.Radiobutton(base_a_pintura, text="330", variable=tipo_var_ce, value=1)
-    acero_radio_eliminar.grid(row=1, column=0)
+    boton_consulta_bases_terminadas = ttk.Button(datos_finales, text="Consulta de Bases Termindas", command= lambda: mostrar_bases_en_bruto(tabla_chapa, subtitulo))
+    boton_consulta_bases_terminadas.grid(row=1,column=1)
     
-    entrada_cantidad_base = ttk.Entry(base_a_pintura, width=10)
-    entrada_cantidad_base.grid(row=2, column=0)
+  
+  #___________________Cabezales_____________________________
+  
+    ttk.Label(box3, text="Cabezales Terminado", font=("Arial", 17, "bold")).grid(row=13, column=1, padx=5, pady=5, sticky="e")   
     
-    btn_pintura_enviar_base = ttk.Button(base_a_pintura, text="enviar")
-    btn_pintura_enviar_base.grid(row=3, column=0)
+    cabezales_terminados = ttk.Frame(box3)
+    cabezales_terminados.grid(row=14,column=1)
+ 
+    tipo_var_cabezal = tk.IntVar()
+    tipo_var_cabezal.set(1)
     
-    chapa_radio_eliminar = tk.Radiobutton(base_a_pintura, text="300", variable=tipo_var_ce, value=2)
-    chapa_radio_eliminar.grid(row=1, column=1)
+    opcion_seleccionada = tk.StringVar()
     
-    entrada_cantidad_base = ttk.Entry(base_a_pintura, width=10)
-    entrada_cantidad_base.grid(row=2, column=1)
+    boton_radius_acero = tk.Radiobutton(cabezales_terminados, text="Inox", variable=tipo_var_cabezal, value=1)
+    boton_radius_acero.grid(row=1, column=0)
     
-    btn_pintura_enviar_base = ttk.Button(base_a_pintura, text="enviar")
-    btn_pintura_enviar_base.grid(row=3, column=1)
+    entrada_cantida_inox = ttk.Entry(cabezales_terminados, width=10)
+    entrada_cantida_inox.grid(row=2, column=0)
     
-    #9)()()()())()()()()()()()()()()()()()()()()()()()()()()()()()()()
+    btn_agregar_cabezal_inox = ttk.Button(cabezales_terminados, text="Agregar", command=lambda: armado_de_cabezales(tipo_var_cabezal, entrada_cantida_inox, lista_acciones, subtitulo, tabla_chapa))
+    btn_agregar_cabezal_inox.grid(row=3, column=0)
     
-    cabezal_a_pintura = ttk.Frame(box3)
-    cabezal_a_pintura.grid(row=14, column=1)
+    boton_radius_pintura = tk.Radiobutton(cabezales_terminados, text="Pintura", variable=tipo_var_cabezal, value=2)
+    boton_radius_pintura.grid(row=1, column=1)
     
-    ttk.Label(cabezal_a_pintura,text="Envios Cabezales a Pintura").grid(row=0, column=0)
+    entrada_cantidad_pintada = ttk.Entry(cabezales_terminados, width=10)
+    entrada_cantidad_pintada.grid(row=2, column=1)
     
-    ttk.Label(cabezal_a_pintura, text="Cantidad De Cabezales:").grid(row=1, column=0)
-    entrada_cantidad = ttk.Entry(cabezal_a_pintura)
-    entrada_cantidad.grid(row=1, column=1)
+    btn_agregar_cabezal_pintada = ttk.Button(cabezales_terminados, text="Agregar", command=lambda: armado_de_cabezales(tipo_var_cabezal, entrada_cantidad_pintada , lista_acciones,subtitulo,tabla_chapa))
+    btn_agregar_cabezal_pintada.grid(row=3, column=1)
     
-    btn_entrega_soldador = ttk.Button(cabezal_a_pintura, text="Envios A Pintura")
-    btn_entrega_soldador.grid(row=2, column=1)
-    
-    ttk.Separator(box3, orient="horizontal").grid(row=15, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
-
-
     

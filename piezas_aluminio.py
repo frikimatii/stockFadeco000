@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from funciones import mostrar_datos , enviar_piezas_a_pulido, mover_piezas_a_stock_pulidas
 
-piezas_totales = ["brazo_250", "brazo_300","brazo_330","velero"]
+piezas_totales = ["brazo_250", "brazo_300","brazo_330","velero", "base_afilador_300", "base_afilador_330"]
 
 def crear_pestana_aluminio(notebook):
     pestana_piezas = ttk.Frame(notebook)
