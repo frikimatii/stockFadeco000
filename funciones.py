@@ -1,6 +1,6 @@
 import sqlite3
 import tkinter as tk 
-from tkinter import ttk ,messagebox
+
 
 def mostrar_datos(tree1, table):
     conn = sqlite3.connect("basedatospiezas.db")
@@ -88,119 +88,6 @@ def eliminar_pieza(lista_predefinida_eliminar, entrada_cantidad_eliminar, res, t
     conn.commit()
     conn.close()
     mostrar_datos(tree, table) 
-
-def enviar_piezas_a_pulido(pieza, cantidad, tabla, tree, newtable):
-    pieza_seleccionada = pieza.get()
-    cantidad_ingresada = cantidad.get()
-    
-    if not cantidad_ingresada.isdigit() or int(cantidad_ingresada) < 0:
-        messagebox.showerror("Error", "Ingrese una Cantidad Válida")
-        return
-    
-    conn = None
-    cursor = None
-
-    try:
-        conn = sqlite3.connect("basedatospiezas.db")
-        cursor = conn.cursor()
-
-        cursor.execute(f"SELECT cantidad FROM {tabla} WHERE piezas = ?", (pieza_seleccionada, ))
-        resultado = cursor.fetchone()
-        cantidad_existente = resultado[0] if resultado else 0
-
-        nueva_cantidad = cantidad_existente + int(cantidad_ingresada)
-
-        # Iniciar una transacción
-        conn.execute("BEGIN")
-
-        # Actualizar la tabla donde envías las piezas a pulido
-        cursor.execute(f"UPDATE {tabla} SET cantidad = ? WHERE piezas = ?", (nueva_cantidad, pieza_seleccionada))
-
-        # Reducir la cantidad en la tabla de stock en bruto
-        cursor.execute(f"SELECT cantidad FROM pieza_en_bruto_aluminio WHERE piezas = ?", (pieza_seleccionada, ))
-        resultado_stock_bruto = cursor.fetchone()
-        cantidad_stock_bruto = resultado_stock_bruto[0] if resultado_stock_bruto else 0
-
-        nueva_cantidad_stock_bruto = cantidad_stock_bruto - int(cantidad_ingresada)
-        cursor.execute(f"UPDATE pieza_en_bruto_aluminio SET cantidad = ? WHERE piezas = ?", (nueva_cantidad_stock_bruto, pieza_seleccionada))
-
-        # Confirmar la transacción
-        conn.commit()
-
-    except sqlite3.Error as e:
-        # Revertir la transacción en caso de error
-        if conn:
-            conn.rollback()
-        messagebox.showerror("Error", f"Error en la base de datos: {e}")
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-    mostrar_datos(tree, tabla)
-    mostrar_datos(newtable, "pieza_en_bruto_aluminio")
-    
-    print(f"{cantidad_ingresada} pieza(s) de {pieza_seleccionada} han sido enviadas a pulido.")
-
-def mover_piezas_a_stock_pulidas(pieza, cantidad, tabla_carmelo, tabla_stock_pulidas, tree_carmelo, tree_stock_pulidas):
-    pieza_seleccionada = pieza.get()
-    cantidad_ingresada = cantidad.get()
-    
-    if not cantidad_ingresada.isdigit() or int(cantidad_ingresada) < 0:
-        messagebox.showerror("Error", "Ingrese una Cantidad Válida")
-        return
-    
-    conn = None
-    cursor = None
-
-    try:
-        conn = sqlite3.connect("basedatospiezas.db")
-        cursor = conn.cursor()
-
-        cursor.execute(f"SELECT cantidad FROM {tabla_carmelo} WHERE piezas = ?", (pieza_seleccionada, ))
-        resultado = cursor.fetchone()
-        cantidad_existente = resultado[0] if resultado else 0
-
-        if int(cantidad_ingresada) > cantidad_existente:
-            messagebox.showerror("Error", "No hay suficientes piezas en la tabla de Carmelo.")
-            return
-
-        # Iniciar una transacción
-        conn.execute("BEGIN")
-
-        # Actualizar la tabla de Carmelo reduciendo la cantidad
-        nueva_cantidad_carmelo = cantidad_existente - int(cantidad_ingresada)
-        cursor.execute(f"UPDATE {tabla_carmelo} SET cantidad = ? WHERE piezas = ?", (nueva_cantidad_carmelo, pieza_seleccionada))
-
-        # Actualizar la tabla de Stock Pulidas aumentando la cantidad
-        cursor.execute(f"SELECT cantidad FROM {tabla_stock_pulidas} WHERE piezas = ?", (pieza_seleccionada, ))
-        resultado_stock_pulidas = cursor.fetchone()
-        cantidad_stock_pulidas = resultado_stock_pulidas[0] if resultado_stock_pulidas else 0
-
-        nueva_cantidad_stock_pulidas = cantidad_stock_pulidas + int(cantidad_ingresada)
-        cursor.execute(f"UPDATE {tabla_stock_pulidas} SET cantidad = ? WHERE piezas = ?", (nueva_cantidad_stock_pulidas, pieza_seleccionada))
-
-        # Confirmar la transacción
-        conn.commit()
-
-    except sqlite3.Error as e:
-        # Revertir la transacción en caso de error
-        if conn:
-            conn.rollback()
-        messagebox.showerror("Error", f"Error en la base de datos: {e}")
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-    mostrar_datos(tree_carmelo, tabla_carmelo)
-    mostrar_datos(tree_stock_pulidas, tabla_stock_pulidas)
-    
-    print(f"{cantidad_ingresada} pieza(s) de {pieza_seleccionada} han sido movidas a Stock Pulidas.")
 
 #funciones de stock de chapas _________________________________________________
 def mostrar_datos_chapa(tree1, table, subtitulo):
@@ -878,9 +765,9 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
                 WHERE tipo = 'inox' AND modelo = '330'
             """, (nueva_cantidad_soldador,))
 
-            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            # Actualiza la cantidad en la tabla piezas_del_fundicion
             cursor.execute("""
-                UPDATE bases_cabezales_brutos
+                UPDATE piezas_del_fundicion
                 SET cantidad = cantidad + ?
                 WHERE piezas = 'inox_330'
             """, (cantidad,))
@@ -919,9 +806,9 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
                 WHERE tipo = 'inox' AND modelo = '300'
             """, (nueva_cantidad_soldador,))
 
-            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            # Actualiza la cantidad en la tabla piezas_del_fundicion
             cursor.execute("""
-                UPDATE bases_cabezales_brutos
+                UPDATE piezas_del_fundicion
                 SET cantidad = cantidad + ?
                 WHERE piezas = 'inox_300'
             """, (cantidad,))
@@ -956,12 +843,12 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
             cursor.execute("""
                 UPDATE soldador_stock
                 SET cantidad = ?
-                WHERE tipo = 'pintura' AND modelo = '330'
+                WHERE tipo = 'pintada' AND modelo = '330'
             """, (nueva_cantidad_soldador,))
 
-            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            # Actualiza la cantidad en la tabla piezas_del_fundicion
             cursor.execute("""
-                UPDATE bases_cabezales_brutos
+                UPDATE piezas_del_fundicion
                 SET cantidad = cantidad + ?
                 WHERE piezas = 'Pintada_330'
             """, (cantidad,))
@@ -997,12 +884,12 @@ def bases_soldador_terminadas(combocaja_terminadas, entrada_cantidad_terminadas,
             cursor.execute("""
                 UPDATE soldador_stock
                 SET cantidad = ?
-                WHERE tipo = 'pintura' AND modelo = '300'
+                WHERE tipo = 'pintada' AND modelo = '300'
             """, (nueva_cantidad_soldador,))
 
-            # Actualiza la cantidad en la tabla bases_cabezales_brutos
+            # Actualiza la cantidad en la tabla piezas_del_fundicion
             cursor.execute("""
-                UPDATE bases_cabezales_brutos
+                UPDATE piezas_del_fundicion
                 SET cantidad = cantidad + ?
                 WHERE piezas = 'Pintada_300'
             """, (cantidad,))
@@ -1076,7 +963,7 @@ def armado_de_cabezales(opcion_seleccionada, entrada_cantidad, lista_acciones,su
                 lista_acciones.insert(0, f"No se puede eliminar {pieza}, no existe en el stock")
                 
         consulta_cabezales(tabla_chapa, tipo_material, "cabezal", subtitulo)
-        cursor.execute("UPDATE bases_cabezales_brutos SET cantidad = cantidad + ? WHERE modelo = 'all' AND tipo = ? ", (cantidad_str, tipo_material))
+        cursor.execute("UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND material = ? ", (cantidad_str, tipo_material))
         lista_acciones.insert(0, f"se agregego {cantidad_str} cantidad a la cabezales terminados")
         # Muestra un mensaje de éxito y agrega la acción a la lista
         mensaje_exito = f"Se han eliminado {cantidad_eliminar} unidades de {tipo_material}."
@@ -1097,7 +984,7 @@ def armado_de_cabezales(opcion_seleccionada, entrada_cantidad, lista_acciones,su
 def mostrar_bases_en_bruto(tree1, subtitulo):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT piezas, cantidad, modelo FROM bases_cabezales_brutos WHERE modelo = '330' OR modelo = '300' ")
+    cursor.execute("SELECT piezas, cantidad, modelo FROM piezas_del_fundicion WHERE modelo = '330' OR modelo = '300' ")
     datos = cursor.fetchall()
     conn.close()
     for item in tree1.get_children():
@@ -1111,7 +998,7 @@ def mostrar_bases_en_bruto(tree1, subtitulo):
 def mostrar_cabezales_en_bruto(tree1, subtitulo):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT piezas, cantidad FROM bases_cabezales_brutos WHERE modelo = 'all' ")
+    cursor.execute("SELECT piezas, cantidad FROM piezas_del_fundicion WHERE modelo = 'cabezal' ")
     datos = cursor.fetchall()
     conn.close()
     for item in tree1.get_children():
@@ -1135,4 +1022,175 @@ def mostrar_datos_materias(material, tabla, res):
     for dato in datos:
         tabla.insert("", "end", values=dato)
     res.insert(0, f"Stock de {material}")
+
+def enviar_piezas_a_pulido(pieza, cantidad, tabla, tree, lista_acciones,):
+    pieza_seleccionada = pieza.get()
+    cantidad_ingresada = cantidad.get()
     
+    if not cantidad_ingresada.isdigit() or int(cantidad_ingresada) < 0:
+        lista_acciones.insert(0, "Ingrese una Cantidad Válida")
+        return
+    
+    conn = None
+    cursor = None
+
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+
+        cursor.execute(f"SELECT cantidad FROM {tabla} WHERE piezas = ?", (pieza_seleccionada, ))
+        resultado = cursor.fetchone()
+        cantidad_existente = resultado[0] if resultado else 0
+
+        nueva_cantidad = cantidad_existente + int(cantidad_ingresada)
+
+        # Iniciar una transacción
+        conn.execute("BEGIN")
+
+        # Actualizar la tabla donde envías las piezas a pulido
+        cursor.execute(f"UPDATE {tabla} SET cantidad = ? WHERE piezas = ?", (nueva_cantidad, pieza_seleccionada))
+
+        # Reducir la cantidad en la tabla de stock en bruto
+        cursor.execute(f"SELECT cantidad FROM piezas_del_fundicion WHERE piezas = ?", (pieza_seleccionada, ))
+        resultado_stock_bruto = cursor.fetchone()
+        cantidad_stock_bruto = resultado_stock_bruto[0] if resultado_stock_bruto else 0
+
+        nueva_cantidad_stock_bruto = cantidad_stock_bruto - int(cantidad_ingresada)
+        cursor.execute(f"UPDATE piezas_del_fundicion SET cantidad = ? WHERE piezas = ?", (nueva_cantidad_stock_bruto, pieza_seleccionada))
+
+        # Confirmar la transacción
+        conn.commit()
+
+    except sqlite3.Error as e:
+        # Revertir la transacción en caso de error
+        if conn:
+            conn.rollback()
+        lista_acciones.insert(0, f"Error en la base de datos: {e}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+    mostrar_datos(tree, tabla)
+    
+    lista_acciones.insert(0, f"{cantidad_ingresada} piezas de {pieza_seleccionada} han sido enviadas a pulido.")
+
+def mover_piezas_a_stock_pulidas(pieza, cantidad, tabla_carmelo, tabla_stock_pulidas, arbol, lista_acciones):
+    pieza_seleccionada = pieza.get()
+    cantidad_ingresada = cantidad.get()
+    
+    if not cantidad_ingresada.isdigit() or int(cantidad_ingresada) < 0:
+        lista_acciones.insert(0,"Ingrese una Cantidad Válida")
+        return
+    
+    conn = None
+    cursor = None
+
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+
+        cursor.execute(f"SELECT cantidad FROM {tabla_carmelo} WHERE piezas = ?", (pieza_seleccionada, ))
+        resultado = cursor.fetchone()
+        cantidad_existente = resultado[0] if resultado else 0
+
+        if int(cantidad_ingresada) > cantidad_existente:
+            lista_acciones.insert(0,"No hay suficientes piezas en la tabla de Carmelo.")
+            return
+
+        # Iniciar una transacción
+        conn.execute("BEGIN")
+
+        # Actualizar la tabla de Carmelo reduciendo la cantidad
+        nueva_cantidad_carmelo = cantidad_existente - int(cantidad_ingresada)
+        cursor.execute(f"UPDATE {tabla_carmelo} SET cantidad = ? WHERE piezas = ?", (nueva_cantidad_carmelo, pieza_seleccionada))
+
+        # Actualizar la tabla de Stock Pulidas aumentando la cantidad
+        cursor.execute(f"SELECT cantidad FROM {tabla_stock_pulidas} WHERE piezas = ?", (pieza_seleccionada, ))
+        resultado_stock_pulidas = cursor.fetchone()
+        cantidad_stock_pulidas = resultado_stock_pulidas[0] if resultado_stock_pulidas else 0
+
+        nueva_cantidad_stock_pulidas = cantidad_stock_pulidas + int(cantidad_ingresada)
+        cursor.execute(f"UPDATE {tabla_stock_pulidas} SET cantidad = ? WHERE piezas = ?", (nueva_cantidad_stock_pulidas, pieza_seleccionada))
+
+        # Confirmar la transacción
+        conn.commit()
+
+    except sqlite3.Error as e:
+        # Revertir la transacción en caso de error
+        if conn:
+            conn.rollback()
+        lista_acciones.insert(0, f"Error en la base de datos: {e}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+    mostrar_datos(arbol, tabla_carmelo)
+    
+    lista_acciones.insert(0,f"{cantidad_ingresada} pieza de {pieza_seleccionada} han sido movidas a Stock Pulidas.")
+    
+def mostrar_datos_especifico(tabla, modelo, arbol):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT piezas, cantidad FROM {tabla} WHERE modelo =  ?", (modelo, ))
+    datos = cursor.fetchall()
+    conn.close()
+    for item in arbol.get_children():
+        arbol.delete(item)
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+    
+def agregar_a_lista_tarea(caja_texto, lista_tarea):
+    texto = caja_texto.get("1.0", "end-1c")  # Obtiene el texto desde la posición 1.0 hasta el final, excluyendo el último carácter (que es un salto de línea)
+    
+    if texto.strip():  # Verifica que el texto no esté vacío después de eliminar espacios en blanco
+        lista_tarea.insert(0, texto)  # Agrega el texto a la lista
+        caja_texto.delete("1.0", tk.END)  # Borra el contenido de la caja de texto
+
+def mostrar(tree1,tabla, mecanizado):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.execute(f"SELECT piezas, cantidad FROM {tabla} WHERE mecanizado = ?", ( mecanizado, ))
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tree1.get_children():
+        tree1.delete(item)
+    for dato in datos:
+        tree1.insert("", "end", values=dato)
+        
+def envios_de_bruto_a_pulido(lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado):
+    pieza = lista_piezas
+    cantidad = cantidad_a_niquelar.get()
+    
+    if cantidad.strip().isdigit():
+        cantidad = int(cantidad)
+        
+        if cantidad < 0:
+            lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+        else:
+            conn = sqlite3.connect("basedatospiezas.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT cantidad FROM piezas_del_fundicion WHERE mecanizado = ? AND piezas = ?", (mecanizado, pieza,))
+            cantidad_actual = cursor.fetchone()
+            
+            if cantidad_actual is not None:
+                cantidad_actual = cantidad_actual[0]
+                nueva_cantidad = cantidad_actual - cantidad
+                cursor.execute("UPDATE piezas_del_fundicion SET cantidad=? WHERE mecanizado = ? AND piezas = ?", (nueva_cantidad, mecanizado, pieza,))
+                conn.commit()
+                
+                # Nueva consulta para actualizar otra tabla
+                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE mecanizado = ? AND piezas = ?", (cantidad, mecanizado, pieza,))
+                
+                conn.commit()
+                conn.close()
+                lista_acciones.insert(0, f"Carga {pieza}: {cantidad} unidades")
+            else:
+                lista_acciones.insert(0, "Cantidad ingresada inválida")
+    else:
+        lista_acciones.insert(0, "Ingrese un número válido")
+

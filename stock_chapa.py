@@ -147,7 +147,7 @@ def crear_pestana_chapa(notebook):
         pady=10,
     )
 
-    notebook.add(pestana_chapa, text="Stock de Chapa")
+    notebook.add(pestana_chapa, text="Session Chapas")
 
     box1 = ttk.Frame(pestana_chapa)
     box1.grid(row=0, column=0, pady=5, padx=5)

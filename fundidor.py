@@ -13,7 +13,7 @@ def ventana_fundidor(notebook):
     pestania = ttk.Frame(notebook)
     pestania.grid(row=0, column=0, padx=10, pady=10,)
 
-    notebook.add(pestania, text="Piezas Fundidor")
+    notebook.add(pestania, text="session Stock")
     
     caja1 = ttk.Frame(pestania)
     caja1.grid(row=0, column=0, padx=5, pady=5)
@@ -33,6 +33,7 @@ def ventana_fundidor(notebook):
     result = tk.Listbox(caja1, width=60)
     result.grid(row=3, column=0, padx=3,pady=3)
     #_______________________caja______________________________________________
+    
     caja2 = ttk.Frame(pestania)
     caja2.grid(row=0, column=1, padx=3, pady=3, sticky="n")
     
