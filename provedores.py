@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
-from funciones import enviar_piezas_a_pulido, mostrar_datos,mover_piezas_a_stock_pulidas, mostrar_datos_especifico, agregar_a_lista_tarea, mostrar, envios_de_bruto_a_pulido
+from funciones import enviar_piezas_a_pulido, mostrar_datos,mover_piezas_a_stock_pulidas, mostrar_datos_especifico, agregar_a_lista_tarea, mostrar, envios_de_bruto_a_pulido, sort_column, sort_column_numeric
 
 modelo_piezas = ["base_pintada_330", "base_pintada_300"]
 niquelado = ["eje_rectificado", "varilla_brazo_330", "varilla_brazo_300", "varilla_brazo_250", "tubo_manija", "tubo_manija_250"]
-piezas_carmelo = ["brazo_330", "brazo_300", "tapa_afilador", "velero"]
-piezas_maxi = ["velero", "cubrecuchilla_330", "cubrecuchilla_300", "caja_330"]
+piezas_carmelo = ["brazo_330", "brazo_300", "tapa_afilador", "velero", "caja_torneado_300", "inox_330","inox_300" ]
+piezas_maxi = ["velero", "cubrecuchilla_330", "cubrecuchilla_300", "caja_330", "inox_330"]
 pieza_buen_hombre = ["vela_330", "vela_300", "planchada_330", "planchada_300"]
 
 cabezal = ["cabezal_pintura"]
@@ -22,8 +22,8 @@ def ventana_provedores(notebook):
     tk.Label(caja1, text="PROVEDORES").grid(row=0, column=0)
     tk.Label(caja1, text=" Tabla de datos").grid(row=1, column=0 , sticky="w")
     arbol = ttk.Treeview(caja1, columns=("Pieza", "Cantidad"))
-    arbol.heading("Pieza", text="Pieza")
-    arbol.heading("Cantidad", text="Cantidad")
+    arbol.heading("Pieza", text="Pieza", command=lambda: sort_column(arbol, "Pieza", False))
+    arbol.heading("Cantidad", text="Cantidad", command=lambda: sort_column_numeric(arbol, "Cantidad", False))
     arbol.column("#0", width=0, stretch=tk.NO)
     arbol.column("Pieza", anchor=tk.W, width=170)
     arbol.column("Cantidad", anchor=tk.W, width=90)
@@ -113,7 +113,7 @@ def ventana_provedores(notebook):
     cantidad_piezas_terminadas_maxi = tk.Entry(caja2, width=10)
     cantidad_piezas_terminadas_maxi.grid(row=22, column=1)
     
-    tk.Button(caja2, text="Piezas Terminadas", command=lambda: mover_piezas_a_stock_pulidas(pieza_predeterminadas4 ,cantidad_piezas_terminadas_maxi, "maxi_pulido", "piezas_finales_defenitivas)", arbol, result)).grid(row=23, column=1)
+    tk.Button(caja2, text="Piezas Terminadas", command=lambda: mover_piezas_a_stock_pulidas(pieza_predeterminadas4 ,cantidad_piezas_terminadas_maxi, "maxi_pulido", "piezas_finales_defenitivas", arbol, result)).grid(row=23, column=1)
     
     #------------------------------------------------------------------------------#
     ttk.Separator(caja2, orient="horizontal").grid(row=245, column=0, columnspan=2, sticky="ew", padx=5, pady=5 )

@@ -177,9 +177,9 @@ def crear_pestana_chapa(notebook):
     box2 = ttk.Frame(pestana_chapa)
     box2.grid(row=0, column=1, padx=5, pady=5, sticky="ne")
 
-    titulo = ttk.Label(box2, text="Stock de Chapas", font=("Arial", 17, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="e")
+    ttk.Label(box2, text="Stock de Chapas", font=("Arial", 17, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="e")
     ttk.Label(box2, text="Total de Piezas").grid(row=1, column=0, padx=5, sticky="e")
-    btn_stock = ttk.Button(
+    ttk.Button(
         box2,
         text="Stock Total",
         command=lambda: mostrar_datos_chapa(tabla_chapa, "chapa", subtitulo),
@@ -463,8 +463,6 @@ def crear_pestana_chapa(notebook):
  
     tipo_var_cabezal = tk.IntVar()
     tipo_var_cabezal.set(1)
-    
-    opcion_seleccionada = tk.StringVar()
     
     boton_radius_acero = tk.Radiobutton(cabezales_terminados, text="Inox", variable=tipo_var_cabezal, value=1)
     boton_radius_acero.grid(row=1, column=0)

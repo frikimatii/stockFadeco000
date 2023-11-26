@@ -21,8 +21,8 @@ root.iconbitmap("img/FLogo.ico")
 notebook = ttk.Notebook(root)
 
 
-ventana_provedores(notebook)
 mecanizado(notebook)
+ventana_provedores(notebook)
 ventana_fundidor(notebook)
 crear_pestana_chapa(notebook)
 pestania1 = crear_pestana(notebook, "Piezas 330")
