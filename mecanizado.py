@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from funciones import mostrar_datos_torno, mostrar_datos_ , actualizar_pieza_torno, actualizar_caja_torno, mostrar_piezas_torno_terminado, pulido_cabezal
+from funciones import mostrar_datos_torno, mostrar_datos_ , actualizar_pieza_torno, actualizar_caja_torno, mostrar_piezas_torno_terminado, pulido_cabezal, de_enbruto_a_torneado, mostrar_cajas_bruto, agregar_a_lista_tarea
 
 tipo = ["330", "300", "250"]
 tipos_de_maquinas = ["inox_330", "inox_300", "Inox_250", "pintada_330", "pintada_300"]
@@ -70,15 +70,17 @@ def mecanizado(notebook):
     cantidad_caja_torneada = tk.Entry(torno)
     cantidad_caja_torneada.grid(row=9, column=1)
     
-    ttk.Button(torno, text="Enviar", command=lambda: actualizar_caja_torno(caja_a_torner, cantidad_caja_torneada, result, arbol)).grid(row=10, column=1)
-    ttk.Button(torno, text="Stock Terminado", command=lambda: mostrar_datos_(arbol, "torno")).grid(row=11, column=0)    
+    ttk.Button(torno, text="Enviar", command=lambda: de_enbruto_a_torneado(caja_a_torner, cantidad_caja_torneada, result)).grid(row=10, column=1)
+    ttk.Button(torno, text="Stock Terminado", command=lambda: mostrar_datos_(arbol)).grid(row=11, column=0)   
+    ttk.Button(torno, text="Stock Bruto", command=lambda: mostrar_cajas_bruto(arbol)).grid(row=11, column=1)   
+    
 
     ttk.Separator(torno, orient="horizontal").grid(row=12, column=0, sticky="ew", columnspan=2, padx=5, pady=5)        
     
     tk.Label(torno, text="Obsebaciones").grid(row=13, column=0)
     info_torno = tk.Text(torno, height=6, width=25)
     info_torno.grid(row=14, column=0, columnspan=1)
-    tk.Button(torno, text="Enviar").grid(row=15, column=0, sticky="e")
+    tk.Button(torno, text="Enviar", command= lambda: agregar_a_lista_tarea(info_torno, result)).grid(row=15, column=0, sticky="e")
     
     caja2 = ttk.Frame(pestania)
     caja2.grid(row=2, column=2)
