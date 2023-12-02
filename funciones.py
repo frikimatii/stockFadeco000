@@ -1482,3 +1482,352 @@ def mostrar_cajas_bruto(arbol):
         arbol.delete(item)
     for dato in datos:
         arbol.insert("", "end", values=dato)
+        
+#--------------------------------------Armado de motores-----------------------------------------------------------
+
+def mostrar_motores(arbol):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas ,cantidad FROM piezas_finales_defenitivas WHERE piezas = 'motores_220w'")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in arbol.get_children():
+        arbol.delete(item)
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+        
+def mostrar_pieza_motores(arbol):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas ,cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_de_caja'")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in arbol.get_children():
+        arbol.delete(item)
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+        
+def armado_de_motor(modelo, cantidad, lista_acciones):
+    tipo = modelo.get()
+    cantidad_ = int(cantidad.get())  # Asegurarse de convertir la cantidad a un entero
+
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    if tipo == 1:
+        motores_finales = ["caja_torneado_330", "eje", "manchon", "ruleman_1", "ruleman_2", "corona_330", "seguer", "sinfin", "motor"]
+    elif tipo == 2:
+        motores_finales = ["caja_torneado_300", "eje", "manchon", "ruleman_1", "ruleman_2", "corona_300", "seguer", "sinfin", "motor"]
+    else:
+        lista_acciones.insert(0, "modelo NO valido")
+
+    # Verificar si hay suficientes piezas en la base de datos
+    for pieza in motores_finales:
+        cursor.execute("SELECT cantidad FROM piezas_del_fundicion WHERE piezas = ?", (pieza, ))
+        cantidad_disponible = cursor.fetchone()[0]
+
+        if cantidad_disponible < cantidad_:
+            lista_acciones.insert(0, f"NO hay suficiente {pieza} para ensamblar")
+            conn.close()
+            
+    # Si hay suficientes piezas, calcular la cantidad máxima de armado de motor
+    for pieza in motores_finales:
+        cursor.execute("UPDATE piezas_del_fundicion SET cantidad = cantidad - ? WHERE piezas = ?", (cantidad_, pieza))
+
+    conn.commit()
+    conn.close()
+
+    lista_acciones.insert(f"Se ensamblaron {cantidad_} unidades del motor {tipo} correctamente.")
+
+def cantida_posible_motores(piezas, lista_acciones, base_modelo=None):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    
+    cantidades = {}
+    
+    try:
+        for pieza in piezas:
+            cursor.execute("SELECT cantidad FROM piezas_finales_defenitivas WHERE piezas = ?", (pieza,))
+            resultado = cursor.fetchone()
+            
+            if resultado is not None:
+                cantidad_disponible = resultado[0]
+                cantidades[pieza] = cantidad_disponible
+                
+        if base_modelo is not None and len(cantidades) == len(base_modelo):
+            cantidad_bases = min(cantidades.values()) // min(base_modelo.values())
+            lista_acciones.insert(0, f"Se pueden armar {cantidad_bases} máquinas.")
+        else:
+            lista_acciones.insert(0, "No hay piezas suficientes para armar las máquinas.")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+        
+def cajas_terminadas(entry_cantidad, modelo, lista_acciones):
+    try:
+        cantidad = int(entry_cantidad.get())
+    except ValueError:
+        lista_acciones.insert(0, "Error: Ingrese un número válido.")
+        return
+
+    modelo_opcion = modelo.get()  # Obtener el valor actual de modelo
+
+    modelos_disponibles = {
+        1: {"caja_torneado_330": 1, "eje": 1, "manchon": 1, "ruleman_1": 1, "ruleman_2": 1, "corona_330": 1, "seguer": 1, "sinfin": 1, "motores_220w": 1},
+        2: {"caja_torneado_300": 1, "eje": 1, "manchon": 1, "ruleman_1": 1, "ruleman_2": 1, "corona_300": 1, "seguer": 1, "sinfin": 1, "motores_220w": 1},
+        3: {"caja_torneado_250": 1, "eje_250": 1, "manchon_250": 1, "ruleman_1": 1, "ruleman_2": 1, "corona_250": 1, "seguer": 1, "sinfin": 1, "motores250_220w": 1},
+    }
+
+    if modelo_opcion not in modelos_disponibles:
+        lista_acciones.insert(0, "Error: Opción de modelo no válida.")
+        return
+
+    modelo_dict = modelos_disponibles[modelo_opcion]
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    piezas_faltantes = []
+
+    try:
+        # Verificar piezas faltantes antes de actualizar la base de datos
+        for pieza, cantidad_modelo in modelo_dict.items():
+            cursor.execute("SELECT cantidad FROM piezas_finales_defenitivas WHERE piezas = ?", (pieza,))
+            resultado = cursor.fetchone()
+
+            if resultado is not None:
+                cantidad_actual = resultado[0]
+                nueva_cantidad = max(0, cantidad_actual - (cantidad_modelo * cantidad))
+
+                if nueva_cantidad == 0:
+                    piezas_faltantes.append(pieza)
+
+        if piezas_faltantes:
+            mensaje = f"Operación Cancelada. Piezas faltantes: {', '.join(piezas_faltantes)}"
+            lista_acciones.insert(0, mensaje)
+        else:
+            # Actualizar la base de datos si no hay piezas faltantes
+            for pieza, cantidad_modelo in modelo_dict.items():
+                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad - ? WHERE piezas = ?", (cantidad_modelo * cantidad, pieza))
+
+            # Consulta dinámica según la opción de modelo
+            if modelo_opcion == 1:
+                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'caja_final_330'",(cantidad, ))
+            elif modelo_opcion == 2:
+                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'caja_final_300'",(cantidad, ))
+            elif modelo_opcion == 3:
+                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'caja_final_250'",(cantidad, ))
+            else:
+                lista_acciones.insert(0, "Error: Opción de modelo no válida.")
+
+            lista_acciones.insert(0, "Operación Completada con Éxito. Todas las piezas se han actualizado.")
+
+        conn.commit()
+
+    except sqlite3.Error as e:
+        lista_acciones.insert(0, f"Error al actualizar la base de datos: {e}")
+
+    finally:
+        conn.close()
+
+#-----------------------------------Pre Armado---------------------------
+
+def stock_prearmado(arbol):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT piezas ,cantidad FROM piezas_finales_defenitivas WHERE sector = 'pre_armado'")
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+    finally:
+        conn.close()
+
+    for item in arbol.get_children():
+        arbol.delete(item)
+
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+
+base_pre_inox_armada330 = {"inox_330": 1, "aro_numerador": 1, "espiral": 1, "perilla_numerador": 1,
+                   "tapita_perilla": 1, "patas": 4, "movientos": 1, "eje_rectificado": 1,
+                   "resorte_movimiento": 1, "tornillo_guia": 1, "guia_U": 1, "teclas": 1,
+                   "cable_220w": 1, "varilla_carro_330": 1, "carros": 1, "rueditas": 4,
+                   "resorte_carro": 2, "cajamotor_final_330": 1, "capacitores": 1}
+
+base_pre_inox_armada300 = {"inox_300": 1, "aro_numerador": 1, "espiral": 1, "perilla_numerador": 1,
+                   "tapita_perilla": 1, "patas": 4, "movientos": 1, "eje_rectificado": 1,
+                   "resorte_movimiento": 1, "tornillo_guia": 1, "guia_U": 1, "teclas": 1,
+                   "cable_220w": 1, "varilla_carro_300": 1, "carros": 1, "rueditas": 4,
+                   "resorte_carro": 2, "cajamotor_final_300": 1, "capacitores": 1}
+
+base_pre_inox_armada250 = {"inox_250": 1, "aro_numerador": 1, "espiral": 1, "perilla_numerador": 1,
+                   "tapita_perilla": 1, "patas": 4, "movientos": 1, "eje_rectificado": 1,
+                   "resorte_movimiento": 1, "tornillo_guia": 1, "guia_U": 1, "teclas": 1,
+                   "cable_220w": 1, "varilla_carro_250": 1, "carros_250": 1, "rueditas": 4, 
+                   "cajamotor_final_250": 1, "capacitores_250": 1}
+
+base_pre_pintada_armada330 = {"base_pintada_330": 1, "aro_numerador": 1, "espiral": 1, "perilla_numerador": 1,
+                   "tapita_perilla": 1, "patas": 4, "movientos": 1, "eje_rectificado": 1,
+                   "resorte_movimiento": 1, "tornillo_guia": 1, "guia_U": 1, "teclas": 1,
+                   "cable_220w": 1, "varilla_carro_330": 1, "carros": 1, "rueditas": 4,
+                   "resorte_carro": 2, "cajamotor_final_330": 1, "capacitores": 1}
+
+base_pre_pintada_armada300 = {"base_pintada_300": 1, "aro_numerador": 1, "espiral": 1, "perilla_numerador": 1,
+                   "tapita_perilla": 1, "patas": 4, "movientos": 1, "eje_rectificado": 1,
+                   "resorte_movimiento": 1, "tornillo_guia": 1, "guia_U": 1, "teclas": 1,
+                   "cable_220w": 1, "varilla_carro_300": 1, "carros": 1, "rueditas": 4,
+                   "resorte_carro": 2, "cajamotor_final_300": 1, "capacitores": 1}
+
+def maquinas_pre_armadas_disponibles(cantidad_maquinas, base_pre_armada, inventario_piezas):
+    # Inicializar la lista de piezas faltantes
+    piezas_faltantes = []
+
+    for pieza, cantidad_necesaria in base_pre_armada.items():
+        if pieza not in inventario_piezas:
+            # Si falta una pieza en el inventario, agregar a la lista de piezas faltantes
+            piezas_faltantes.append((pieza, cantidad_necesaria * cantidad_maquinas))
+        else:
+            cantidad_inventario = inventario_piezas[pieza]
+            maquinas_posibles_con_pieza = cantidad_inventario // cantidad_necesaria
+
+            # Verificar si la cantidad de piezas en inventario es suficiente
+            if maquinas_posibles_con_pieza < cantidad_maquinas:
+                piezas_faltantes.append((pieza, cantidad_necesaria * (cantidad_maquinas - maquinas_posibles_con_pieza)))
+
+    return piezas_faltantes
+
+def conectar_base_datos_y_calcular_maquinas(cantidad_maquinas, base_pre_armada):
+    # Conectar a la base de datos
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    try:
+        # Ejecutar una consulta para obtener la cantidad de cada pieza en el inventario
+        cursor.execute("SELECT piezas, cantidad FROM piezas_finales_defenitivas")
+        resultados = cursor.fetchall()
+
+        # Crear un diccionario con la información del inventario
+        inventario_piezas = dict(resultados)
+
+        # Calcular las piezas faltantes para la cantidad de máquinas especificada
+        piezas_faltantes = maquinas_pre_armadas_disponibles(cantidad_maquinas, base_pre_armada, inventario_piezas)
+
+        if not piezas_faltantes:
+            print(f"Se pueden armar {cantidad_maquinas} máquinas pre-armadas.")
+        else:
+            print(f"No hay suficientes piezas para armar {cantidad_maquinas} máquinas pre-armadas. Piezas faltantes:")
+            for pieza, cantidad_faltante in piezas_faltantes:
+                print(f"{pieza}: {cantidad_faltante}")
+
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+
+    finally:
+        # Cerrar la conexión a la base de datos
+        conn.close()
+
+conectar_base_datos_y_calcular_maquinas(5, base_pre_inox_armada330) 
+print("inox330") 
+conectar_base_datos_y_calcular_maquinas(5, base_pre_inox_armada300) 
+print("inox300") 
+conectar_base_datos_y_calcular_maquinas(5, base_pre_inox_armada250) 
+print("inox250" ) 
+conectar_base_datos_y_calcular_maquinas(5, base_pre_pintada_armada330) 
+print("pint330") 
+conectar_base_datos_y_calcular_maquinas(5, base_pre_pintada_armada300) 
+print("pint300") 
+
+def actualizar_inventario(cantidad_maquinas, tipo_maquina, ensamblar=True):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    try:
+        # Obtener la cantidad actual de piezas en la base de datos
+        cursor.execute("SELECT piezas, cantidad FROM piezas_finales_defenitivas")
+        resultados = cursor.fetchall()
+        inventario_piezas = dict(resultados)
+
+        # Definir la base pre-armada según el tipo de máquina
+        if tipo_maquina == "inox_330":
+            base_pre_armada = base_pre_inox_armada330
+        elif tipo_maquina == "inox_300":
+            base_pre_armada = base_pre_inox_armada300
+        elif tipo_maquina == "inox_250":
+            base_pre_armada = base_pre_inox_armada250
+        elif tipo_maquina == "pintada_330":
+            base_pre_armada = base_pre_pintada_armada330
+        elif tipo_maquina == "pintada_300":
+            base_pre_armada = base_pre_pintada_armada300
+        else:
+            print("Tipo de máquina no reconocido.")
+            return inventario_piezas, []
+
+        # Verificar si hay suficientes piezas disponibles antes de realizar el descuento
+        piezas_faltantes = []
+        for pieza, cantidad_necesaria in base_pre_armada.items():
+            if inventario_piezas[pieza] < cantidad_necesaria * cantidad_maquinas:
+                piezas_faltantes.append((pieza, cantidad_necesaria * cantidad_maquinas - inventario_piezas[pieza]))
+
+        if piezas_faltantes:
+            print("No hay suficientes piezas para ensamblar la cantidad deseada de máquinas.")
+            return inventario_piezas, piezas_faltantes
+
+        # Actualizar el inventario según sea necesario
+        for pieza, cantidad_necesaria in base_pre_armada.items():
+            if ensamblar:
+                inventario_piezas[pieza] -= cantidad_necesaria * cantidad_maquinas
+                if inventario_piezas[pieza] < 0:
+                    inventario_piezas[pieza] = 0
+            else:
+                inventario_piezas[pieza] += cantidad_necesaria * cantidad_maquinas
+
+        # Actualizar la base de datos con el nuevo inventario
+        for pieza, cantidad_actualizada in inventario_piezas.items():
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = ? WHERE piezas = ?", (cantidad_actualizada, pieza))
+
+        # Incrementar la cantidad de la base pre-armada según el tipo de máquina
+        if tipo_maquina == "inox_330":
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'base_pre_armada330inox'", (cantidad_maquinas,))
+        elif tipo_maquina == "inox_300":
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'base_pre_armada300inox'", (cantidad_maquinas,))
+        elif tipo_maquina == "inox_250":
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'base_pre_armada250inox'", (cantidad_maquinas,))
+        elif tipo_maquina == "pintada_330":
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'base_pre_armada330pint'", (cantidad_maquinas,))
+        elif tipo_maquina == "pintada_300":
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = 'base_pre_armada300pint'", (cantidad_maquinas,))
+        else:
+            print("Error al actualizar.")
+
+        # Confirmar los cambios en la base de datos
+        conn.commit()
+
+        # Imprimir un mensaje indicando si se ensamblaron o eliminaron las máquinas
+        accion = "ensamblaron" if ensamblar else "eliminaron"
+        print(f"{cantidad_maquinas} máquinas {tipo_maquina} se {accion}. Inventario actualizado en la base de datos.")
+
+    except sqlite3.Error as e:
+        print(f"Error al actualizar el inventario en la base de datos: {e}")
+        piezas_faltantes = []
+
+    finally:
+        # Cerrar la conexión a la base de datos
+        conn.close()
+        
+def stock_prebases(arbol):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT piezas ,cantidad FROM piezas_finales_defenitivas WHERE mecanizado = 'prearmado'")
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+    finally:
+        conn.close()
+
+    for item in arbol.get_children():
+        arbol.delete(item)
+
+    for dato in datos:
+        arbol.insert("", "end", values=dato)

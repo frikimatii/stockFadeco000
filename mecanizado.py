@@ -1,11 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
-from funciones import mostrar_datos_torno, mostrar_datos_ , actualizar_pieza_torno, actualizar_caja_torno, mostrar_piezas_torno_terminado, pulido_cabezal, de_enbruto_a_torneado, mostrar_cajas_bruto, agregar_a_lista_tarea
+from funciones import mostrar_datos_torno, mostrar_datos_ , actualizar_pieza_torno, actualizar_caja_torno, mostrar_piezas_torno_terminado, pulido_cabezal, de_enbruto_a_torneado, mostrar_cajas_bruto, agregar_a_lista_tarea, mostrar_motores, mostrar_pieza_motores, armado_de_motor, cantida_posible_motores, cajas_terminadas, stock_prearmado,actualizar_inventario, stock_prebases
 
 tipo = ["330", "300", "250"]
-tipos_de_maquinas = ["inox_330", "inox_300", "Inox_250", "pintada_330", "pintada_300"]
+tipos_de_maquinas = ["inox_330", "inox_300", "inox_250", "pintada_330", "pintada_300"]
 cajas_torono = ["caja_torneado_330", "caja_torneado_300", "caja_torneado_250"]
 piezas_a_torner_lista = ["manchon", "manchon_250", "eje_250", "eje", "rueditas", "tornillo_guia", "carros", "movientos", "carros_250" ]
+motores_finales330 = ["caja_torneado_330", "eje", "manchon", "ruleman_1", "ruleman_2", "corona_330", "seguer", "sinfin", "motores_220w"]
+modelo330 = {"caja_torneado_330": 1, "eje": 1, "manchon": 1, "ruleman_1": 1, "ruleman_2": 1, "corona_330": 1, "seguer": 1, "sinfin": 1, "motores_220w": 1}
+motores_finales300 = ["caja_torneado_300", "eje", "manchon", "ruleman_1", "ruleman_2", "corona_300", "seguer", "sinfin", "motores_220w"]
+modelo300 = {"caja_torneado_300": 1, "eje": 1, "manchon": 1, "ruleman_1": 1, "ruleman_2": 1, "corona_300": 1, "seguer": 1, "sinfin": 1, "motores_220w": 1}
+motores_finales250 = ["caja_torneado_250", "eje", "manchon", "ruleman_1", "ruleman_2", "corona_250", "seguer", "sinfin", "motores250_220w"]
+modelo250 = {"caja_torneado_250": 1, "eje": 1, "manchon": 1, "ruleman_1": 1, "ruleman_2": 1, "corona_250": 1, "seguer": 1, "sinfin": 1, "motores250_220w": 1}
+
 
 
 def mecanizado(notebook):
@@ -91,12 +98,12 @@ def mecanizado(notebook):
     tk.Label(armado_de_caja, text="Armado de cajas").grid(row=0, column=0)
     
     tk.Label(armado_de_caja, text="Stock de Motores").grid(row=1, column=0)
-    tk.Button(armado_de_caja, text="Motores").grid(row=1, column=1)
+    tk.Button(armado_de_caja, text="Motores", command=lambda: mostrar_motores(arbol)).grid(row=1, column=1)
     
     ttk.Separator(armado_de_caja, orient="horizontal").grid(row=2, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
     
     tk.Label(armado_de_caja, text="Consultas de Piezas Para Armar Motores").grid(row=3, column=0)
-    tk.Button(armado_de_caja, text="Mostrar").grid(row=3, column=1)
+    tk.Button(armado_de_caja, text="Mostrar", command=lambda: mostrar_pieza_motores(arbol)).grid(row=3, column=1)
     
     ttk.Separator(armado_de_caja, orient="horizontal").grid(row=4, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
     
@@ -104,9 +111,11 @@ def mecanizado(notebook):
     botonera = ttk.Frame(armado_de_caja)
     botonera.grid(row=6, column=0, columnspan=3)
     
-    tk.Button(botonera, text="330").grid(row=12, column=0)
-    tk.Button(botonera, text="300").grid(row=12, column=1)
-    tk.Button(botonera, text="250").grid(row=12, column=2)
+    
+    
+    tk.Button(botonera, text="330", command=lambda : cantida_posible_motores(motores_finales330, result, modelo330)).grid(row=12, column=0)
+    tk.Button(botonera, text="300", command=lambda : cantida_posible_motores(motores_finales300, result, modelo300)).grid(row=12, column=1)
+    tk.Button(botonera, text="250", command=lambda : cantida_posible_motores(motores_finales250, result, modelo250)).grid(row=12, column=2)
 
     ttk.Separator(armado_de_caja, orient="horizontal").grid(row=7, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
 
@@ -125,7 +134,7 @@ def mecanizado(notebook):
     tk.Label(armado_de_caja, text="Cantidad").grid(row=10, column=0)
     motores_terminado_cantidad = tk.Entry(armado_de_caja)
     motores_terminado_cantidad.grid(row=10, column=1)
-    ttk.Button(armado_de_caja, text="Enviar").grid(row=11, column=1)
+    ttk.Button(armado_de_caja, text="Enviar",command=lambda:cajas_terminadas(motores_terminado_cantidad, modelo, result)).grid(row=11, column=1)
 
     ttk.Separator(armado_de_caja, orient="horizontal").grid(row=12, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
 
@@ -173,50 +182,31 @@ def mecanizado(notebook):
     ttk.Separator(pre_armado, orient="horizontal").grid(row=2, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
 
     tk.Label(pre_armado, text="Stock De Piezas Pre Armado").grid(row=3, column=0)
-    tk.Button(pre_armado, text="Stock").grid(row=3, column=1)
+    tk.Button(pre_armado, text="Stock" , command=lambda: stock_prearmado(arbol)).grid(row=3, column=1)
+    
+    ttk.Separator(pre_armado, orient="horizontal").grid(row=6, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
 
-    ttk.Separator(pre_armado, orient="horizontal").grid(row=4, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
+    tk.Label(pre_armado, text="Bases Terminadas con motores").grid(row=7, column=0)
     
-    tk.Label(pre_armado, text="Bases Terminandas 'sin Motor'").grid(row=5, column=0)
-    
-    tk.Label(pre_armado, text="Tipo").grid(row=6, column=0)
-    tk.Label(pre_armado, text="Cantidad").grid(row=6, column=1)
-    
-    tipo_pre_armado = ttk.Combobox(pre_armado, values=tipos_de_maquinas)
-    tipo_pre_armado.grid(row=7, column=0)
-    cantidad_pre_armado_base = tk.Entry(pre_armado)
-    cantidad_pre_armado_base.grid(row=7, column=1)
-    
-    tk.Button(pre_armado, text="Enviar").grid(row=8, column=1)
-    
-    ttk.Separator(pre_armado, orient="horizontal").grid(row=9, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
-
-    tk.Label(pre_armado, text="Stock de bases pre Armadas").grid(row=10, column=0)
-    tk.Button(pre_armado, text="Stock").grid(row=10, column=1)
-    
-    ttk.Separator(pre_armado, orient="horizontal").grid(row=11, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
-
-    tk.Label(pre_armado, text="Bases Terminadas con motores").grid(row=12, column=0)
-    
-    tk.Label(pre_armado, text="Tipo").grid(row=13, column=0)
-    tk.Label(pre_armado, text="Cantidad").grid(row=13, column=1)
+    tk.Label(pre_armado, text="Tipo").grid(row=8, column=0)
+    tk.Label(pre_armado, text="Cantidad").grid(row=8, column=1)
     
     tipo_pre_armado_final = ttk.Combobox(pre_armado, values=tipos_de_maquinas)
-    tipo_pre_armado_final.grid(row=14, column=0)
+    tipo_pre_armado_final.grid(row=9, column=0)
     cantidad_pre_armado_base_final = tk.Entry(pre_armado)
-    cantidad_pre_armado_base_final.grid(row=14, column=1)
+    cantidad_pre_armado_base_final.grid(row=9, column=1)
 
-    tk.Button(pre_armado, text="Enviar").grid(row=15, column=1)
+    tk.Button(pre_armado, text="Enviar", command=lambda: actualizar_inventario(int(cantidad_pre_armado_base_final.get()), tipo_pre_armado_final.get())).grid(row=10, column=1)
 
-    ttk.Separator(pre_armado, orient="horizontal").grid(row=16, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
+    ttk.Separator(pre_armado, orient="horizontal").grid(row=11, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
 
-    tk.Label(pre_armado, text="Stock de bases Terminadas").grid(row=17, column=0)
-    tk.Button(pre_armado, text="Stock").grid(row=17, column=1)
+    tk.Label(pre_armado, text="Stock de bases Terminadas").grid(row=12, column=0)
+    tk.Button(pre_armado, text="Stock", command= lambda: stock_prebases(arbol)).grid(row=12, column=1)
     
-    ttk.Separator(pre_armado, orient="horizontal").grid(row=18, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
+    ttk.Separator(pre_armado, orient="horizontal").grid(row=13, column=0, columnspan=2, sticky="ew", pady=5, padx=5)
 
-    tk.Label(pre_armado, text="Obsebaciones").grid(row=19, column=0)
+    tk.Label(pre_armado, text="Obsebaciones").grid(row=14, column=0)
     info_pre_armado = tk.Text(pre_armado, height=6, width=25)
-    info_pre_armado.grid(row=20, column=0, columnspan=1)
-    tk.Button(pre_armado, text="Enviar").grid(row=21, column=0, sticky="e")
+    info_pre_armado.grid(row=15, column=0, columnspan=1)
+    tk.Button(pre_armado, text="Enviar").grid(row=16, column=0, sticky="e")
     
