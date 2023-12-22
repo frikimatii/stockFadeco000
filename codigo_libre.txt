@@ -170,3 +170,5 @@ def crear_pestana_aluminio(notebook):
     tabla2.grid(row=3, column=0, pady=5, padx=5) 
     
    
+
+   i330 = ["brazo_330", "cubrecuchilla_330", "velero", "perilla_brazo", "cabezal_I", "teletubi_330", "chuchilla_330", "cuadrado_regulador", "vela_final", "cubre_motor_rectangulo", "cubre_motor_cuadrado", "planchada_final_330", "varilla_brazo_330", "resorte_brazo", "tapa_afilador", "pipas", "tubo_manija", "afilador_final", "perilla_cubrecuchilla", "perilla_afilador", "base_afilador_330", "base_pre_armada330inox", "piedras_afilador" ]

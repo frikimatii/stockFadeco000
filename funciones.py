@@ -2351,7 +2351,6 @@ def maquinas_pre_armadas_disponibles(
 
     return piezas_faltantes
 
-
 def conectar_base_datos_y_calcular_maquinas(cantidad_maquinas, base_pre_armada):
     # Conectar a la base de datos
     conn = sqlite3.connect("basedatospiezas.db")
@@ -2385,7 +2384,6 @@ def conectar_base_datos_y_calcular_maquinas(cantidad_maquinas, base_pre_armada):
     finally:
         # Cerrar la conexión a la base de datos
         conn.close()
-
 
 conectar_base_datos_y_calcular_maquinas(5, base_pre_inox_armada330)
 
@@ -2494,7 +2492,6 @@ def actualizar_inventario(cantidad_maquinas, tipo_maquina, ensamblar=True):
         # Cerrar la conexión a la base de datos
         conn.close()
 
-
 def stock_prebases(arbol):
     try:
         conn = sqlite3.connect("basedatospiezas.db")
@@ -2513,3 +2510,194 @@ def stock_prebases(arbol):
 
     for dato in datos:
         arbol.insert("", "end", values=dato)
+
+def ensamblar_maquinas(cantidad_ensamblar_entry,lista_acciones ):
+
+    maquinas_mes = 0
+
+    cantidad_ensamblada = cantidad_ensamblar_entry.get()
+
+    # Validamos que la cantidad ingresada sea un número válido
+    try:
+        cantidad_ensamblada = int(cantidad_ensamblada)
+    except ValueError:
+        lista_acciones.insert(0, "Ingrese una Cantidad Válida")
+        return
+
+    conn = sqlite3.connect("Stock_Fadeco.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT Pieza, Cantidad FROM piezas_de_330")
+    stock = cursor.fetchall()
+
+    cantidades_requeridas = {
+        "Base": 1,
+        "Motor": 1,
+        "Teletubi": 1,
+        "Cuchilla": 1,
+        "Vela": 1,
+        "CubreCuchilla": 1,
+        "Cabezal": 1,
+        "Planchada": 1,
+        "Brazo": 1,
+        "Tapa_afilador": 1,
+        "Afilador": 1,
+        "Patas": 4
+    }
+
+    for pieza, cantidad in stock:
+        if pieza in cantidades_requeridas:
+            cantidades_requerida = cantidades_requeridas[pieza] * cantidad_ensamblada
+            if cantidad < cantidades_requerida:
+                lista_acciones.insert(0,"No hay suficientes {pieza} en el stock para ensamblar {cantidad_ensamblada} máquinas.")
+                conn.close()
+                return
+
+    # Si hay suficientes piezas, ensamblar las máquinas y actualizar las cantidades en la base de datos
+    for pieza, cantidad in stock:
+        if pieza in cantidades_requeridas:
+            cantidad_requerida = cantidades_requeridas[pieza] * cantidad_ensamblada
+            nueva_cantidad = cantidad - cantidad_requerida
+            cursor.execute("UPDATE piezas_de_330 SET Cantidad=? WHERE Pieza=?", (nueva_cantidad, pieza))
+
+    # Actualizar el contador de máquinas ensambladas
+
+    maquinas_mes += cantidad_ensamblada
+
+    # Crear una etiqueta para mostrar la cantidad total de máquinas ensambladas en el mes
+    lista_acciones.insert(0,"Maquinas Terminadas en el mes: {maquinas_mes}")
+
+    # Mostrar la cantidad total de máquinas ensambladas
+    lista_acciones.insert(0,"Se Armaron {cantidad_ensamblada} máquinas \h Total del mes: {maquinas_mes}")
+
+    conn.commit()
+    conn.close()
+    mostrar_datos()
+
+#'''''''''''''''''''''''''''''''''''''''''''''''ARmado Final''''''''''''''''''''''
+
+def consulta_bases_terminadas(arbol, mostrar):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad , modelo FROM piezas_finales_defenitivas WHERE mecanizado = 'prearmado'")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in arbol.get_children():
+        arbol.delete(item)
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+        
+    subtitulo_text = "Mostrar Datos: Bases Terminadas"
+    mostrar.config(text=subtitulo_text)
+
+def consulta_insumos(arbol, mostrar):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT piezas, cantidad, modelo FROM piezas_finales_defenitivas WHERE sector = 'armado_final' AND mecanizado = 'shop'")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in arbol.get_children():
+        arbol.delete(item)
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+        
+    subtitulo_text = "Mostrar Datos: Insumos"
+    mostrar.config(text=subtitulo_text)
+
+def consulta_piezas(arbol, mostrar):
+    try:
+        with sqlite3.connect("basedatospiezas.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT piezas, cantidad, modelo FROM piezas_finales_defenitivas WHERE sector = 'armado_final' AND mecanizado IN ('pulido', 'niquelado')")
+            datos = cursor.fetchall()
+        
+        # Borrar todos los elementos existentes en el Treeview
+        for item in arbol.get_children():
+            arbol.delete(item)
+        
+        # Insertar los nuevos datos en el Treeview
+        for dato in datos:
+            arbol.insert("", "end", values=dato)
+
+        subtitulo_text = "Mostrar Datos: Piezas"
+        mostrar.config(text=subtitulo_text)
+    except sqlite3.Error as e:
+        # Manejo de errores: Imprimir el error o realizar alguna acción adecuada.
+        print(f"Error SQLite: {e}")
+
+def consulta_afiladores(arbol, mostrar):
+    try:
+        with sqlite3.connect("basedatospiezas.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT piezas, cantidad, modelo FROM piezas_finales_defenitivas WHERE piezas = 'afilador_final'")
+            datos = cursor.fetchall()
+        
+        # Borrar todos los elementos existentes en el Treeview
+        for item in arbol.get_children():
+            arbol.delete(item)
+        
+        # Insertar los nuevos datos en el Treeview
+        for dato in datos:
+            arbol.insert("", "end", values=dato)
+
+        subtitulo_text = "Mostrar Datos: Piezas"
+        mostrar.config(text=subtitulo_text)
+    except sqlite3.Error as e:
+        # Manejo de errores: Imprimir el error o realizar alguna acción adecuada.
+        print(f"Error SQLite: {e}")
+        
+def armado_de_maquinas(cantidad_maquinas, piezas_a_ensamblar):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_final'")
+    filas = cursor.fetchall()
+    base_de_datos = {pieza: cantidad for pieza, cantidad in filas}
+
+    piezas_faltantes = {}
+
+    for pieza, cantidad_necesaria in piezas_a_ensamblar.items():
+        cantidad_disponible = base_de_datos.get(pieza, 0)
+        cantidad_necesaria_total = cantidad_necesaria * cantidad_maquinas
+        cantidad_faltante = max(0, cantidad_necesaria_total - cantidad_disponible)
+        
+        if cantidad_faltante > 0:
+            piezas_faltantes[pieza] = cantidad_faltante
+
+    if not piezas_faltantes:
+        print(f"Es posible ensamblar {cantidad_maquinas} máquinas del tipo 330.")
+    else:
+        print("No hay suficientes piezas para ensamblar las máquinas. Faltan las siguientes piezas:")
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+            print(f"{pieza}: {cantidad_faltante} unidades.")
+    
+    conn.close()
+
+
+i330 = {
+    "brazo_330": 1,
+    "cubrecuchilla_330": 1,
+    "velero": 1,
+    "perilla_brazo": 1,
+    "cabezal_inox": 1,
+    "teletubi_330": 1,
+    "cuchilla_330": 1,
+    "cuadrado_regulador": 1,
+    "vela_final_330": 1,
+    "cubre_motor_rectangulo": 1,
+    "cubre_motor_cuadrado": 1,
+    "planchada_final_330": 1,
+    "varilla_brazo_330": 1,
+    "resorte_brazo": 1,
+    "tapa_afilador": 1,
+    "pipas": 2,
+    "tubo_manija": 1,
+    "afilador_final": 1,
+    "perilla_cubrecuchilla": 2,
+    "perilla_afilador": 1,
+    "base_afilador_330": 1,
+    "base_pre_armada330inox": 1,
+    "piedra_afilador": 1,
+}
+
+cantidad_maquinas = 2
+armado_de_maquinas(cantidad_maquinas, i330)

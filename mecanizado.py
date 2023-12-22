@@ -31,7 +31,7 @@ piezas_a_torner_lista = [
     "rueditas",
     "tornillo_guia",
     "carros",
-    "movientos",
+    "movimientos",
     "carros_250",
 ]
 motores_finales330 = [

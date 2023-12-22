@@ -5,7 +5,7 @@ from stock_chapa import crear_pestana_chapa
 from fundidor import ventana_fundidor
 from provedores import ventana_provedores
 from mecanizado import mecanizado
-from armado_fiinal import armado_final
+from arnado import armado_final
 from index import inicio
 
 def crear_pestana(notebook, texto):
@@ -29,8 +29,8 @@ root.title("Mostrar Datos de la Base De Datos")
 root.iconbitmap("img/FLogo.ico")
 notebook = ttk.Notebook(root)
 
-inicio(notebook)
 armado_final(notebook)
+inicio(notebook)
 mecanizado(notebook)
 ventana_provedores(notebook)
 ventana_fundidor(notebook)
