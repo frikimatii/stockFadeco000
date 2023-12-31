@@ -10,14 +10,10 @@ from funciones import (
     de_enbruto_a_torneado,
     mostrar_cajas_bruto,
     agregar_a_lista_tarea,
-    mostrar_motores,
-    mostrar_pieza_motores,
-    armado_de_motor,
-    cantida_posible_motores,
-    cajas_terminadas,
     stock_prearmado,
     actualizar_inventario,
     stock_prebases,
+    varilla_para_soldar
 )
 
 tipo = ["330", "300", "250"]
@@ -100,6 +96,11 @@ modelo250 = {
     "sinfin": 1,
     "motores250_220w": 1,
 }
+piezas_a_augeriar_lista = ["cuadrado_regulador"]
+piezas_lijadas = ["base_afilador_300", "base_afilador_330", "base_afilador_250", "carcaza_afilador" ]
+piezas_prenza = ["guia_U", "eje_corto", "eje_largo"]
+cabezal_inox = ["cabezal_inox"]
+varillas_soldar = ["varilla_330", "varilla_300", "varilla_250"]
 
 
 def mecanizado(notebook):
@@ -215,184 +216,168 @@ def mecanizado(notebook):
         torno, text="Enviar", command=lambda: agregar_a_lista_tarea(info_torno, result)
     ).grid(row=15, column=0, sticky="e")
 
-    caja2 = ttk.Frame(pestania)
+#--------------------------------
+        
+    mecanizado_de_piezas = tk.Frame(pestania)
+    mecanizado_de_piezas.grid(row=2, column=2)   
+    
+#____________________________________augeriado_______________________________________
+
+    caja2 = tk.Frame(mecanizado_de_piezas)
     caja2.grid(row=2, column=2)
+    
+    tk.Label(caja2, text="Augeriado de Piezas").grid(row=0, column=0)
+    
+    tk.Label(caja2, text="Piezas Augeriadas").grid(row=1, column=0)
+    piezas_a_augerias = ttk.Combobox(caja2, values=piezas_a_augeriar_lista)
+    piezas_a_augerias.grid(row=2, column=0)
 
-    armado_de_caja = ttk.Frame(caja2)
-    armado_de_caja.grid(row=0, column=0)
+    tk.Label(caja2, text="Cantidad").grid(row=1, column=1)
+    cantidad_augeriada = tk.Entry(caja2)
+    cantidad_augeriada.grid(row=2, column=1)
 
-    tk.Label(armado_de_caja, text="Armado de cajas").grid(row=0, column=0)
-
-    tk.Label(armado_de_caja, text="Stock de Motores").grid(row=1, column=0)
-    tk.Button(
-        armado_de_caja, text="Motores", command=lambda: mostrar_motores(arbol)
-    ).grid(row=1, column=1)
-
-    ttk.Separator(armado_de_caja, orient="horizontal").grid(
-        row=2, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    tk.Label(armado_de_caja, text="Consultas de Piezas Para Armar Motores").grid(
-        row=3, column=0
-    )
-    tk.Button(
-        armado_de_caja, text="Mostrar", command=lambda: mostrar_pieza_motores(arbol)
+    ttk.Button(
+        caja2,
+        text="Enviar",
+        command=lambda: actualizar_pieza_torno(
+            piezas_a_augerias,
+            cantidad_augeriada,
+            result,
+            "piezas_finales_defenitivas",
+            arbol,
+        ),
     ).grid(row=3, column=1)
 
-    ttk.Separator(armado_de_caja, orient="horizontal").grid(
-        row=4, column=0, columnspan=2, sticky="ew", pady=5, padx=5
+    ttk.Separator(caja2, orient="horizontal").grid(
+        row=4, column=0, sticky="ew", columnspan=2, padx=5, pady=5
     )
+    
+#=-==========================Lijado=============================
+    
+    caja3 = tk.Frame(mecanizado_de_piezas)
+    caja3.grid(row=3, column=2)
+    
+    tk.Label(caja3, text="Lijado de Piezas").grid(row=0, column=0)
+    
+    tk.Label(caja3, text="Piezas lijada").grid(row=1, column=0)
+    piezas_a_lijada = ttk.Combobox(caja3, values=piezas_lijadas)
+    piezas_a_lijada.grid(row=2, column=0)
 
-    tk.Label(armado_de_caja, text="Cantidad Posible de Cajas Terminadas").grid(
-        row=5, column=0
-    )
-    botonera = ttk.Frame(armado_de_caja)
-    botonera.grid(row=6, column=0, columnspan=3)
+    tk.Label(caja3, text="Cantidad").grid(row=1, column=1)
+    cantidad_lijada = tk.Entry(caja3)
+    cantidad_lijada.grid(row=2, column=1)
 
-    tk.Button(
-        botonera,
-        text="330",
-        command=lambda: cantida_posible_motores(motores_finales330, result, modelo330),
-    ).grid(row=12, column=0)
-    tk.Button(
-        botonera,
-        text="300",
-        command=lambda: cantida_posible_motores(motores_finales300, result, modelo300),
-    ).grid(row=12, column=1)
-    tk.Button(
-        botonera,
-        text="250",
-        command=lambda: cantida_posible_motores(motores_finales250, result, modelo250),
-    ).grid(row=12, column=2)
-
-    ttk.Separator(armado_de_caja, orient="horizontal").grid(
-        row=7, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    ttk.Label(armado_de_caja, text="Morotes Terminados").grid(row=8, column=0)
-
-    checkbox = ttk.Frame(armado_de_caja)
-    checkbox.grid(row=9, column=0, columnspan=2)
-
-    modelo = tk.IntVar()
-    modelo.set(1)
-
-    tk.Radiobutton(checkbox, text="330", variable=modelo, value=1).grid(row=0, column=0)
-    tk.Radiobutton(checkbox, text="300", variable=modelo, value=2).grid(row=0, column=1)
-    tk.Radiobutton(checkbox, text="250", variable=modelo, value=3).grid(row=0, column=2)
-
-    tk.Label(armado_de_caja, text="Cantidad").grid(row=10, column=0)
-    motores_terminado_cantidad = tk.Entry(armado_de_caja)
-    motores_terminado_cantidad.grid(row=10, column=1)
     ttk.Button(
-        armado_de_caja,
+        caja3,
         text="Enviar",
-        command=lambda: cajas_terminadas(motores_terminado_cantidad, modelo, result),
-    ).grid(row=11, column=1)
-
-    ttk.Separator(armado_de_caja, orient="horizontal").grid(
-        row=12, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    afiladores = ttk.Frame(caja2)
-    afiladores.grid(row=13, column=0)
-
-    tk.Label(afiladores, text="Afiladores").grid(row=0, column=0)
-    tk.Label(afiladores, text="Stock de Afiladores Terminados").grid(row=1, column=0)
-    tk.Button(afiladores, text="Mostrar").grid(row=1, column=1)
-
-    ttk.Separator(afiladores, orient="horizontal").grid(
-        row=2, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    tk.Label(afiladores, text=" Stock De Piezas para afiladores").grid(row=3, column=0)
-    tk.Button(afiladores, text="Mostrar").grid(row=3, column=1)
-
-    ttk.Separator(afiladores, orient="horizontal").grid(
-        row=4, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    tk.Label(afiladores, text="Cantidad Terminada").grid(row=5, column=0)
-    cantidad_entrada_afilador = tk.Entry(afiladores)
-    cantidad_entrada_afilador.grid(row=6, column=0)
-    tk.Button(afiladores, text="Enviar").grid(row=6, column=1)
-
-    ttk.Separator(afiladores, orient="horizontal").grid(
-        row=7, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    pulido_en_fabrica = ttk.Frame(caja2)
-    pulido_en_fabrica.grid(row=14, column=0)
-
-    tk.Label(pulido_en_fabrica, text="Cabezales a pulir").grid(
-        row=0, column=0, columnspan=2
-    )
-    tk.Label(pulido_en_fabrica, text="Cantidad").grid(row=1, column=0)
-    cantidad_cabezales_pulir = tk.Entry(pulido_en_fabrica)
-    cantidad_cabezales_pulir.grid(row=1, column=1)
-    tk.Button(
-        pulido_en_fabrica,
-        text="Enviar",
-        command=lambda: pulido_cabezal(cantidad_cabezales_pulir, result),
-    ).grid(row=2, column=1)
-
-    ttk.Separator(pulido_en_fabrica, orient="horizontal").grid(
-        row=3, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    caja4 = ttk.Frame(pestania)
-    caja4.grid(row=2, column=3)
-
-    pre_armado = tk.Frame(caja4)
-    pre_armado.grid(row=0, column=0)
-
-    tk.Label(pre_armado, text="Pre Armado").grid(row=1, column=0)
-
-    ttk.Separator(pre_armado, orient="horizontal").grid(
-        row=2, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    tk.Label(pre_armado, text="Stock De Piezas Pre Armado").grid(row=3, column=0)
-    tk.Button(pre_armado, text="Stock", command=lambda: stock_prearmado(arbol)).grid(
-        row=3, column=1
-    )
-
-    ttk.Separator(pre_armado, orient="horizontal").grid(
-        row=6, column=0, columnspan=2, sticky="ew", pady=5, padx=5
-    )
-
-    tk.Label(pre_armado, text="Bases Terminadas con motores").grid(row=7, column=0)
-
-    tk.Label(pre_armado, text="Tipo").grid(row=8, column=0)
-    tk.Label(pre_armado, text="Cantidad").grid(row=8, column=1)
-
-    tipo_pre_armado_final = ttk.Combobox(pre_armado, values=tipos_de_maquinas)
-    tipo_pre_armado_final.grid(row=9, column=0)
-    cantidad_pre_armado_base_final = tk.Entry(pre_armado)
-    cantidad_pre_armado_base_final.grid(row=9, column=1)
-
-    tk.Button(
-        pre_armado,
-        text="Enviar",
-        command=lambda: actualizar_inventario(
-            int(cantidad_pre_armado_base_final.get()), tipo_pre_armado_final.get()
+        command=lambda: actualizar_pieza_torno(
+            piezas_a_lijada,
+            cantidad_lijada,
+            result,
+            "piezas_finales_defenitivas",
+            arbol,
         ),
-    ).grid(row=10, column=1)
+    ).grid(row=3, column=1)
 
-    ttk.Separator(pre_armado, orient="horizontal").grid(
-        row=11, column=0, columnspan=2, sticky="ew", pady=5, padx=5
+    ttk.Separator(caja3, orient="horizontal").grid(
+        row=4, column=0, sticky="ew", columnspan=2, padx=5, pady=5
     )
+    
+#=----------------------------Prenza---------------------------------
+    
+    caja4 = tk.Frame(mecanizado_de_piezas)
+    caja4.grid(row=4, column=2)
+    
+    tk.Label(caja4, text="Prenza").grid(row=0, column=0)
+    
+    tk.Label(caja4, text="Piezas Prenza").grid(row=1, column=0)
+    piezas_a_prenza = ttk.Combobox(caja4, values=piezas_prenza)
+    piezas_a_prenza.grid(row=2, column=0)
 
-    tk.Label(pre_armado, text="Stock de bases Terminadas").grid(row=12, column=0)
-    tk.Button(pre_armado, text="Stock", command=lambda: stock_prebases(arbol)).grid(
-        row=12, column=1
+    tk.Label(caja4, text="Cantidad").grid(row=1, column=1)
+    cantidad_prenza = tk.Entry(caja4)
+    cantidad_prenza.grid(row=2, column=1)
+
+    ttk.Button(
+        caja4,
+        text="Enviar",
+        command=lambda: actualizar_pieza_torno(
+            piezas_a_prenza,
+            cantidad_prenza,
+            result,
+            "piezas_finales_defenitivas",
+            arbol,
+        ),
+    ).grid(row=3, column=1)
+
+    ttk.Separator(caja4, orient="horizontal").grid(
+        row=4, column=0, sticky="ew", columnspan=2, padx=5, pady=5
     )
+    
+    
+#------------------------pulido en fabrica---------------------------
+    
+    caja5 = tk.Frame(mecanizado_de_piezas)
+    caja5.grid(row=5, column=2)
+    
+    tk.Label(caja5, text="Pulido en fabrica").grid(row=0, column=0)
+    
+    tk.Label(caja5, text="Piezas a Pulir").grid(row=1, column=0)
+    piezas_a_pulir = ttk.Combobox(caja5, values=cabezal_inox)
+    piezas_a_pulir.grid(row=2, column=0)
 
-    ttk.Separator(pre_armado, orient="horizontal").grid(
-        row=13, column=0, columnspan=2, sticky="ew", pady=5, padx=5
+    tk.Label(caja5, text="Cantidad").grid(row=1, column=1)
+    cantidad_pulido = tk.Entry(caja5)
+    cantidad_pulido.grid(row=2, column=1)
+
+    ttk.Button(
+        caja5,
+        text="Enviar",
+        command=lambda: pulido_cabezal(
+            piezas_a_pulir,
+            cantidad_pulido,
+            result,
+            "piezas_finales_defenitivas",
+            arbol,
+        ),
+    ).grid(row=3, column=1)
+
+    ttk.Separator(caja5, orient="horizontal").grid(
+        row=4, column=0, sticky="ew", columnspan=2, padx=5, pady=5
     )
+    
+    tk.Label(caja5, text="Consulta de Cabezales").grid(row=5, column=0)
+    
+    tk.Button(caja5, text="Cabezales Sin Pulir").grid(row=6, column=0)
+    tk.Button(caja5, text="Cabezales Pulidos").grid(row=6, column=1)
+    
+    ttk.Separator(caja5, orient="horizontal").grid(
+        row=7, column=0, sticky="ew", columnspan=2, padx=5, pady=5
+    )
+    
+#-----------------------SOLDADO EN FABRICA-----------------------------------------
 
-    tk.Label(pre_armado, text="Obsebaciones").grid(row=14, column=0)
-    info_pre_armado = tk.Text(pre_armado, height=6, width=25)
-    info_pre_armado.grid(row=15, column=0, columnspan=1)
-    tk.Button(pre_armado, text="Enviar").grid(row=16, column=0, sticky="e")
+    caja6 = tk.Frame(mecanizado_de_piezas)
+    caja6.grid(row=6, column=2)
+    
+    tk.Label(caja6, text="Soldado en fabrica").grid(row=0, column=0)
+    
+    tk.Label(caja6, text="Piezas a soldar").grid(row=1, column=0)
+    piezas_a_varilla = ttk.Combobox(caja6, values=varillas_soldar)
+    piezas_a_varilla.grid(row=2, column=0)
+
+    tk.Label(caja6, text="Cantidad").grid(row=1, column=1)
+    cantidad_varilla = tk.Entry(caja6)
+    cantidad_varilla.grid(row=2, column=1)
+
+    ttk.Button(
+        caja6,
+        text="Enviar",
+        command=lambda: varilla_para_soldar(cantidad_varilla, piezas_a_varilla.get(), result),
+    ).grid(row=3, column=1)
+
+    ttk.Separator(caja6, orient="horizontal").grid(
+        row=4, column=0, sticky="ew", columnspan=2, padx=5, pady=5
+    ) 
+
+#-------------------------------------------

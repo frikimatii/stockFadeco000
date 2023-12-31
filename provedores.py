@@ -20,25 +20,89 @@ niquelado = [
     "varilla_brazo_250",
     "tubo_manija",
     "tubo_manija_250",
+    "palanca_afilador"
 ]
 piezas_carmelo = [
-    "brazo_330",
-    "brazo_300",
-    "tapa_afilador",
-    "velero",
-    "caja_torneado_300",
-    "inox_330",
-    "inox_300",
+    "brazo_330",#
+    "brazo_300",#
+    "brazo_250",#
+    "cubrecuchilla_330",#
+    "cubrecuchilla_300",#
+    "cubrecuchilla_250",#
+    "teletubi_330",#
+    "teletubi_300",#
+    "teletubi_250",#
+    "vela_final_330",#
+    "vela_final_300",#
+    "vela_final_250",#
+    "planchada_final_330",#
+    "planchada_final_300",#
+    "planchada_final_250",#
+    "tapa_afilador",#
+    "velero",#
+    "aro_numerador",#
+    "tapa_afilador_250",#
+    "caja_torneado_330",#
+    "caja_torneado_300",#
+    "caja_torneado_250",#
+    "inox_330",#
+    "inox_300",#
+    "inox_250"#
 ]
 piezas_maxi = [
-    "velero",
-    "cubrecuchilla_330",
-    "cubrecuchilla_300",
-    "caja_330",
-    "inox_330",
+    "brazo_330",#
+    "brazo_300",#
+    "brazo_250",#
+    "cubrecuchilla_330",#
+    "cubrecuchilla_300",#
+    "cubrecuchilla_250",#
+    "teletubi_330",#
+    "teletubi_300",#
+    "teletubi_250",#
+    "vela_final_330",#
+    "vela_final_300",#
+    "vela_final_250",#
+    "planchada_final_330",#
+    "planchada_final_300",#
+    "planchada_final_250",#
+    "tapa_afilador",#
+    "velero",#
+    "aro_numerador",#
+    "tapa_afilador_250",#
+    "caja_torneado_330",#
+    "caja_torneado_300",#
+    "caja_torneado_250",#
+    "inox_330",#
+    "inox_300",#
+    "inox_250"#
 ]
-pieza_buen_hombre = ["vela_330", "vela_300", "planchada_330", "planchada_300"]
-
+pieza_buen_hombre =  [
+    "brazo_330",#
+    "brazo_300",#
+    "brazo_250",#
+    "cubrecuchilla_330",#
+    "cubrecuchilla_300",#
+    "cubrecuchilla_250",#
+    "teletubi_330",#
+    "teletubi_300",#
+    "teletubi_250",#
+    "vela_final_330",#
+    "vela_final_300",#
+    "vela_final_250",#
+    "planchada_final_330",#
+    "planchada_final_300",#
+    "planchada_final_250",#
+    "tapa_afilador",#
+    "velero",#
+    "aro_numerador",#
+    "tapa_afilador_250",#
+    "caja_torneado_330",#
+    "caja_torneado_300",#
+    "caja_torneado_250",#
+    "inox_330",#
+    "inox_300",#
+    "inox_250"#
+]
 cabezal = ["cabezal_pintura"]
 
 
@@ -236,7 +300,7 @@ def ventana_provedores(notebook):
     caja3 = ttk.Frame(pestania)
     caja3.grid(row=0, column=2)
 
-    # 0000----------------------------------------------------------------#
+    # 0000----------------------------BUEN HOMBRE ------------------------------------#
     tk.Label(caja3, text="Envios A Buen Hombre").grid(row=1, column=0)
     tk.Label(caja3, text="Pieza").grid(row=2, column=0, sticky="w")
     tk.Label(caja3, text="Cantidad").grid(row=2, column=1)
@@ -247,12 +311,21 @@ def ventana_provedores(notebook):
     cantidad_agregar_buen_hombre = tk.Entry(caja3, width=10)
     cantidad_agregar_buen_hombre.grid(row=3, column=1)
 
-    tk.Button(caja3, text="Enviar Piezas").grid(row=4, column=1)
+    tk.Button(caja3,
+            text="Enviar Piezas",
+            command=lambda: enviar_piezas_a_pulido(
+            pieza_predeterminadas5,
+            cantidad_agregar_buen_hombre,
+            "buen_hombre_pulido",
+            arbol,
+            result,
+        ),
+    ).grid(row=4, column=1)
 
     # ___________________consulta stock_________________________________________#
     tk.Label(caja3, text="Consultas De Stock").grid(row=5, column=0, sticky="w")
 
-    tk.Button(caja3, text="Stock Total").grid(row=6, column=0, columnspan=2)
+    tk.Button(caja3, text="Stock Total", command=lambda: mostrar_datos(arbol, "buen_hombre_pulido")).grid(row=6, column=0, columnspan=2)
 
     botonera = ttk.Frame(caja3)
     botonera.grid(row=7, column=0, columnspan=2)
@@ -260,20 +333,20 @@ def ventana_provedores(notebook):
     tk.Button(
         botonera,
         text="Stock 300",
-        command=lambda: mostrar_datos_especifico("buenhombre_pulido", "330", arbol),
+        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "330", arbol),
     ).grid(row=0, column=0)
     tk.Button(
         botonera,
         text="Stock 330",
-        command=lambda: mostrar_datos_especifico("buenhombre_pulido", "300", arbol),
+        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "300", arbol),
     ).grid(row=0, column=1)
     tk.Button(
         botonera,
         text="Resto De Piezas",
-        command=lambda: mostrar_datos_especifico("buenhombre_pulido", "all", arbol),
+        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "all", arbol),
     ).grid(row=0, column=2)
 
-    # _---------------------------------------------------------#
+    # _------------------------------------- --------------------#
     tk.Label(caja3, text="Piezas Resibidas").grid(row=8, column=0)
     tk.Label(caja3, text="Pieza").grid(row=9, column=0, sticky="w")
     tk.Label(caja3, text="Cantidad").grid(row=9, column=1)
@@ -284,12 +357,23 @@ def ventana_provedores(notebook):
     cantidad_piezas_terminadas_buen_hombre = tk.Entry(caja3, width=10)
     cantidad_piezas_terminadas_buen_hombre.grid(row=10, column=1)
 
-    tk.Button(caja3, text="Piezas Terminadas").grid(row=11, column=1)
+    tk.Button(caja3,
+        text="Piezas Terminadas",
+        command=lambda: mover_piezas_a_stock_pulidas(
+        pieza_predeterminadas6,
+        cantidad_piezas_terminadas_buen_hombre,
+        "buen_hombre_pulido",
+        "piezas_finales_defenitivas",
+        arbol,
+        result,
+        ),).grid(row=11, column=1)
 
-    # ------------------------------------------------------------------------------#
     ttk.Separator(caja3, orient="horizontal").grid(
         row=12, column=0, columnspan=2, sticky="ew", padx=5, pady=5
     )
+
+
+    # -----------------------------------stock en fabrica-------------------------------------------#
 
     botonera2 = ttk.Frame(caja3)
     botonera2.grid(row=13, column=0, columnspan=2)

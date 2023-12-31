@@ -172,3 +172,54 @@ def crear_pestana_aluminio(notebook):
    
 
    i330 = ["brazo_330", "cubrecuchilla_330", "velero", "perilla_brazo", "cabezal_I", "teletubi_330", "chuchilla_330", "cuadrado_regulador", "vela_final", "cubre_motor_rectangulo", "cubre_motor_cuadrado", "planchada_final_330", "varilla_brazo_330", "resorte_brazo", "tapa_afilador", "pipas", "tubo_manija", "afilador_final", "perilla_cubrecuchilla", "perilla_afilador", "base_afilador_330", "base_pre_armada330inox", "piedras_afilador" ]
+
+
+
+
+    pizas_para_motorterimando = {
+        1: { 
+            "caja_torneado_330": 1,
+            "eje": 1,
+            "manchon": 1,
+            "ruleman_1": 1,
+            "ruleman_2": 2,
+            "corona_330": 1,
+            "seguer": 1,
+            "sinfin": 1,
+            "motores_220w": 1,
+        },
+        2: {
+            "caja_torneado_300": 1,
+            "eje": 1,
+            "manchon": 1,
+            "ruleman_1": 1,
+            "ruleman_2": 2,
+            "corona_300": 1,
+            "seguer": 1,
+            "sinfin": 1,
+            "motores_220w": 1,
+        },
+        3: {
+            "caja_torneado_250": 1,
+            "eje_250": 1,
+            "manchon_250": 1,
+            "ruleman_1": 1,
+            "ruleman_2": 2,
+            "corona_250": 1,
+            "seguer": 1,
+            "sinfin": 1,
+            "motores250_220w": 1,
+        },
+    }
+
+    motores_330 = (
+    "caja_torneado_330",
+    "eje",
+    "manchon",
+    "ruleman_1",
+    "ruleman_2",
+    "corona_330",
+    "seguer",
+    "sinfin",
+    "motores_220w",
+)
