@@ -101,9 +101,10 @@ cabezales_inox = {"chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"}
 
 cabezales_pintada = {"chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"}
 
+color1 = "#1016cf"
 
 def crear_pestana_chapa(notebook):
-    pestana_chapa = ttk.Frame(notebook)
+    pestana_chapa = ttk.Frame(notebook , style='Pestania.TFrame')
     pestana_chapa.grid(
         row=3,
         column=0,
@@ -112,8 +113,20 @@ def crear_pestana_chapa(notebook):
     )
 
     notebook.add(pestana_chapa, text="Session Chapas")
+    
+    notebook.style = ttk.Style()
+    notebook.style.configure('Color.TFrame', background='#9aa1b3')  # Puedes ajustar el color
+    notebook.style.configure('WhiteOnRed.TLabel', background='#9aa1b3', foreground='white')  # Puedes ajustar el color
+    notebook.style.configure('WhiteOnRed.TEntry', fieldbackground='blue', foreground='blue')  # Puedes ajustar el color
+    notebook.style.configure('WhiteOnRed.TCombobox', fieldbackground='#9aa1b3', foreground='white')  # Puedes ajustar el color
 
-    box1 = ttk.Frame(pestana_chapa)
+    estilo = ttk.Style()
+    estilo.configure('Pestania.TFrame', background='#192965')
+    estilo.configure('Color.TFrame', background='#9aa1b3')
+
+    notebook.configure(style='Pestania.TNotebook')
+
+    box1 = ttk.Frame(pestana_chapa, style='Pestania.TFrame')
     box1.grid(row=0, column=0, pady=5, padx=5)
 
     ttk.Label(box1, text="Tabla de Chapas", font=("Arial", 10, "bold")).grid(
@@ -123,22 +136,10 @@ def crear_pestana_chapa(notebook):
     subtitulo.grid(row=1, column=0, padx=5, pady=5)
 
     tabla_chapa = ttk.Treeview(box1, columns=("Pieza", "Cantidad", "Modelo", "Tipo"))
-    tabla_chapa.heading(
-        "Pieza", text="Pieza", command=lambda: sort_column(tabla_chapa, "Pieza", False)
-    )
-    tabla_chapa.heading(
-        "Cantidad",
-        text="Cantidad",
-        command=lambda: sort_column(tabla_chapa, "Cantidad", False),
-    )
-    tabla_chapa.heading(
-        "Modelo",
-        text="Modelo",
-        command=lambda: sort_column(tabla_chapa, "Modelo", False),
-    )
-    tabla_chapa.heading(
-        "Tipo", text="Tipo", command=lambda: sort_column(tabla_chapa, "Tipo", False)
-    )
+    tabla_chapa.heading("Pieza", text="Pieza",)
+    tabla_chapa.heading("Cantidad", text="Cantidad",command=lambda: sort_column(tabla_chapa, "Cantidad", False))
+    tabla_chapa.heading("Modelo", text="Modelo")
+    tabla_chapa.heading("Tipo", text="Tipo")
     tabla_chapa.column("#0", width=0, stretch=tk.NO)
     tabla_chapa.column("Pieza", anchor=tk.W, width=150)
     tabla_chapa.column("Cantidad", anchor=tk.W, width=50)
@@ -146,6 +147,10 @@ def crear_pestana_chapa(notebook):
     tabla_chapa.column("Tipo", anchor=tk.W, width=50)
     tabla_chapa.config(height=25)
     tabla_chapa.grid(row=3, column=0, pady=5, padx=5, sticky="nsew")
+    
+    tabla_chapa.tag_configure("red", background="red")
+    tabla_chapa.tag_configure("green", background="green")
+    
 
     lista_acciones = tk.Listbox(box1, width=60)
     lista_acciones.grid(
@@ -153,54 +158,71 @@ def crear_pestana_chapa(notebook):
         column=0,
     )
 
-    box2 = ttk.Frame(pestana_chapa)
+    box2 = ttk.Frame(pestana_chapa, style='Pestania.TFrame')
     box2.grid(row=0, column=1, padx=5, pady=5, sticky="ne")
 
-    ttk.Label(box2, text="Stock de Chapas", font=("Arial", 17, "bold")).grid(
-        row=0, column=1, padx=5, pady=5, sticky="e"
-    )
-    ttk.Label(box2, text="Total de Piezas").grid(row=1, column=0, padx=5, sticky="e")
-    ttk.Button(
+    etiqueta_stock_chapas = ttk.Label(
         box2,
-        text="Stock Total",
-        command=lambda: mostrar_datos_chapa(tabla_chapa, "chapa", subtitulo),
-    ).grid(row=1, column=1, padx=5, sticky="w")
+        text="Stock de Chapas",
+        font=("Arial", 22, "bold"),
+        background="#192965",  # Fondo azul
+        foreground="white",    # Texto blanco
+)
+    # Colocar la etiqueta en la ventana
+    etiqueta_stock_chapas.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+
+    etiqueta_total_piezas = ttk.Label(
+        box2,
+        text="Total de Piezas",
+        font=("Arial", 12, "bold"),
+        background="#192965",  # Fondo naranja (puedes ajustar el color)
+        foreground="white",    # Texto negro (puedes ajustar el color)
+)   
+    # Colocar la etiqueta en la ventana
+    etiqueta_total_piezas.grid(row=1, column=0, padx=5, sticky="e")
+
+    boton_stock_total = tk.Button(
+    box2,
+    text="Consultar Stock Total",
+    command=lambda: mostrar_datos_chapa(tabla_chapa, "chapa", subtitulo),
+    bg="#192965",  # Color de fondo
+    fg="white",    # Color del texto
+    padx=10,
+    pady=5,
+    font=('Helvetica', 12, 'bold'),
+    relief=tk.GROOVE,  # Tipo de relieve del botón
+    )
+
+    # Colocar el botón en la ventana
+    boton_stock_total.grid(row=1, column=1, padx=5, sticky="w")
+
 
     ttk.Separator(box2, orient="horizontal").grid(
         row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=10
     )
-
-    pieza_agregar_chapa = ttk.Frame(box2)
+    
+    pieza_agregar_chapa = ttk.Frame(box2, style='Color.TFrame')
     pieza_agregar_chapa.grid(row=3, column=0, padx=7)
-
-    ttk.Label(
-        pieza_agregar_chapa, text="Agregar Piezas ", font=("Arial", 10, "bold")
-    ).grid(row=0, column=1, pady=5, sticky="w")
-
+    
+    # Crear los elementos con el nuevo estilo
+    ttk.Label(pieza_agregar_chapa, text="Agregar Piezas", font=("Arial", 10, "bold"), style='WhiteOnRed.TLabel').grid(row=0, column=1, pady=5, sticky="w")
     tipo_var = tk.IntVar()
     tipo_var.set(1)
 
-    acero_radio_agregar = tk.Radiobutton(
-        pieza_agregar_chapa, text="Acero", variable=tipo_var, value=1
-    )
+    acero_radio_agregar = tk.Radiobutton(pieza_agregar_chapa, text="Acero", variable=tipo_var, value=1, background='#9aa1b3', foreground='blue')
     acero_radio_agregar.grid(row=1, column=0)
-    chapa_radio_agregar = tk.Radiobutton(
-        pieza_agregar_chapa, text="Pintura", variable=tipo_var, value=2
-    )
+
+    chapa_radio_agregar = tk.Radiobutton(pieza_agregar_chapa, text="Pintura", variable=tipo_var, value=2, background='#9aa1b3', foreground='blue')
     chapa_radio_agregar.grid(row=1, column=1)
 
-    ttk.Label(pieza_agregar_chapa, text="Agregar Pieza").grid(row=2, column=0, pady=5)
-    lista_agregar_chapa = ttk.Combobox(
-        pieza_agregar_chapa, values=piezas_pedefinida_chapas_base, state="readonly"
-    )
+    ttk.Label(pieza_agregar_chapa, text="Agregar Pieza", style='WhiteOnRed.TLabel').grid(row=2, column=0, pady=5)
+    lista_agregar_chapa = ttk.Combobox(pieza_agregar_chapa, values=piezas_pedefinida_chapas_base, state="readonly", style='WhiteOnRed.TCombobox')
     lista_agregar_chapa.grid(row=2, column=1, pady=5)
-
-    ttk.Label(pieza_agregar_chapa, text="Cantidad").grid(
-        row=3, column=0, sticky="nw", pady=5
-    )
-    cantidad_agregar = ttk.Entry(pieza_agregar_chapa)
+    
+    ttk.Label(pieza_agregar_chapa, text="Cantidad", style='WhiteOnRed.TLabel').grid(row=3, column=0, sticky="nw", pady=5)
+    cantidad_agregar = ttk.Entry(pieza_agregar_chapa, style='WhiteOnRed.TEntry')
     cantidad_agregar.grid(row=3, column=1, sticky="we", pady=5)
-
+    
     btn_agregar = ttk.Button(
         pieza_agregar_chapa,
         text="Agregar",
@@ -214,8 +236,8 @@ def crear_pestana_chapa(notebook):
         ),
     )
     btn_agregar.grid(row=4, column=1, sticky="ne", pady=5)
-
-    pieza_eliminar_chapa = ttk.Frame(box2)
+    
+    pieza_eliminar_chapa = ttk.Frame(box2, style='Color.TFrame')
     pieza_eliminar_chapa.grid(row=3, column=1, padx=7)
 
     ttk.Label(

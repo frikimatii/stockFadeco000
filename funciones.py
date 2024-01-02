@@ -1,21 +1,34 @@
 import sqlite3
 import tkinter as tk
 
+def obtener_color_fondo(cantidad):
+    if cantidad < 5:
+        return "red"
+    elif cantidad > 50:
+        return "green"
+    else:
+        return ""
+    
 
-def mostrar_datos(tree1, table):
+def mostrar_datos(treeview, table):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(f"SELECT piezas, cantidad FROM {table}")
     datos = cursor.fetchall()
     conn.close()
-    for item in tree1.get_children():
-        tree1.delete(item)
-    for dato in datos:
-        tree1.insert("", "end", values=dato)
+
+    # Limpiar la tabla antes de agregar nuevos datos
+    for item in treeview.get_children():
+        treeview.delete(item)
+
+    # Agregar elementos a la lista con cantidades y aplicar colores
+    for pieza, cantidad in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        treeview.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
 
 
 def sort_column(tree, col, reverse):
-    items = [(tree.set(item, col), item) for item in tree.get_children("")]
+    items = [(float(tree.set(item, col)), item) for item in tree.get_children("")]
     items.sort(reverse=reverse)
 
     # Reorganiza los elementos en la tabla
@@ -129,7 +142,7 @@ def eliminar_pieza(
     conn.close()
     mostrar_datos(tree, table)
 
- 
+    
 # ---------------funciones de stock de chapas _________________________________________________
     
 def mostrar_datos_chapa(tree1, table, subtitulo):
@@ -1354,7 +1367,7 @@ def mostrar_cabezales_en_bruto(tree1, subtitulo):
 # --------------------------------funciiones de piezas fundidor --------------------------------------------------------
 
 
-def mostrar_datos_materias(material, tabla, res):
+def mostrar_datos_materias(material, tabla, res, sub):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(
@@ -1365,10 +1378,123 @@ def mostrar_datos_materias(material, tabla, res):
     conn.close()
     for item in tabla.get_children():
         tabla.delete(item)
-    for dato in datos:
-        tabla.insert("", "end", values=dato)
+    for pieza, cantidad in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        tabla.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
     res.insert(0, f"Stock de {material}")
+    sub_text = f"Mostrando {material}"
+    sub.config(text=sub_text)
 
+def mostrar_plastico(material, tabla, res, sub):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE tipo = ? ",
+        (material,),
+    )
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for pieza, cantidad in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        tabla.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
+    res.insert(0, f"Stock de {material}")
+    
+    sub_text = f"Mostrando {material}"
+    sub.config(text=sub_text)
+
+def mostrar_shop(material, tabla, res, sub):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE mecanizado = ? ",
+        (material,),
+    )
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for pieza, cantidad in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        tabla.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
+    res.insert(0, f"Stock de {material}")
+    sub_text = f"Mostrando {material}"
+    sub.config(text=sub_text)
+
+def mostrar_chapa_cortada(tabla, res, sub):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT cantidad, piezas FROM piezas_del_fundicion WHERE material= 'chapa' AND mecanizado = 'pulido'")
+    datos = cursor.fetchall()
+    conn.close()
+    for item in tabla.get_children():
+        tabla.delete(item)
+    for cantidad , pieza in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        tabla.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
+    res.insert(0, f"Stock de Chapa Cortada")
+    sub_text = f"Mostrando Chapa Cortada"
+    sub.config(text=sub_text)
+    
+def mostrar_piezas_cortadas(tabla, res, sub):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    
+    # Corrige la consulta SQL
+    cursor.execute("""
+        SELECT piezas, SUM(cantidad) AS cantidad_cortada
+        FROM piezas_del_fundicion
+        WHERE piezas IN ('guia_U', 'eje_rectificado', 'varilla_brazo_330', 'varilla_brazo_300', 'varilla_brazo_250', 'tubo_manija', 'tubo_manija_250', 'cuadrado_regulador', 'palanca_afilador', 'eje_corto', 'eje_largo')
+        GROUP BY piezas
+    """)
+    
+    datos = cursor.fetchall()
+    conn.close()
+    
+    # Limpia la tabla antes de agregar nuevos datos
+    for item in tabla.get_children():
+        tabla.delete(item)
+    
+    # Agrega los datos a la tabla
+    for pieza, cantidad in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        tabla.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
+    
+    res.insert(0, f"Stock de Piezas Cortada")
+    
+    sub_text = f"Mostrando Piezas Cortadas"
+    sub.config(text=sub_text)
+    
+def mostrar_tornillo_guia_rueditas(tabla, res, sub):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+    
+    # Corrige la consulta SQL
+    cursor.execute("""
+        SELECT piezas, SUM(cantidad) AS cantidad_cortada
+        FROM piezas_del_fundicion
+        WHERE piezas IN ('tornillo_guia', 'rueditas')
+        GROUP BY piezas
+    """)
+    
+    datos = cursor.fetchall()
+    conn.close()
+    
+    # Limpia la tabla antes de agregar nuevos datos
+    for item in tabla.get_children():
+        tabla.delete(item)
+    
+    # Agrega los datos a la tabla
+    for pieza, cantidad in datos:
+        color_fondo = obtener_color_fondo(cantidad)
+        tabla.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
+    
+    res.insert(0, f"Stock de Tornillo Guia / Tornillo")
+    
+    sub_text = f"Mostrando Varios"
+    sub.config(text=sub_text)
+    
 
 def enviar_piezas_a_pulido(
     pieza,
@@ -3344,12 +3470,10 @@ p300 = {
 
 
 def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
-
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_final'")
+    cursor.execute("SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_final'")
     filas = cursor.fetchall()
     base_de_datos = {pieza: cantidad for pieza, cantidad in filas}
 
@@ -3362,6 +3486,7 @@ def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
         'inox_250': i250,
         'pintada_330': p330,
         'pintada_300': p300,
+        # ... (add more types as needed)
     }
 
     # Obtén el diccionario específico para el tipo seleccionado
@@ -3384,12 +3509,16 @@ def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
 
         if cantidad_disponible:
             cantidad_disponible = int(cantidad_disponible[0])
-            # print(f"Tipo: {pieza}, Cantidad Necesaria: {cantidad_necesaria}, Cantidad Disponible: {cantidad_disponible}")
             cantidad_faltante = max(
                 0, cantidad_necesaria - cantidad_disponible)
 
             if cantidad_faltante > 0:
                 piezas_faltantes[pieza] = cantidad_faltante
+            else:
+                # Resta la cantidad utilizada de la base de datos
+                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad - ? WHERE sector = 'armado_final' AND piezas = ?",
+                               (cantidad_necesaria, pieza))
+                conn.commit()
         else:
             text1 = f"No se encontró cantidad para la pieza {pieza} en la base de datos."
             result.insert(0, text1)
@@ -3407,7 +3536,6 @@ def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
             result.insert(0, f"{pieza}: {cantidad_faltante} unidades.")
 
     conn.close()
-
 
 
 def mostrar_maquinas_teminadas(arbol,res):

@@ -333,7 +333,7 @@ def mecanizado(notebook):
     ttk.Button(
         caja5,
         text="Enviar",
-        command=lambda: pulido_cabezal(
+        command=lambda: actualizar_pieza_torno(
             piezas_a_pulir,
             cantidad_pulido,
             result,
