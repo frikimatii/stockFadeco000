@@ -40,7 +40,7 @@ piezas_cortadas = [
 
 
 def stock(notebook):
-    pestania = ttk.Frame(notebook)
+    pestania = ttk.Frame(notebook, style='Color.TFrame')
     pestania.grid(
         row=0,
         column=0,
@@ -49,17 +49,31 @@ def stock(notebook):
     )
 
     notebook.add(pestania, text="session Stock")
+    
+    #------------------------------sTYLO------------------------------------------
+    
+    style = ttk.Style()
+    style.configure("Color.TFrame", background ="#192965")
+    style.configure("Color.TLabel", background ="#192965", foreground="white")
+    style.configure('WhiteOnRed.TEntry', fieldbackground='black', foreground='black')  # Puedes ajustar el color
+    style.configure("Separador1.TSeparator", background="yellow")
+    style.configure("Separador2.TSeparator", background="black")
+    style.configure("Colortitulo.TLabel", background ="#192965", foreground="yellow")
+
+
+
+    
    # ______________________Titulo _____________________________________________
 
-    caja = ttk.Frame(pestania, style='Pestania.TFrame')
+    caja = ttk.Frame(pestania, style='Color.TFrame')
     caja.grid(row=0, column=0, padx=5, pady=5)
 
-    titulo = tk.Label(caja, text="Session Stock de Piezas", font=("Verdana", 22, "bold"))
+    titulo = ttk.Label(caja, text="Session Stock de Piezas",style="Color.TLabel" ,font=("Verdana", 22, "bold"))
     titulo.grid(row=0, column=0, columnspan=4)
 
     # ______________________Tabla MOSTRAR datos _____________________________________________
 
-    caja1 = tk.Frame(pestania)
+    caja1 = ttk.Frame(pestania, style="Color.TFrame")
     caja1.grid(row=1, column=0)
 
     tablafundidor = ttk.Treeview(caja1, columns=("Pieza", "Cantidad"))
@@ -74,14 +88,13 @@ def stock(notebook):
     tablafundidor.tag_configure("red", background="red")
     tablafundidor.tag_configure("green", background="green")
     
-    
-    consulta1 = tk.Frame(caja1)
+    consulta1 = ttk.Frame(caja1, style='Color.TFrame')
     consulta1.grid(row=0, column=0)
 
     ttk.Button(consulta1, text="Mostras Datos bruto",command=lambda: mostrar_datos(tablafundidor, "piezas_del_fundicion"),).grid(row=0, column=0,padx=3, pady=3)
     ttk.Button(consulta1, text="Mostras Datos terminado",command=lambda: mostrar_datos(tablafundidor, "piezas_finales_defenitivas"),).grid(row=0, column=1, padx=3, pady=3)
     
-    box = tk.Label(consulta1, text="")
+    box = ttk.Label(consulta1, text="",style="Color.TLabel")
     box.grid(row=1, column=0, columnspan=2)
     
     result = tk.Listbox(caja1, width=60)
@@ -89,25 +102,25 @@ def stock(notebook):
 
 # ______________________Caja 2____________________________________________
 
-    caja2 = ttk.Frame(pestania)
+    caja2 = ttk.Frame(pestania, style='Color.TFrame')
     caja2.grid(row=1, column=1, padx=3, pady=3, sticky="n")
 
 #_________________________________ALUMINIO_____________________________
 
-    ttk.Label(caja2, text="Piezas Fundidor ALUMINIO", font=("Verdana", 11, "bold")).grid(
+    ttk.Label(caja2, text="Piezas Fundidor ALUMINIO" ,style="Colortitulo.TLabel", font=("Verdana", 11, "bold")).grid(
         row=0, column=0, padx=3, pady=2, sticky="en", columnspan=2
     )
-    ttk.Label(caja2, text="Agregar Piezas",font=( "Arial", 9, "bold")).grid(
+    ttk.Label(caja2, text="Agregar Piezas" ,style="Color.TLabel" ,font=( "Arial", 9, "bold")).grid(
         row=1, column=0, padx=3, pady=3, sticky="we", columnspan=2
     )
-    ttk.Label(caja2, text="Piezas").grid(row=2, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja2, text="Piezas",style="Color.TLabel").grid(row=2, column=0, padx=1, pady=1, sticky="e")
     
     predefinidas_aluminio = ttk.Combobox(
         caja2, values=piezas_fundidor_aluminio, state="readonly"
     )
     predefinidas_aluminio.grid(row=2, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja2, text="Cantidad").grid(row=3, column=0, padx=1, pady=1, sticky="e")
-    entrada_aluminio = ttk.Entry(caja2)
+    ttk.Label(caja2, text="Cantidad",style="Color.TLabel").grid(row=3, column=0, padx=1, pady=1, sticky="e")
+    entrada_aluminio = ttk.Entry(caja2, style='WhiteOnRed.TEntry')
     entrada_aluminio.grid(row=3, column=1, padx=1, pady=1, sticky="w")
 
     tk.Button(
@@ -128,20 +141,20 @@ def stock(notebook):
         )
     ).grid(row=4, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=5, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja2, text="Eliminar Pieza(rotas)" ,font=( "Arial", 9, "bold")).grid(
+    ttk.Label(caja2, text="Eliminar Pieza(rotas)",style="Color.TLabel" ,font=( "Arial", 9, "bold")).grid(
         row=6, column=0, padx=3, pady=3, sticky="we", columnspan=2)
     
-    ttk.Label(caja2, text="Piezas").grid(row=7, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja2, text="Piezas",style="Color.TLabel").grid(row=7, column=0, padx=1, pady=1, sticky="e")
     predefinidas_aluminio_delete = ttk.Combobox(
         caja2, values=piezas_fundidor_aluminio, state="readonly"
     )
     predefinidas_aluminio_delete.grid(row=7, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja2, text="Cantidad").grid(row=8, column=0, padx=1, pady=1, sticky="e")
-    entrada_aluminio_delete = ttk.Entry(caja2)
+    ttk.Label(caja2, text="Cantidad",style="Color.TLabel").grid(row=8, column=0, padx=1, pady=1, sticky="e")
+    entrada_aluminio_delete = ttk.Entry(caja2, style='WhiteOnRed.TEntry')
     entrada_aluminio_delete.grid(row=8, column=1, padx=1, pady=1, sticky="w")
 
     tk.Button(
@@ -162,12 +175,12 @@ def stock(notebook):
         ),
     ).grid(row=9, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja2, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=11, column=0, sticky="we", columnspan=2)
-    ttk.Label(caja2, text="Aluminio", font=("Arial", 12)).grid(row=12, column=0, columnspan=2, sticky="ew")
+    ttk.Label(caja2, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=11, column=0, sticky="we", columnspan=2)
+    ttk.Label(caja2, text="Aluminio",style="Color.TLabel", font=("Arial", 12)).grid(row=12, column=0, columnspan=2, sticky="ew")
     btn_stock_en_bruto = tk.Button(
         caja2,
         text="Stock En Bruto",
@@ -180,26 +193,25 @@ def stock(notebook):
     )
     btn_stock_en_bruto.grid(row=13, column=0)
 
-    ttk.Separator(caja2, orient="horizontal").grid(
-        row=14, column=0, columnspan=2, sticky="ew", padx=3, pady=3
-    )
+    separador = ttk.Separator(caja2, orient="horizontal", style="Separador1.TSeparator")
+    separador.grid(row=14, column=0, columnspan=2, sticky="ew", padx=7, pady=7)
     
-
+    
     # ____________________________Hierro_______________________________________
-    ttk.Label(caja2, text="Piezas Fundidor HIERRO", font=("Verdana", 11, "bold")).grid(
+    ttk.Label(caja2, text="Piezas Fundidor HIERRO",style="Colortitulo.TLabel", font=("Verdana", 11, "bold")).grid(
         row=15, column=0, padx=3, pady=2, sticky="en", columnspan=2
     )
-    ttk.Label(caja2, text="Agregar Piezas", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja2, text="Agregar Piezas",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=16, column=0, padx=3, pady=3, sticky="we", columnspan=2
     )
-    ttk.Label(caja2, text="Piezas").grid(row=17, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja2, text="Piezas",style="Color.TLabel").grid(row=17, column=0, padx=1, pady=1, sticky="e")
     
     predefinidas_hierro = ttk.Combobox(
         caja2, values=piezas_fundidor_hierro, state="readonly"
     )
     predefinidas_hierro.grid(row=17, column=1, padx=3, pady=3, sticky="w")
     
-    ttk.Label(caja2, text="Cantidad").grid(row=18, column=0, padx=3, pady=3, sticky="e")
+    ttk.Label(caja2, text="Cantidad",style="Color.TLabel").grid(row=18, column=0, padx=3, pady=3, sticky="e")
     entrada_hierro = ttk.Entry(caja2)
     entrada_hierro.grid(row=18, column=1, padx=3, pady=3, sticky="w")
 
@@ -221,19 +233,19 @@ def stock(notebook):
         ),
     ).grid(row=19, column=1, padx=2, pady=2, sticky="ew")
     
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=20, column=0, columnspan=2, sticky="ew", padx=4, pady=4)
 
-    ttk.Label(caja2, text="Eliminar Pieza(rotas)", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja2, text="Eliminar Pieza(rotas)",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=21, column=0, padx=3, pady=3, sticky="w", columnspan=2)
     
-    ttk.Label(caja2, text="Piezas").grid(row=22, column=0, padx=3, pady=3, sticky="e")
+    ttk.Label(caja2, text="Piezas",style="Color.TLabel").grid(row=22, column=0, padx=3, pady=3, sticky="e")
     
     predefinidas_hierro_delete = ttk.Combobox(
         caja2, values=piezas_fundidor_hierro, state="readonly")
     predefinidas_hierro_delete.grid(row=22, column=1, padx=1, pady=1, sticky="w")
     
-    ttk.Label(caja2, text="Cantidad:").grid(row=23, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja2, text="Cantidad",style="Color.TLabel").grid(row=23, column=0, padx=1, pady=1, sticky="e")
     
     entrada_hierro_delete = ttk.Entry(caja2)
     entrada_hierro_delete.grid(row=23, column=1, padx=1, pady=1, sticky="w")
@@ -255,12 +267,13 @@ def stock(notebook):
             tablafundidor,
         ),
     ).grid(row=24, column=1, padx=2, pady=2, sticky="ew")
-    ttk.Separator(caja2, orient="horizontal").grid(
+    
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=25, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
     
-    ttk.Label(caja2, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=26, column=0, sticky="we", columnspan=2)
-    ttk.Label(caja2, text="Hierro", font=("Arial", 12)).grid(row=27, column=0, columnspan=2, sticky="ew")
+    ttk.Label(caja2, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=26, column=0, sticky="we", columnspan=2)
+    ttk.Label(caja2, text="Hierro",style="Color.TLabel", font=("Arial", 12)).grid(row=27, column=0, columnspan=2, sticky="ew")
     tk.Button(
         caja2,
         background="blue",  # Puedes ajustar el color de fondo según tus preferencias
@@ -275,23 +288,23 @@ def stock(notebook):
     
 # -------------------------Plastico----------------------------------------------
 
-    caja3 = ttk.Frame(pestania)
+    caja3 = ttk.Frame(pestania, style='Color.TFrame' )
     caja3.grid(row=1, column=2, padx=3, pady=3, sticky="n")
 
-    ttk.Label(caja3, text="Piezas De Plastico", font=("Verdana", 11, "bold")).grid(
+    ttk.Label(caja3, text="Piezas De Plastico",style='Colortitulo.TLabel', font=("Verdana", 11, "bold")).grid(
         row=0, column=0, padx=3, pady=2, sticky="en", columnspan=2)
     
-    ttk.Label(caja3, text="Agregar Piezas", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja3, text="Agregar Piezas",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=1, column=0, padx=3, pady=3, sticky="we", columnspan=2
     )
-    ttk.Label(caja3, text="Piezas").grid(row=2, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja3, text="Piezas",style="Color.TLabel").grid(row=2, column=0, padx=1, pady=1, sticky="e")
     
     predefinidas_plastico = ttk.Combobox(
         caja3, values=piezas_plastico, state="readonly"
     )
     predefinidas_plastico.grid(row=2, column=1, padx=1, pady=1, sticky="w")
     
-    ttk.Label(caja3, text="Cantidad").grid(row=3, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja3, text="Cantidad",style="Color.TLabel").grid(row=3, column=0, padx=1, pady=1, sticky="e")
     
     entrada_plastico = ttk.Entry(caja3)
     entrada_plastico.grid(row=3, column=1, padx=1, pady=1, sticky="w")
@@ -314,19 +327,19 @@ def stock(notebook):
         ),
     ).grid(row=4, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=5, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja3, text="Eliminar Pieza (rotas)", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja3, text="Eliminar Pieza (rotas)",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=6, column=0, padx=3, pady=3, sticky="we", columnspan=2
     )
-    ttk.Label(caja3, text="Piezas").grid(row=7, column=0, padx=3, pady=3, sticky="e")
+    ttk.Label(caja3, text="Piezas",style="Color.TLabel").grid(row=7, column=0, padx=3, pady=3, sticky="e")
     predefinidas_plastico_delete = ttk.Combobox(
         caja3, values=piezas_plastico, state="readonly"
     )
     predefinidas_plastico_delete.grid(row=7, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja3, text="Cantidad:").grid(row=8, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja3, text="Cantidad",style="Color.TLabel").grid(row=8, column=0, padx=1, pady=1, sticky="e")
     entrada_plastico_delete = ttk.Entry(caja3)
     entrada_plastico_delete.grid(row=8, column=1, padx=1, pady=1, sticky="w")
 
@@ -348,13 +361,13 @@ def stock(notebook):
         ),
     ).grid(row=9, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, columnspan=2, sticky="ew", padx=3, pady=3
     )
 
-    ttk.Label(caja3, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=11, column=0, columnspan=2, sticky="we")
+    ttk.Label(caja3, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=11, column=0, columnspan=2, sticky="we")
 
-    ttk.Label(caja3, text="Plastico", font=("Arial", 12)).grid(row=12, column=0, columnspan=2, sticky="ew")
+    ttk.Label(caja3, text="Plastico",style="Color.TLabel", font=("Arial", 12)).grid(row=12, column=0, columnspan=2, sticky="ew")
     tk.Button(
         caja3,
         text="Stock En Plastico",
@@ -366,25 +379,25 @@ def stock(notebook):
         command=lambda: mostrar_plastico("plastico", tablafundidor, result, box),
     ).grid(row=13, column=0)
     
-    ttk.Separator(caja3, orient="horizontal").grid(row=14, column=0, columnspan=2, sticky="ew", padx=3, pady=3)
+    ttk.Separator(caja3, orient="horizontal", style="Separador1.TSeparator").grid(row=14, column=0, columnspan=2, sticky="ew", padx=3, pady=3)
 
 
 
 # ____________________________shop _______________________________________
 
-    ttk.Label(caja3, text="Piezas Shop(comprar)", font=("Verdana", 11, "bold")).grid(
+    ttk.Label(caja3, text="Piezas Shop(comprar)",style="Colortitulo.TLabel", font=("Verdana", 11, "bold")).grid(
         row=15, column=0, padx=3, pady=2, sticky="en", columnspan=2
     )
 
-    ttk.Label(caja3, text="Agregar Piezas", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja3, text="Agregar Piezas",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=16, column=0, padx=3, pady=3, sticky="we", columnspan=2
     )
-    ttk.Label(caja3, text="Piezas").grid(row=17, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja3, text="Piezas",style="Color.TLabel").grid(row=17, column=0, padx=1, pady=1, sticky="e")
     
     predefinidas_shop = ttk.Combobox(caja3, values=shop, state="readonly")
     predefinidas_shop.grid(row=17, column=1, padx=1, pady=1, sticky="w")
     
-    ttk.Label(caja3, text="Cantidad").grid(row=18, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja3, text="Cantidad",style="Color.TLabel").grid(row=18, column=0, padx=1, pady=1, sticky="e")
     
     entrada_shop = ttk.Entry(caja3)
     entrada_shop.grid(row=18, column=1, padx=1, pady=1, sticky="w")
@@ -407,19 +420,19 @@ def stock(notebook):
         ),
     ).grid(row=19, column=1, padx=2, pady=2, sticky="ew")
     
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=20, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja3, text="Eliminar Pieza", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja3, text="Eliminar Pieza",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=21, column=0, padx=3, pady=3, sticky="w", columnspan=2
     )
-    ttk.Label(caja3, text="Piezas").grid(row=22, column=0, padx=3, pady=3, sticky="e")
+    ttk.Label(caja3, text="Piezas",style="Color.TLabel").grid(row=22, column=0, padx=3, pady=3, sticky="e")
     predefinidas_shop_delete = ttk.Combobox(
         caja3, values=shop, state="readonly"
     )
     predefinidas_shop_delete.grid(row=22, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja3, text="Cantidad").grid(row=23, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja3, text="Cantidad",style="Color.TLabel").grid(row=23, column=0, padx=1, pady=1, sticky="e")
     entrada_shop_delete = ttk.Entry(caja3)
     entrada_shop_delete.grid(row=23, column=1, padx=1, pady=1, sticky="w")
 
@@ -441,12 +454,12 @@ def stock(notebook):
         ),
     ).grid(row=24, column=1, padx=2, pady=2, sticky="ew")
     
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=25, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja3, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=26, column=0, columnspan=2, sticky="we")
-    ttk.Label(caja3, text="Shop/ Compras", font=("Arial", 12)).grid(row=27, column=0, sticky="ew", columnspan=2)
+    ttk.Label(caja3, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=26, column=0, columnspan=2, sticky="we")
+    ttk.Label(caja3, text="Shop/ Compras",style="Color.TLabel", font=("Arial", 12)).grid(row=27, column=0, sticky="ew", columnspan=2)
     tk.Button(
         caja3,
         text="Stock Shop",
@@ -461,22 +474,22 @@ def stock(notebook):
 
 #______________________________________________Pieza chapas terminadas__________________________________________________
 
-    caja4 = ttk.Frame(pestania)
+    caja4 = ttk.Frame(pestania, style='Color.TFrame')
     caja4.grid(row=1, column=4, padx=3, pady=3, sticky="n")
 
-    ttk.Label(caja4, text="Piezas Chapas Terminadas ", font=("Verdana", 11, "bold")).grid(
+    ttk.Label(caja4, text="Piezas Chapas Terminadas ", style='Colortitulo.TLabel', font=("Verdana", 11, "bold")).grid(
         row=0, column=0, padx=3, pady=2, sticky="en", columnspan=2
     )
-    ttk.Label(caja4, text="Agregar Piezas", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja4, text="Agregar Piezas",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=1, column=0, padx=3, pady=3, sticky="w", columnspan=2
     )
-    ttk.Label(caja4, text="Piezas").grid(row=2, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Piezas",style="Color.TLabel").grid(row=2, column=0, padx=1, pady=1, sticky="e")
     
     predefinidas_chapa_final = ttk.Combobox(
         caja4, values=piezas_chapa_final, state="readonly"
     )
     predefinidas_chapa_final.grid(row=2, column=1, padx=1, pady=1 , sticky="w")
-    ttk.Label(caja4, text="Cantidad:").grid(row=3, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Cantidad",style="Color.TLabel").grid(row=3, column=0, padx=1, pady=1, sticky="e")
     entrada_chapa_final = ttk.Entry(caja4)
     entrada_chapa_final.grid(row=3, column=1, padx=1, pady=1, sticky="w")
 
@@ -498,20 +511,20 @@ def stock(notebook):
         ),
     ).grid(row=4, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=5, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja4, text="Eliminar Pieza", font=("Arial",9, "bold")).grid(
+    ttk.Label(caja4, text="Eliminar Pieza",style="Color.TLabel", font=("Arial",9, "bold")).grid(
         row=6, column=1, padx=3, pady=3, sticky="we", columnspan=2)
     
-    ttk.Label(caja4, text="Piezas: ").grid(row=7, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Piezas",style="Color.TLabel").grid(row=7, column=0, padx=1, pady=1, sticky="e")
     
     predefinidas_chapa_final_delete = ttk.Combobox(
         caja4, values=piezas_chapa_final, state="readonly"
     )
     predefinidas_chapa_final_delete.grid(row=7, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja4, text="Cantidad:").grid(row=8, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Cantidad",style="Color.TLabel").grid(row=8, column=0, padx=1, pady=1, sticky="e")
     entrada_chapa_final_delete = ttk.Entry(caja4)
     entrada_chapa_final_delete.grid(row=8, column=1, padx=1, pady=1, sticky="w")
 
@@ -533,12 +546,12 @@ def stock(notebook):
         ),
     ).grid(row=9, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
     
-    ttk.Label(caja4, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=11, column=0, sticky="we", columnspan=2)
-    ttk.Label(caja4, text="Chapa Cortada", font=("Arial", 12)).grid(row=12, column=0, columnspan=2, sticky="ew")
+    ttk.Label(caja4, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=11, column=0, sticky="we", columnspan=2)
+    ttk.Label(caja4, text="Chapa Cortada",style="Color.TLabel", font=("Arial", 12)).grid(row=12, column=0, columnspan=2, sticky="ew")
     tk.Button(
         caja4,
         background="blue",  # Puedes ajustar el color de fondo según tus preferencias
@@ -550,24 +563,24 @@ def stock(notebook):
         command=lambda: mostrar_chapa_cortada(tablafundidor, result, box),
     ).grid(row=13, column=0)
     
-    ttk.Separator(caja4, orient="horizontal").grid(row=14, column=0, columnspan=2, sticky="ew", padx=3, pady=3)
+    ttk.Separator(caja4, orient="horizontal", style="Separador1.TSeparator").grid(row=14, column=0, columnspan=2, sticky="ew", padx=3, pady=3)
     
     
 #---------------------------------------pieza Cortadas ----------------------------
 
 
-    ttk.Label(caja4, text="Piezas Cortadas", font=("Arial", 11, "bold")).grid(
+    ttk.Label(caja4, text="Piezas Cortadas",style="Colortitulo.TLabel", font=("Arial", 11, "bold")).grid(
         row=15, column=0, padx=3, pady=5, sticky="en", columnspan=2
     )
-    ttk.Label(caja4, text="Agregar Piezas", font=("Arial", 9,"bold")).grid(
+    ttk.Label(caja4, text="Agregar Piezas",style="Color.TLabel", font=("Arial", 9,"bold")).grid(
         row=16, column=0, padx=3, pady=3, sticky="we", columnspan=2
     )
-    ttk.Label(caja4, text="Piezas").grid(row=17, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Piezas",style="Color.TLabel").grid(row=17, column=0, padx=1, pady=1, sticky="e")
     predefinidas_pieza_final = ttk.Combobox(
         caja4, values=piezas_cortadas, state="readonly"
     )
     predefinidas_pieza_final.grid(row=17, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja4, text="Cantidad").grid(row=18, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Cantidad",style="Color.TLabel").grid(row=18, column=0, padx=1, pady=1, sticky="e")
     entrada_cortada_final = ttk.Entry(caja4)
     entrada_cortada_final.grid(row=18, column=1, padx=1, pady=1, sticky="w")
 
@@ -589,19 +602,19 @@ def stock(notebook):
         ),
     ).grid(row=19, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=20, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja4, text="Eliminar Pieza", font=("Arial", 9, "bold")).grid(
+    ttk.Label(caja4, text="Eliminar Pieza",style="Color.TLabel", font=("Arial", 9, "bold")).grid(
         row=21, column=1, padx=3, pady=3, sticky="w", columnspan=2
     )
-    ttk.Label(caja4, text="Piezas").grid(row=22, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Piezas",style="Color.TLabel").grid(row=22, column=0, padx=1, pady=1, sticky="e")
     predefinidas_pieza_final_delete = ttk.Combobox(
         caja4, values=piezas_cortadas, state="readonly"
     )
     predefinidas_pieza_final_delete.grid(row=22, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja4, text="Cantidad:").grid(row=23, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja4, text="Cantidad",style="Color.TLabel").grid(row=23, column=0, padx=1, pady=1, sticky="e")
     entrada_pieza_final_delete = ttk.Entry(caja4)
     entrada_pieza_final_delete.grid(row=23, column=1, padx=1, pady=1, sticky="w")
 
@@ -623,12 +636,12 @@ def stock(notebook):
         ),
     ).grid(row=24, column=1, padx=5, pady=5, sticky="ne")
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=25, column=0, columnspan=2, sticky="ew", padx=3, pady=3
     )
 
-    ttk.Label(caja4, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=26, column=0, sticky="we", columnspan=2)
-    ttk.Label(caja4, text="Pieza Cortadas", font=("Arial", 12)).grid(row=27, column=0, columnspan=2, sticky="ew")
+    ttk.Label(caja4, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=26, column=0, sticky="we", columnspan=2)
+    ttk.Label(caja4, text="Pieza Cortadas",style="Color.TLabel", font=("Arial", 12)).grid(row=27, column=0, columnspan=2, sticky="ew")
     tk.Button(
         caja4,
         background="blue",  # Puedes ajustar el color de fondo según tus preferencias
@@ -642,28 +655,28 @@ def stock(notebook):
     ).grid(row=28, column=0)
     
     
-    ttk.Separator(caja4, orient="vertical").grid(row=1, column=3, columnspan=3, sticky="ew")
+    ttk.Separator(caja4, orient="vertical", style="Separador1.TSeparator").grid(row=1, column=3, columnspan=3, sticky="ew")
     
     
     
 
-    caja5 = tk.Frame(pestania)
+    caja5 = ttk.Frame(pestania, style='Color.TFrame')
     caja5.grid(row=1, column=5, padx=3, pady=3, sticky="n")
 
 #==========================tornillo===========================================
     
-    ttk.Label(caja5, text="Tornillos, Ruediatas", font=("Verdana", 11, "bold")).grid(
+    ttk.Label(caja5, text="Tornillos, Ruediatas",style="Colortitulo.TLabel", font=("Verdana", 11, "bold")).grid(
         row=1, column=0, padx=3, pady=5, sticky="en", columnspan=2
     )
-    ttk.Label(caja5, text="Agregar Piezas",font=( "Arial", 9, "bold")).grid(
+    ttk.Label(caja5, text="Agregar Piezas",style="Color.TLabel",font=( "Arial", 9, "bold")).grid(
         row=2, column=0, padx=3, pady=3,sticky="we", columnspan=2
     )
-    ttk.Label(caja5, text="Piezas").grid(row=3, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja5, text="Piezas",style="Color.TLabel").grid(row=3, column=0, padx=1, pady=1, sticky="e")
     predefinidas_tornillo_final = ttk.Combobox(
         caja5, values=tornilleria, state="readonly"
     )
     predefinidas_tornillo_final.grid(row=3, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja5, text="Cantidad:").grid(row=4, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja5, text="Cantidad",style="Color.TLabel").grid(row=4, column=0, padx=1, pady=1, sticky="e")
     entrada_tornillo = ttk.Entry(caja5)
     entrada_tornillo.grid(row=4, column=1, padx=1, pady=1, sticky="w")
 
@@ -685,19 +698,19 @@ def stock(notebook):
         ),
     ).grid(row=5, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=6, column=0, columnspan=2, sticky="ew", padx=3, pady=3
     )
 
-    ttk.Label(caja5, text="Eliminar Pieza" ,font=( "Arial", 9, "bold")).grid(
+    ttk.Label(caja5, text="Eliminar Pieza",style="Color.TLabel" ,font=( "Arial", 9, "bold")).grid(
         row=7, column=0, padx=3, pady=3, sticky="ew", columnspan=2
     )
-    ttk.Label(caja5, text="Piezas: ").grid(row=8, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja5, text="Piezas",style="Color.TLabel").grid(row=8, column=0, padx=1, pady=1, sticky="e")
     predefinidas_tornillo_final_delete = ttk.Combobox(
         caja5, values=tornilleria, state="readonly"
     )
     predefinidas_tornillo_final_delete.grid(row=8, column=1, padx=1, pady=1, sticky="w")
-    ttk.Label(caja5, text="Cantidad:").grid(row=9, column=0, padx=1, pady=1, sticky="e")
+    ttk.Label(caja5, text="Cantidad",style="Color.TLabel").grid(row=9, column=0, padx=1, pady=1, sticky="e")
     entrada_tornillo_delete = ttk.Entry(caja5)
     entrada_tornillo_delete.grid(row=9, column=1, padx=1, pady=1, sticky="w")
 
@@ -719,12 +732,12 @@ def stock(notebook):
         ),
     ).grid(row=10, column=1, padx=2, pady=2, sticky="ew")
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=11, column=0, columnspan=2, sticky="ew", padx=4, pady=4
     )
 
-    ttk.Label(caja5, text="Consultas De Stock", font=("Arial", 12, "bold")).grid(row=12, column=0, sticky="we", columnspan=2)
-    ttk.Label(caja5, text="Varios", font=("Arial", 12)).grid(row=13, column=0, columnspan=2, sticky="ew")
+    ttk.Label(caja5, text="Consultas De Stock",style="Color.TLabel", font=("Arial", 12, "bold")).grid(row=12, column=0, sticky="we", columnspan=2)
+    ttk.Label(caja5, text="Varios",style="Color.TLabel", font=("Arial", 12)).grid(row=13, column=0, columnspan=2, sticky="ew")
     btn_stock_en_bruto = tk.Button(
         caja5,
         text="Stock En Bruto",
@@ -737,11 +750,13 @@ def stock(notebook):
     )
     btn_stock_en_bruto.grid(row=14, column=0)
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador1.TSeparator").grid(
         row=15, column=0, columnspan=2, sticky="ew", padx=3, pady=3
     )
     
-    tk.Label(caja5, text="Observaciones", font=("Arial", 13, "bold")).grid(row=16, column=0, sticky="w")
+    
+#_----------------------------------obserbaciones------------------------------------------------
+    ttk.Label(caja5, text="Observaciones",style="Colortitulo.TLabel", font=("Arial", 13, "bold")).grid(row=16, column=0, sticky="w")
     caja_texto = tk.Text(caja5, height=10, width=30)
     caja_texto.grid(row=17, column=0, columnspan=2)
 
