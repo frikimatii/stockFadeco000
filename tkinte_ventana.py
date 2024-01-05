@@ -3,7 +3,7 @@ from tkinter import ttk
 
 from stock_chapa import crear_pestana_chapa
 #from fundidor import ventana_fundidor
-from provedores import ventana_provedores
+from provedores_fadeco import ventana_provedores
 from mecanizado import mecanizado
 from session_stock import stock
 from index import inicio
