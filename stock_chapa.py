@@ -18,11 +18,13 @@ from funciones import (
     calcular_maquinas_posibles,
     eliminar_cantidad_de_piezas,
     bases_soldador_terminadas,
-    armado_de_cabezales,
     mostrar_cabezales_en_bruto,
     mostrar_bases_en_bruto,
     agregar_a_lista_tarea,
-    mostrar_datos_mecanizado
+    mostrar_datos_mecanizado,
+    armar_cabezales_inox,
+    armar_cabezales_250,
+    armar_cabezales_pint
 )
 
 
@@ -379,7 +381,7 @@ def crear_pestana_chapa(notebook):
     consulta_cabezales_pieza.grid(row=13,column=0, columnspan=2)
     ttk.Button(consulta_cabezales_pieza,text="Cabezales Chapa negra", style="3D.TButton", command=lambda: consulta_cabezales(tabla_chapa, "pintura", "cabezal", subtitulo)).grid(row=0, column=0, padx=5, pady=5, sticky="w")
     ttk.Button(consulta_cabezales_pieza,text="Cabezales Inox", style="3D.TButton",command=lambda: consulta_cabezales(tabla_chapa, "acero", "cabezal", subtitulo)).grid(row=0, column=1, padx=5, pady=5, sticky="e")
-    ttk.Button(consulta_cabezales_pieza,text="Cabezales Inox", style="3D.TButton",command=lambda: mostrar_datos_mecanizado(tabla_chapa, subtitulo, cabezal_250, "Cabezal 250", "chapa")).grid(row=0, column=2, padx=5, pady=5, sticky="e")
+    ttk.Button(consulta_cabezales_pieza,text="Cabezales 250", style="3D.TButton",command=lambda: mostrar_datos_mecanizado(tabla_chapa, subtitulo, cabezal_250, "Cabezal 250", "chapa")).grid(row=0, column=2, padx=5, pady=5, sticky="e")
 
     pieza_agregar_cabezal = ttk.Frame(box2, style='Color.TFrame')
     pieza_agregar_cabezal.grid(row=18, column=0, padx=7)
@@ -755,13 +757,8 @@ def crear_pestana_chapa(notebook):
     cabezales_terminados = ttk.Frame(box3, style='Pestania.TFrame')
     cabezales_terminados.grid(row=14, column=1)
 
-    tipo_var_cabezal = tk.IntVar()
-    tipo_var_cabezal.set(1)
 
-    boton_radius_acero = tk.Radiobutton(
-        cabezales_terminados, text="Inox", variable=tipo_var_cabezal, value=1, background='#192965', foreground='#9fa0a5'
-    )
-    boton_radius_acero.grid(row=1, column=0)
+    ttk.Label(cabezales_terminados, style='WhiteOnRed.TLabel', text="acero").grid(row=1, column=0)
 
     entrada_cantida_inox = ttk.Entry(cabezales_terminados, width=10, style='WhiteOnRed.TEntry')
     entrada_cantida_inox.grid(row=2, column=0)
@@ -770,22 +767,11 @@ def crear_pestana_chapa(notebook):
         cabezales_terminados,
         text="Agregar",
         style="TButton",
-        command=lambda: armado_de_cabezales(
-            tipo_var_cabezal,
-            entrada_cantida_inox,
-            lista_acciones,
-            subtitulo,
-            tabla_chapa,
-        ),
+        command= lambda: armar_cabezales_inox(entrada_cantida_inox.get(), lista_acciones)
     )
     btn_agregar_cabezal_inox.grid(row=3, column=0, padx=3, pady=3)
 
-
-
-    boton_radius_pintura = tk.Radiobutton(
-        cabezales_terminados, text="Pintura", variable=tipo_var_cabezal, value=2 , background='#192965', foreground='#9fa0a5'
-    )
-    boton_radius_pintura.grid(row=1, column=1)
+    ttk.Label(cabezales_terminados, style='WhiteOnRed.TLabel', text="pintada").grid(row=1, column=1)
 
     entrada_cantidad_pintada = ttk.Entry(cabezales_terminados, width=10, style='WhiteOnRed.TEntry')
     entrada_cantidad_pintada.grid(row=2, column=1)
@@ -794,20 +780,11 @@ def crear_pestana_chapa(notebook):
         cabezales_terminados,
         text="Agregar",
         style="TButton",
-        command=lambda: armado_de_cabezales(
-            tipo_var_cabezal,
-            entrada_cantidad_pintada,
-            lista_acciones,
-            subtitulo,
-            tabla_chapa,
-        ),
+        command=lambda: armar_cabezales_pint(entrada_cantidad_pintada.get(), lista_acciones)
     )
     btn_agregar_cabezal_pintada.grid(row=3, column=1, padx=3, pady=3)
     
-    boton_radius_250 = tk.Radiobutton(
-    cabezales_terminados, text="250", variable=tipo_var_cabezal, value=3 , background='#192965', foreground='#9fa0a5'
-    )
-    boton_radius_250.grid(row=1, column=2)
+    ttk.Label(cabezales_terminados, style='WhiteOnRed.TLabel', text="250").grid(row=1, column=2)
 
     entrada_cantidad_250 = ttk.Entry(cabezales_terminados, width=10, style='WhiteOnRed.TEntry')
     entrada_cantidad_250.grid(row=2, column=2)
@@ -816,15 +793,9 @@ def crear_pestana_chapa(notebook):
         cabezales_terminados,
         text="Agregar",
         style="TButton",
-        command=lambda: armado_de_cabezales(
-        tipo_var_cabezal,
-        entrada_cantidad_250,
-        lista_acciones,
-        subtitulo,
-        tabla_chapa,
-        ),
+        command=lambda: armar_cabezales_250(entrada_cantidad_250.get(), lista_acciones)
+        )
 
-    )
     btn_agregar_cabezal_pintada.grid(row=3, column=2, padx=3, pady=3)
 #---------------------------------------------------------------\
     

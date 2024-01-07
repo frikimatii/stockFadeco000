@@ -103,7 +103,7 @@ modelo250 = {
 piezas_a_augeriar_lista = ["cuadrado_regulador"]
 piezas_lijadas = ["base_afilador_300", "base_afilador_330", "base_afilador_250", "carcaza_afilador" ]
 piezas_prenza = ["guia_U", "eje_corto", "eje_largo"]
-cabezal_inox = ["cabezal_inox"]
+cabezal_inox = ["cabezal_inox", "cabezal_250"]
 varillas_soldar = ["varilla_330", "varilla_300", "varilla_250"]
 
 
@@ -288,7 +288,7 @@ def mecanizado(notebook):
             cantidad_augeriada,
             result,
             "piezas_finales_defenitivas",
-            arbol,
+            arbol,info
         ),
     ).grid(row=3, column=1)
     
@@ -342,7 +342,7 @@ def mecanizado(notebook):
             cantidad_lijada,
             result,
             "piezas_finales_defenitivas",
-            arbol,
+            arbol,info
         ),
     ).grid(row=3, column=1)
     
@@ -396,7 +396,7 @@ def mecanizado(notebook):
             cantidad_prenza,
             result,
             "piezas_finales_defenitivas",
-            arbol,
+            arbol,info
         ),
     ).grid(row=3, column=1)
     
@@ -450,7 +450,7 @@ def mecanizado(notebook):
             cantidad_pulido,
             result,
             "piezas_finales_defenitivas",
-            arbol,
+            arbol,info
         ),
     ).grid(row=3, column=1)
 

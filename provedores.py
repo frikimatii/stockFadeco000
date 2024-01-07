@@ -171,7 +171,7 @@ def ventana_provedores(notebook):
         ),
     ).grid(row=4, column=1)
 
-    # ___________________consulta stock_________________________________________#
+    # ___________________consulta stock____________________________________#
     tk.Label(caja2, text="Consultas De Stock").grid(row=5, column=0, sticky="w")
 
     tk.Button(

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 def inicio(notebook):
-    # Establecer el color de fondo del notebook
+    # Establecer el color de fondo del notebook 
     notebook.configure(style='Pestania.TNotebook')
     estilo_notebook = ttk.Style()
     estilo_notebook.configure('Pestania.TNotebook', background='#192965')
@@ -62,3 +62,4 @@ def inicio(notebook):
     label_image2 = tk.Label(box2, image=image2, bg='#192965')  # Cambiar el color de fondo de la imagen
     label_image2.image = image2  # Para evitar que la imagen sea eliminada por el recolector de basura
     label_image2.grid(row=1, column=0, padx=50, pady=50 )
+ 

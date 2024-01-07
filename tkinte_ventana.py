@@ -26,7 +26,6 @@ notebook = ttk.Notebook(root)
 
 inicio(notebook)
 stock(notebook)
-
 crear_pestana_chapa(notebook)
 ventana_provedores(notebook)
 mecanizado(notebook)

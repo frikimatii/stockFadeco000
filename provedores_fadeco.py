@@ -18,7 +18,7 @@ from funciones import (
     
 )
 
-modelo_piezas = ["base_pintada_330", "base_pintada_300"]
+modelo_piezas = ["base_pintada_330", "base_pintada_300"]  
 niquelado = [
     "eje_rectificado",
     "varilla_brazo_330",
@@ -124,10 +124,10 @@ def ventana_provedores(notebook):
     notebook.add(pestania, text="session Provedores")
 
     notebook.style = ttk.Style()
-    notebook.style.configure('Color.TFrame', background='#192965', radius=20, borderwidth=10)  # Puedes ajustar el color
-    notebook.style.configure('WhiteOnRed.TLabel', background='#192965', foreground='#c1c1c1')  # Puedes ajustar el color
-    notebook.style.configure('WhiteOnRed.TEntry', fieldbackground='black', foreground='black')  # Puedes ajustar el color
-    notebook.style.configure('WhiteOnRed.TCombobox', fieldbackground='#192965', foreground='white')  # Puedes ajustar el color
+    notebook.style.configure('Color.TFrame', background='#192965', radius=20, borderwidth=10) 
+    notebook.style.configure('WhiteOnRed.TLabel', background='#192965', foreground='#c1c1c1')  
+    notebook.style.configure('WhiteOnRed.TEntry', fieldbackground='black', foreground='black')  
+    notebook.style.configure('WhiteOnRed.TCombobox', fieldbackground='#192965', foreground='white')  
     notebook.style.configure("Estilo9.TButton", font=("Verdana", 7, "bold"), padding=(2, 2))
     notebook.style.configure("Separador1.TSeparator", background="yellow")
     notebook.style.configure("Separador2.TSeparator", background="blue")

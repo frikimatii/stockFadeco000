@@ -1385,122 +1385,170 @@ def bases_soldador_terminadas(
         conn.close()
 
 
-def armado_de_cabezales(opcion_seleccionada, entrada_cantidad, lista_acciones, subtitulo, tabla_chapa):
-    def verificar_suficientes_piezas(cursor, pieza, tipo_material, cantidad_eliminar):
-        cursor.execute(
-            "SELECT cantidad FROM chapa WHERE piezas = ? AND tipo_de_base = ?",
-            (pieza, tipo_material,),
-        )
-        cantidad_actual = cursor.fetchone()
+def armado_cabezales():
+    pass
 
-        if cantidad_actual is not None:
-            cantidad_actual = cantidad_actual[0]
-            return cantidad_eliminar <= cantidad_actual
-        else:
-            return False
-
-    tipo_material = opcion_seleccionada.get()
-
-    # Mapea el valor del tipo de material a una cadena
-    if tipo_material == 1:
-        tipo_material = "acero"
-    elif tipo_material == 2:
-        tipo_material = "pintura"
-    elif tipo_material == 3:
-        tipo_material = "acero"  # Corrección aquí
-    else:
-        # Maneja el caso en que el valor no sea 1, 2 ni 3
-        mensaje_error = "Error: Tipo de material no válido."
-        print(mensaje_error)
-        lista_acciones.insert(0, mensaje_error)
-        return
-
-    # Lista de piezas necesarias para el armado de cabezales
-    if tipo_material == "acero":
-        piezas = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
-    elif tipo_material == "pintura":
-        piezas = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
-    elif tipo_material == "cabezal_250":
-        piezas = ["chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"]
-    else:
-        # Maneja el caso en que el tipo de material no sea "acero", "pintura" ni "cabezal_250"
-        mensaje_error = "Error: Tipo de material no válido."
-        print(mensaje_error)
-        lista_acciones.insert(0, mensaje_error)
-        return
-
-    # Resto del código sigue igual...
-    # ... (copiar el resto del código desde aquí)
-
-    # Verifica si la cantidad ingresada es un número
-    cantidad_str = entrada_cantidad.get()
-    if not cantidad_str.isdigit():
-        mensaje_error = "Error: La cantidad debe ser un número entero."
-        print(mensaje_error)
-        lista_acciones.insert(0, mensaje_error)
-        return
-
-    cantidad_eliminar = int(cantidad_str)
+#inox
+def armar_cabezales_inox(cantidad_cabezales, lista_acciones):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
 
-    try:
-        # Verifica si hay suficientes piezas en el stock
-        suficientes_piezas = all(
-            verificar_suficientes_piezas(cursor, pieza, tipo_material, cantidad_eliminar)
-            for pieza in piezas
-        )
+    # Define the required pieces for the cabezal
+    cabezales_inox = {"chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"}
 
-        if not suficientes_piezas:
-            lista_acciones.insert(
-                0, "No hay suficientes piezas en el stock para armar el cabezal."
-            )
-            return
+    # Check if there are enough pieces available
+    piezas_faltantes = {}
+    for pieza in cabezales_inox:
+        cursor.execute("SELECT cantidad FROM chapa WHERE modelo = 'cabezal' AND piezas = ?", (pieza,))
+        cantidad_disponible = cursor.fetchone()
 
-        # Itera sobre las piezas y muestra un mensaje por cada una
-        for pieza in piezas:
-            cursor.execute(
-                "SELECT cantidad FROM chapa WHERE piezas = ? AND tipo_de_base = ?",
-                (pieza, tipo_material,),
-            )
-            cantidad_actual = cursor.fetchone()
+        if cantidad_disponible:
+            cantidad_disponible = int(cantidad_disponible[0])
+            cantidad_necesaria = int(cantidad_cabezales)
+            cantidad_faltante = max(0, cantidad_necesaria - cantidad_disponible)
 
-            if cantidad_actual is not None:
-                cantidad_actual = cantidad_actual[0]
-                nueva_cantidad = cantidad_actual - cantidad_eliminar
-                cursor.execute(
-                    "UPDATE chapa SET cantidad=? WHERE piezas=? AND tipo_de_base = ?",
-                    (nueva_cantidad, pieza, tipo_material,),
-                )
-                conn.commit()
+            if cantidad_faltante > 0:
+                piezas_faltantes[pieza] = cantidad_faltante
             else:
-                lista_acciones.insert(
-                    0, f"No se puede eliminar {pieza}, no existe en el stock"
-                )
+                # Deduct the used quantity from the "chapa" table
+                cursor.execute("UPDATE chapa SET cantidad = cantidad - ? WHERE modelo = 'cabezal' AND piezas = ?",
+                               (cantidad_necesaria, pieza))
+                conn.commit()
 
-        cursor.execute(
-            "UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND material = ? ",
-            (cantidad_str, tipo_material,),
-        )
+    if not piezas_faltantes:
+        # Update the "piezas_del_fundidor" table
+        cursor.execute("UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND piezas = 'cabezal_inox'",
+                       (cantidad_cabezales,))
         conn.commit()
+        lista_acciones.insert(0, f"Se agregaron {cantidad_cabezales} cabezales inox ")
+    else:
+        lista_acciones.insert(0, "No hay suficientes piezas en la tabla 'chapa' para armar los cabezales. Faltan las siguientes piezas:")
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+           lista_acciones.insert(0, f"{pieza}: {cantidad_faltante} unidades.")
 
-        consulta_cabezales(tabla_chapa, tipo_material, "cabezal", subtitulo)
+    conn.close()
 
-        # Muestra un mensaje de éxito y agrega la acción a la lista
-        mensaje_exito = (
-            f"Se han eliminado {cantidad_eliminar} unidades de {tipo_material}."
-        )
-        lista_acciones.insert(0, mensaje_exito)
+#250
+def armar_cabezales_250(cantidad_cabezales, lista_acciones):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
 
-    except Exception as e:
-        # Manejo de errores
-        mensaje_error = f"Error: {e}"
-        print(mensaje_error)
-        lista_acciones.insert(0, mensaje_error)
+    # Define the required pieces for the cabezal
+    cabezales_inox = {"chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"}
 
-    finally:
-        # Cierra la conexión a la base de datos
-        conn.close()
+    # Check if there are enough pieces available
+    piezas_faltantes = {}
+    for pieza in cabezales_inox:
+        cursor.execute("SELECT cantidad FROM chapa WHERE modelo = 'cabezal' AND piezas = ?", (pieza,))
+        cantidad_disponible = cursor.fetchone()
+
+        if cantidad_disponible:
+            cantidad_disponible = int(cantidad_disponible[0])
+            cantidad_necesaria = int(cantidad_cabezales)
+            cantidad_faltante = max(0, cantidad_necesaria - cantidad_disponible)
+
+            if cantidad_faltante > 0:
+                piezas_faltantes[pieza] = cantidad_faltante
+            else:
+                # Deduct the used quantity from the "chapa" table
+                cursor.execute("UPDATE chapa SET cantidad = cantidad - ? WHERE modelo = 'cabezal' AND piezas = ?",
+                               (cantidad_necesaria, pieza))
+                conn.commit()
+
+    if not piezas_faltantes:
+        # Update the "piezas_del_fundidor" table
+        cursor.execute("UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND piezas = 'cabezal_250'",
+                       (cantidad_cabezales,))
+        conn.commit()
+        lista_acciones.insert(0, f"Se agregaron {cantidad_cabezales} cabezales inox a la tabla 'piezas_del_fundicion'.")
+    else:
+        lista_acciones.insert(0, "No hay suficientes piezas en la tabla 'chapa' para armar los cabezales. Faltan las siguientes piezas:")
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+           lista_acciones.insert(0, f"{pieza}: {cantidad_faltante} unidades.")
+
+    conn.close()
+    
+#pinta 
+
+def armar_cabezales_250(cantidad_cabezales, lista_acciones):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    # Define the required pieces for the cabezal
+    cabezales_inox = {"chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"}
+
+    # Check if there are enough pieces available
+    piezas_faltantes = {}
+    for pieza in cabezales_inox:
+        cursor.execute("SELECT cantidad FROM chapa WHERE modelo = 'cabezal' AND piezas = ?", (pieza,))
+        cantidad_disponible = cursor.fetchone()
+
+        if cantidad_disponible:
+            cantidad_disponible = int(cantidad_disponible[0])
+            cantidad_necesaria = int(cantidad_cabezales)
+            cantidad_faltante = max(0, cantidad_necesaria - cantidad_disponible)
+
+            if cantidad_faltante > 0:
+                piezas_faltantes[pieza] = cantidad_faltante
+            else:
+                # Deduct the used quantity from the "chapa" table
+                cursor.execute("UPDATE chapa SET cantidad = cantidad - ? WHERE modelo = 'cabezal' AND piezas = ?",
+                               (cantidad_necesaria, pieza))
+                conn.commit()
+
+    if not piezas_faltantes:
+        # Update the "piezas_del_fundidor" table
+        cursor.execute("UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND piezas = 'cabezal_250'",
+                       (cantidad_cabezales,))
+        conn.commit()
+        lista_acciones.insert(0, f"Se agregaron {cantidad_cabezales} cabezales inox a la tabla 'piezas_del_fundicion'.")
+    else:
+        lista_acciones.insert(0, "No hay suficientes piezas en la tabla 'chapa' para armar los cabezales. Faltan las siguientes piezas:")
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+           lista_acciones.insert(0, f"{pieza}: {cantidad_faltante} unidades.")
+
+    conn.close()
+    
+    
+def armar_cabezales_pint(cantidad_cabezales, lista_acciones):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    # Define the required pieces for the cabezal
+    cabezales_inox = {"chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"}
+
+    # Check if there are enough pieces available
+    piezas_faltantes = {}
+    for pieza in cabezales_inox:
+        cursor.execute("SELECT cantidad FROM chapa WHERE tipo_de_base = 'pintura' AND piezas = ?", (pieza,))
+        cantidad_disponible = cursor.fetchone()
+
+        if cantidad_disponible:
+            cantidad_disponible = int(cantidad_disponible[0])
+            cantidad_necesaria = int(cantidad_cabezales)
+            cantidad_faltante = max(0, cantidad_necesaria - cantidad_disponible)
+
+            if cantidad_faltante > 0:
+                piezas_faltantes[pieza] = cantidad_faltante
+            else:
+                # Deduct the used quantity from the "chapa" table
+                cursor.execute("UPDATE chapa SET cantidad = cantidad - ? WHERE tipo_de_base = 'pintura' AND piezas = ?",
+                               (cantidad_necesaria, pieza))
+                conn.commit()
+
+    if not piezas_faltantes:
+        # Update the "piezas_del_fundidor" table
+        cursor.execute("UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND piezas = 'cabezal_pintura'",
+                       (cantidad_cabezales,))
+        conn.commit()
+        lista_acciones.insert(0, f"Se agregaron {cantidad_cabezales} cabezales inox a la tabla 'piezas_del_fundicion'.")
+    else:
+        lista_acciones.insert(0, "No hay suficientes piezas en la tabla 'chapa' para armar los cabezales. Faltan las siguientes piezas:")
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+           lista_acciones.insert(0, f"{pieza}: {cantidad_faltante} unidades.")
+
+    conn.close()
+
 
 
 def mostrar_bases_en_bruto(tree1, subtitulo):
@@ -3105,22 +3153,24 @@ def ensamblar_motor_terminado(modelo_seleccionado, cantidad_motores, res):
 
             # Commit para aplicar los cambios
             conn.commit()
-            res.insert(0, f"Se ensamblaron {cantidad} motores {modelo_seleccionado}.")
 
             if modelo_seleccionado in [1, 2, 3]:
                 if modelo_seleccionado == 1:
                     nombre_pieza = "cajamotor_final_330"
+                    txt = "Motor 330"
                 elif modelo_seleccionado == 2:
                     nombre_pieza = "cajamotor_final_300"
+                    txt = "Motor 300"
                 elif modelo_seleccionado == 3:
                     nombre_pieza = "cajamotor_final_250"
+                    txt = "Motor 250"
 
                 cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE piezas = ?", (cantidad, nombre_pieza))
 
                 if cantidad == 1:
-                    res.insert(0, f"Se agregó {cantidad} motor terminado")
+                    res.insert(0, f"Se agregó {cantidad} motor terminado {txt}")
                 else:
-                    res.insert(0, f"Se agregaron {cantidad} motores terminados")
+                    res.insert(0, f"Se agregaron {cantidad} motores terminados {txt}")
             else:
                 res.insert(0, "Modelo no reconocido")
 
@@ -3881,7 +3931,7 @@ i250 = {
     "cubrecuchilla_250": 1,
     "velero": 1,
     "perilla_brazo": 1,
-    "cabezal_inox": 1,
+    "cabezal_250": 1,
     "teletubi_250": 1,
     "cuchilla_250": 1,
     "cuadrado_regulador": 1,
@@ -3906,7 +3956,7 @@ p330 = {
     "cubrecuchilla_330": 1,
     "velero": 1,
     "perilla_brazo": 1,
-    "cabezal_inox": 1,
+    "cabezal_pintura": 1,
     "teletubi_330": 1,
     "cuchilla_330": 1,
     "cuadrado_regulador": 1,
@@ -3932,7 +3982,7 @@ p300 = {
     "cubrecuchilla_300": 1,
     "velero": 1,
     "perilla_brazo": 1,
-    "cabezal_inox": 1,
+    "cabezal_pintura": 1,
     "teletubi_300": 1,
     "cuchilla_300": 1,
     "cuadrado_regulador": 1,
@@ -3962,7 +4012,7 @@ def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
     filas = cursor.fetchall()
     base_de_datos = {pieza: cantidad for pieza, cantidad in filas}
 
-    piezas_faltantes = {}
+    piezas_faltantes = []
 
     # Utiliza diccionarios específicos para cada tipo
     tipos_piezas = {
@@ -3987,6 +4037,8 @@ def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
     tipo_a_ensamblar = {pieza: cantidad * int(cantidad_maquinas)
                         for pieza, cantidad in tipo_a_ensamblar.items()}
 
+    # Verifica si hay suficientes piezas disponibles
+    piezas_disponibles = True
     for pieza, cantidad_necesaria in tipo_a_ensamblar.items():
         cursor.execute(
             "SELECT cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_final' AND piezas = ?", (pieza,))
@@ -3998,26 +4050,26 @@ def armado_de_maquinas(cantidad_maquinas, tipo_seleccionado, result):
                 0, cantidad_necesaria - cantidad_disponible)
 
             if cantidad_faltante > 0:
-                piezas_faltantes[pieza] = cantidad_faltante
-            else:
-                # Resta la cantidad utilizada de la base de datos
-                cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad - ? WHERE sector = 'armado_final' AND piezas = ?",
-                               (cantidad_necesaria, pieza))
-                conn.commit()
-        else:
-            text1 = f"No se encontró cantidad para la pieza {pieza} en la base de datos."
-            result.insert(0, text1)
+                piezas_faltantes.append((pieza, cantidad_faltante))
+                piezas_disponibles = False
 
-    if not piezas_faltantes:
+    if piezas_disponibles:
+        # Si todas las piezas están disponibles, resta las cantidades
+        for pieza, cantidad_necesaria in tipo_a_ensamblar.items():
+            cursor.execute("UPDATE piezas_finales_defenitivas SET cantidad = cantidad - ? WHERE sector = 'armado_final' AND piezas = ?",
+                           (cantidad_necesaria, pieza))
+            conn.commit()
+
         cursor.execute(f"UPDATE producto_final SET cantidad = cantidad + ? WHERE piezas = ?",
                        (int(cantidad_maquinas), tipo_seleccionado))
         conn.commit()
-        text3 = f"Se Agregaron {cantidad_maquinas} máquinas {tipo_seleccionado}."
+        text3 = f"Se agregaron {cantidad_maquinas} máquinas {tipo_seleccionado}."
         result.insert(0, text3)
     else:
-        text4 = "No hay suficientes piezas para ensamblar las máquinas. Faltan las siguientes piezas:"
+        # Si alguna pieza falta, muestra un mensaje
+        text4 = "No se pueden armar las máquinas. Faltan las siguientes piezas:"
         result.insert(0, text4)
-        for pieza, cantidad_faltante in piezas_faltantes.items():
+        for pieza, cantidad_faltante in piezas_faltantes:
             result.insert(0, f"{pieza}: {cantidad_faltante} unidades.")
 
     conn.close()
@@ -4038,4 +4090,4 @@ def mostrar_maquinas_teminadas(arbol,res):
     subtitulo_text = "Mostrar Datos: Maquinas Terminadas"
     res.config(text=subtitulo_text)
 
-#9999999999999999999999999999999999999999
+#999999999999999999969699999999999999999999

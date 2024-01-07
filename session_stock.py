@@ -50,7 +50,7 @@ def stock(notebook):
 
     notebook.add(pestania, text="session Stock")
     
-    #------------------------------sTYLO------------------------------------------
+    #------------------------------sTYLO---------------------------------
     
     style = ttk.Style()
     style.configure("Color.TFrame", background ="#192965")
