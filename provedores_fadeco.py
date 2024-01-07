@@ -10,6 +10,12 @@ from funciones import (
     envios_de_bruto_a_pulido,
     sort_column,
     sort_column_numeric,
+    envios_de_bruto_a_niquelar,
+    envios_de_niquelado_a_fabrica,
+    envios_pulido_a_fabrica,
+    envios_pulido_a_fabrica_cabezal,
+    envios_de_bruto_cabezal,
+    
 )
 
 modelo_piezas = ["base_pintada_330", "base_pintada_300"]
@@ -119,14 +125,14 @@ def ventana_provedores(notebook):
 
     notebook.style = ttk.Style()
     notebook.style.configure('Color.TFrame', background='#192965', radius=20, borderwidth=10)  # Puedes ajustar el color
-    notebook.style.configure('WhiteOnRed.TLabel', background='#192965', foreground='white')  # Puedes ajustar el color
+    notebook.style.configure('WhiteOnRed.TLabel', background='#192965', foreground='#c1c1c1')  # Puedes ajustar el color
     notebook.style.configure('WhiteOnRed.TEntry', fieldbackground='black', foreground='black')  # Puedes ajustar el color
     notebook.style.configure('WhiteOnRed.TCombobox', fieldbackground='#192965', foreground='white')  # Puedes ajustar el color
     notebook.style.configure("Estilo9.TButton", font=("Verdana", 7, "bold"), padding=(2, 2))
     notebook.style.configure("Separador1.TSeparator", background="yellow")
     notebook.style.configure("Separador2.TSeparator", background="blue")
-    notebook.style.configure("Estilo2.TButton", background="green", padding=7)
-    notebook.style.configure("Estilo5.TButton", font=("Courier", 7, "italic"))
+    notebook.style.configure("Estilo2.TButton", background="green", padding=2)
+    notebook.style.configure("Estilo5.TButton", font=("Arial", 7, "bold"))
     notebook.style.configure("Estilo4.TButton", background="yellow", padding=7)
 
  
@@ -135,12 +141,12 @@ def ventana_provedores(notebook):
     caja1 = ttk.Frame(pestania, style='Color.TFrame')
     caja1.grid(row=0, column=0, sticky="n")
     
-    ttk.Label(caja1, text="Provedores", style="WhiteOnRed.TLabel", font=("Verdana", 25, "bold")).grid(row=0, column=0)
-    ttk.Label(caja1, text=" Tabla de datos", style="WhiteOnRed.TLabel").grid(row=1, column=0, sticky="w")
+    ttk.Label(caja1, text="Provedores", style="WhiteOnRed.TLabel", font=("Verdana", 30, "bold")).grid(row=0, column=0)
+    info = ttk.Label(caja1, text=" Tabla de datos", style="WhiteOnRed.TLabel")
+    info.grid(row=1, column=0, sticky="w")
     arbol = ttk.Treeview(caja1, columns=("Pieza", "Cantidad"))
     arbol.heading(
-        "Pieza", text="Pieza", command=lambda: sort_column(arbol, "Pieza", False)
-    )
+        "Pieza", text="Pieza")
     arbol.heading(
         "Cantidad",
         text="Cantidad",
@@ -158,20 +164,20 @@ def ventana_provedores(notebook):
 #----------------------Carmelo-------------------------------------
     
     box2 = ttk.Frame(pestania, style='Color.TFrame')
-    box2.grid(row=0, column=1, sticky="n",pady=27)
+    box2.grid(row=0, column=1, sticky="n",pady=27, padx=10)
     
     
     ttk.Label(box2, text="Carmelo", style="WhiteOnRed.TLabel",font=("Arial", 18, "bold")).grid(row=0, column=0, columnspan=2)
     
     ttk.Label(box2, text="Envios A Carmelo", style="WhiteOnRed.TLabel",font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w")
-    ttk.Label(box2, text="Pieza", style="WhiteOnRed.TLabel",).grid(row=2, column=0, sticky="w")
-    ttk.Label(box2, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=2, column=1)
+    ttk.Label(box2, text="Pieza", style="WhiteOnRed.TLabel",).grid(row=2, column=0, sticky="ew")
+    ttk.Label(box2, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=2, column=1, sticky="ew")
 
-    pieza_predeterminadas = ttk.Combobox(box2, values=piezas_carmelo)
+    pieza_predeterminadas = ttk.Combobox(box2, values=piezas_carmelo, state="readonly")
     pieza_predeterminadas.grid(row=3, column=0, sticky="w")
 
     cantidad_agregar_carmelo = ttk.Entry(box2, width=10 ,style='WhiteOnRed.TEntry')
-    cantidad_agregar_carmelo.grid(row=3, column=1)
+    cantidad_agregar_carmelo.grid(row=3, column=1, sticky="w")
 
     tk.Button(
         box2,
@@ -186,9 +192,9 @@ def ventana_provedores(notebook):
             cantidad_agregar_carmelo,
             "carmelo_pulido",
             arbol,
-            result,
+            result,info
         ),
-    ).grid(row=4, column=1,padx=5, pady=5)
+    ).grid(row=4, column=1,pady=5, sticky="w")
     
     ttk.Separator(box2, orient="horizontal", style="Separador2.TSeparator").grid(
     row=5, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
@@ -196,13 +202,13 @@ def ventana_provedores(notebook):
     
     ttk.Label(box2, text="Piezas Resibidas", style="WhiteOnRed.TLabel",font=("Arial", 10, "bold")).grid(row=6, column=0, sticky="w")
     ttk.Label(box2, text="Pieza", style="WhiteOnRed.TLabel",).grid(row=7, column=0, sticky="w")
-    ttk.Label(box2, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=7, column=1)
+    ttk.Label(box2, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=7, column=1, sticky="ew")
 
-    pieza_predeterminadas1 = ttk.Combobox(box2, values=piezas_carmelo)
+    pieza_predeterminadas1 = ttk.Combobox(box2, values=piezas_carmelo, state="readonly")
     pieza_predeterminadas1.grid(row=8, column=0, sticky="w")
 
     cantidad_piezas_terminadas_carmelo = ttk.Entry(box2, width=10,style='WhiteOnRed.TEntry')
-    cantidad_piezas_terminadas_carmelo.grid(row=8, column=1)
+    cantidad_piezas_terminadas_carmelo.grid(row=8, column=1, sticky="w")
 
     tk.Button(
         box2,
@@ -218,9 +224,9 @@ def ventana_provedores(notebook):
             "carmelo_pulido",
             "piezas_finales_defenitivas",
             arbol,
-            result,
+            result,info
         ),
-    ).grid(row=9, column=1, padx=5, pady=5)
+    ).grid(row=9, column=1, pady=5, sticky="w")
     
     ttk.Separator(box2, orient="horizontal", style="Separador2.TSeparator").grid(
     row=10, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
@@ -231,7 +237,7 @@ def ventana_provedores(notebook):
         box2,
         text="Stock Total",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos(arbol, "carmelo_pulido"),
+        command=lambda: mostrar_datos(arbol, "carmelo_pulido", info),
     ).grid(row=12, column=0, columnspan=2)
 
     botonera = ttk.Frame(box2, style='Color.TFrame')
@@ -241,19 +247,19 @@ def ventana_provedores(notebook):
         botonera,
         text="Stock 330",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("carmelo_pulido", "330", arbol),
+        command=lambda: mostrar_datos_especifico("carmelo_pulido", "330", arbol, info),
     ).grid(row=0, column=0, padx=5, pady=5)
     ttk.Button(
         botonera,
         text="Stock 300",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("carmelo_pulido", "300", arbol),
+        command=lambda: mostrar_datos_especifico("carmelo_pulido", "300", arbol, info),
     ).grid(row=0, column=1, padx=5, pady=5)
     ttk.Button(
         botonera,
         text="Resto De Piezas",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("carmelo_pulido", "all", arbol),
+        command=lambda: mostrar_datos_especifico("carmelo_pulido", "250", arbol, info),
     ).grid(row=0, column=2, padx=5, pady=5)
 
     ttk.Separator(box2, orient="horizontal", style="Separador1.TSeparator").grid(
@@ -267,14 +273,14 @@ def ventana_provedores(notebook):
     ttk.Label(box3, text="Maxi", style="WhiteOnRed.TLabel",font=("Arial", 18, "bold")).grid(row=0, column=0, columnspan=2)
 
     ttk.Label(box3, text="Envios A Maxi", style="WhiteOnRed.TLabel",font=("Arial", 10, "bold")).grid(row=1, column=0,sticky="w")
-    ttk.Label(box3, text="Pieza", style="WhiteOnRed.TLabel",).grid(row=2, column=0, sticky="w")
-    ttk.Label(box3, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=2, column=1)
+    ttk.Label(box3, text="Pieza", style="WhiteOnRed.TLabel",).grid(row=2, column=0, sticky="ew")
+    ttk.Label(box3, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=2, column=1, sticky="ew")
 
-    pieza_predeterminadas2 = ttk.Combobox(box3, values=piezas_maxi)
+    pieza_predeterminadas2 = ttk.Combobox(box3, values=piezas_maxi, state="readonly")
     pieza_predeterminadas2.grid(row=3, column=0,sticky="w")
 
     cantidad_agregar_maxi = ttk.Entry(box3, width=10,style='WhiteOnRed.TEntry')
-    cantidad_agregar_maxi.grid(row=3, column=1)
+    cantidad_agregar_maxi.grid(row=3, column=1, sticky="w")
 
     tk.Button(
         box3,
@@ -285,9 +291,9 @@ def ventana_provedores(notebook):
         pady=4,
         font=('Helvetica', 8, "bold"),
         command=lambda: enviar_piezas_a_pulido(
-            pieza_predeterminadas2, cantidad_agregar_maxi, "maxi_pulido", arbol, result
+            pieza_predeterminadas2, cantidad_agregar_maxi, "maxi_pulido", arbol, result,info
         ),
-    ).grid(row=4, column=1,padx=5, pady=5)
+    ).grid(row=4, column=1,padx=5, sticky="w")
 
     ttk.Separator(box3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=5, column=0, columnspan=2, sticky="ew", padx=5, pady=5
@@ -295,13 +301,13 @@ def ventana_provedores(notebook):
     
     ttk.Label(box3, text="Piezas Resibidas", style="WhiteOnRed.TLabel",font=("Arial", 10, "bold")).grid(row=6, column=0, sticky="w")
     ttk.Label(box3, text="Pieza", style="WhiteOnRed.TLabel",).grid(row=7, column=0, sticky="w")
-    ttk.Label(box3, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=7, column=1)
+    ttk.Label(box3, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=7, column=1, sticky="ew")
 
-    pieza_predeterminadas4 = ttk.Combobox(box3, values=piezas_maxi)
+    pieza_predeterminadas4 = ttk.Combobox(box3, values=piezas_maxi,state="readonly")
     pieza_predeterminadas4.grid(row=8, column=0, sticky="w")
 
     cantidad_piezas_terminadas_maxi = ttk.Entry(box3, width=10,style='WhiteOnRed.TEntry')
-    cantidad_piezas_terminadas_maxi.grid(row=8, column=1)
+    cantidad_piezas_terminadas_maxi.grid(row=8, column=1, sticky="w")
 
     tk.Button(
         box3,
@@ -317,17 +323,16 @@ def ventana_provedores(notebook):
             "maxi_pulido",
             "piezas_finales_defenitivas",
             arbol,
-            result,
+            result,info
         ),
-    ).grid(row=9, column=1,padx=5, pady=5)
-
+    ).grid(row=9, column=1,padx=5,sticky="w")
     ttk.Separator(box3, orient="horizontal", style="Separador2.TSeparator").grid(row=10, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
 
 
     ttk.Label(box3, text="Consultas De Stock", style="WhiteOnRed.TLabel",).grid(row=11, column=0, sticky="w")
 
     ttk.Button(
-        box3, text="Stock Total", style = "Estilo9.TButton", command=lambda: mostrar_datos(arbol, "maxi_pulido")
+        box3, text="Stock Total", style = "Estilo9.TButton", command=lambda: mostrar_datos(arbol, "maxi_pulido", info)
     ).grid(row=12, column=0, columnspan=2)
 
     botonera = ttk.Frame(box3, style='Color.TFrame')
@@ -337,19 +342,19 @@ def ventana_provedores(notebook):
         botonera,
         text="Stock 300",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("maxi_pulido", "330", arbol),
+        command=lambda: mostrar_datos_especifico("maxi_pulido", "330", arbol, info),
     ).grid(row=0, column=0, padx=5, pady=5)
     ttk.Button(
         botonera,
         text="Stock 330",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("maxi_pulido", "300", arbol),
+        command=lambda: mostrar_datos_especifico("maxi_pulido", "300", arbol, info),
     ).grid(row=0, column=1, padx=5, pady=5)
     ttk.Button(
         botonera,
         text="Resto De Piezas",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("maxi_pulido", "250", arbol),
+        command=lambda: mostrar_datos_especifico("maxi_pulido", "250", arbol, info),
     ).grid(row=0, column=2, padx=5, pady=5)
     
     ttk.Separator(box3, orient="horizontal", style="Separador1.TSeparator").grid(row=14, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
@@ -358,19 +363,19 @@ def ventana_provedores(notebook):
     box1 = ttk.Frame(pestania, style='Color.TFrame')
     box1.grid(row=0, column=3, sticky="n",pady=25)
 
-    ttk.Label(box1, text="Buen Hombre", style="WhiteOnRed.TLabel",font=("Arial", 15, "bold")).grid(row=0, column=0, columnspan=2)
+    ttk.Label(box1, text="Buen Hombre", style="WhiteOnRed.TLabel",font=("Arial", 18, "bold")).grid(row=0, column=0, columnspan=2)
     
     # 0000----------------------------BUEN HOMBRE ------------------------------------#
     
     ttk.Label(box1, text="Envios A Buen Hombre", style="WhiteOnRed.TLabel",font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w")
-    ttk.Label(box1, text="Pieza", style="WhiteOnRed.TLabel").grid(row=2, column=0, sticky="w")
-    ttk.Label(box1, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=2, column=1)
+    ttk.Label(box1, text="Pieza", style="WhiteOnRed.TLabel").grid(row=2, column=0, sticky="ew")
+    ttk.Label(box1, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=2, column=1, sticky="ew")
 
-    pieza_predeterminadas5 = ttk.Combobox(box1, values=pieza_buen_hombre)
+    pieza_predeterminadas5 = ttk.Combobox(box1, values=pieza_buen_hombre ,state="readonly")
     pieza_predeterminadas5.grid(row=3, column=0, sticky="w")
 
     cantidad_agregar_buen_hombre = ttk.Entry(box1, width=10,style='WhiteOnRed.TEntry')
-    cantidad_agregar_buen_hombre.grid(row=3, column=1)
+    cantidad_agregar_buen_hombre.grid(row=3, column=1, sticky="w")
 
     tk.Button(box1,
             text="Enviar Piezas",
@@ -384,9 +389,9 @@ def ventana_provedores(notebook):
             cantidad_agregar_buen_hombre,
             "buen_hombre_pulido",
             arbol,
-            result,
+            result,info
         ),
-    ).grid(row=4, column=1,padx=5, pady=5)
+    ).grid(row=4, column=1,padx=5, sticky="w")
 
     ttk.Separator(box1, orient="horizontal", style="Separador2.TSeparator").grid(
         row=5, column=0, columnspan=2, sticky="ew", padx=5, pady=5
@@ -394,13 +399,13 @@ def ventana_provedores(notebook):
 
     ttk.Label(box1, text="Piezas Resibidas", style="WhiteOnRed.TLabel",font=("Arial", 10, "bold")).grid(row=6, column=0, sticky="w")
     ttk.Label(box1, text="Pieza", style="WhiteOnRed.TLabel").grid(row=7, column=0, sticky="w")
-    ttk.Label(box1, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=7, column=1)
+    ttk.Label(box1, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=7, column=1, sticky="ew")
 
-    pieza_predeterminadas6 = ttk.Combobox(box1, values=pieza_buen_hombre)
+    pieza_predeterminadas6 = ttk.Combobox(box1, values=pieza_buen_hombre, state="readonly")
     pieza_predeterminadas6.grid(row=8, column=0, sticky="w")
 
     cantidad_piezas_terminadas_buen_hombre = ttk.Entry(box1, width=10,style='WhiteOnRed.TEntry')
-    cantidad_piezas_terminadas_buen_hombre.grid(row=8, column=1)
+    cantidad_piezas_terminadas_buen_hombre.grid(row=8, column=1, sticky="w")
 
     tk.Button(box1,
         text="Piezas Terminadas",
@@ -415,8 +420,8 @@ def ventana_provedores(notebook):
         "buen_hombre_pulido",
         "piezas_finales_defenitivas",
         arbol,
-        result,
-        ),).grid(row=9, column=1,padx=5, pady=5)
+        result,info
+        ),).grid(row=9, column=1,padx=5, sticky="w")
 
     ttk.Separator(box1, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, columnspan=2, sticky="ew", padx=5, pady=5
@@ -424,7 +429,7 @@ def ventana_provedores(notebook):
 
     ttk.Label(box1, text="Consultas De Stock", style="WhiteOnRed.TLabel",).grid(row=11, column=0, sticky="w")
 
-    ttk.Button(box1, text="Stock Total"  ,style = "Estilo9.TButton",command=lambda: mostrar_datos(arbol, "buen_hombre_pulido")).grid(row=12, column=0, columnspan=2)
+    ttk.Button(box1, text="Stock Total"  ,style = "Estilo9.TButton",command=lambda: mostrar_datos(arbol, "buen_hombre_pulido", info)).grid(row=12, column=0, columnspan=2)
 
     botonera = ttk.Frame(box1, style='Color.TFrame')
     botonera.grid(row=13, column=0, columnspan=2)
@@ -433,19 +438,19 @@ def ventana_provedores(notebook):
         botonera,
         text="Stock 300",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "330", arbol),
+        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "330", arbol, info),
     ).grid(row=0, column=0, padx=5, pady=5)
     ttk.Button(
         botonera,
         text="Stock 330",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "300", arbol),
+        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "300", arbol, info),
     ).grid(row=0, column=1, padx=5, pady=5)
     ttk.Button(
         botonera,
         text="Resto De Piezas",
         style = "Estilo9.TButton",
-        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "all", arbol),
+        command=lambda: mostrar_datos_especifico("buen_hombre_pulido", "250", arbol, info),
     ).grid(row=0, column=2, padx=5, pady=5)
 
     ttk.Separator(box1, orient="horizontal", style="Separador1.TSeparator").grid(
@@ -466,26 +471,27 @@ def ventana_provedores(notebook):
         box5,
         text="Stock en bruto",
         style="Estilo2.TButton",
-        command=lambda: mostrar(arbol, "piezas_del_fundicion", "niquelado"),
-    ).grid(row=1, column=0, padx=5, pady=5)
+        command=lambda: mostrar(arbol, "piezas_del_fundicion", "niquelado", info),
+    ).grid(row=1, column=0, padx=1, pady=1)
     
     ttk.Button(
         box5,
         text="Stock en fabrica",
         style="Estilo2.TButton",
-        command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "niquelado"),
-    ).grid(row=1, column=1, padx=5, pady=5)
+        command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "niquelado", info),
+    ).grid(row=1, column=1, padx=1, pady=1)
     
     ttk.Button(
         box5,
         text="Stock en niquelado",
         style="Estilo2.TButton",
-    ).grid(row=1, column=2, padx=5, pady=5)
+        command= lambda: mostrar(arbol, "pieza_retocadas", "niquelado", info)
+    ).grid(row=1, column=2, padx=1, pady=1)
     
-    ttk.Label(box5, text="Piezas A Niquelar", style="WhiteOnRed.TLabel").grid(row=2, column=0, sticky="w")
+    ttk.Label(box5, text="Piezas A Niquelar", style="WhiteOnRed.TLabel", font=("Arial", 12, "bold")).grid(row=2, column=0, columnspan=2)
     ttk.Label(box5, text="Piezas", style="WhiteOnRed.TLabel").grid(row=3, column=0, sticky="w")
     
-    lista_piezas = ttk.Combobox(box5, values=niquelado)
+    lista_piezas = ttk.Combobox(box5, values=niquelado, state="readonly")
     lista_piezas.grid(row=3, column=1, sticky="w")
     
     ttk.Label(box5, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=4, column=0, sticky="w")
@@ -501,7 +507,7 @@ def ventana_provedores(notebook):
         padx=10,
         pady=4,
         font=('Helvetica', 8, "bold"),
-        command=lambda: envios_de_bruto_a_pulido(
+        command=lambda: envios_de_bruto_a_niquelar(
             lista_piezas.get(), cantidad_a_niquelar, result, arbol, "niquelado"
         ),
     ).grid(row=5, column=1, columnspan=2, padx=5, pady=5,sticky="w")
@@ -510,10 +516,10 @@ def ventana_provedores(notebook):
         row=6, column=0, columnspan=2, sticky="ew", padx=5, pady=5
     )
 
-    ttk.Label(box5, text="Piezas Terminadas", style="WhiteOnRed.TLabel").grid(row=7, column=0, sticky="w")
+    ttk.Label(box5, text="Piezas Terminadas", style="WhiteOnRed.TLabel", font=("Arial", 12, "bold")).grid(row=7, column=0, columnspan=2)
     ttk.Label(box5, text="Piezas", style="WhiteOnRed.TLabel").grid(row=8, column=0, sticky="w")
     
-    lista_piezas_nique = ttk.Combobox(box5, values=niquelado)
+    lista_piezas_nique = ttk.Combobox(box5, values=niquelado, state="readonly")
     lista_piezas_nique.grid(row=8, column=1, sticky="w")
     
     ttk.Label(box5, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=9, column=0, sticky="w")
@@ -528,8 +534,9 @@ def ventana_provedores(notebook):
         foreground="white",
         padx=10,
         pady=4,
-        font=('Helvetica', 8, "bold")
-    ).grid(row=10, column=1, columnspan=2, padx=5, pady=5, sticky="w")
+        font=('Helvetica', 8, "bold"),
+        command=lambda: envios_de_niquelado_a_fabrica(lista_piezas_nique.get(),cantidad_a_niquelado ,result, arbol, "niquelado")
+        ).grid(row=10, column=1, columnspan=2, padx=5, pady=5, sticky="w")
 
     ttk.Separator(box5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=11, column=0, columnspan=2, sticky="ew", padx=5, pady=5
@@ -541,38 +548,39 @@ def ventana_provedores(notebook):
     box6 = ttk.Frame(box3, style='Color.TFrame')
     box6.grid(row=17, column=0, columnspan=3)
     
-    ttk.Label(box6, text="Pintura", style="WhiteOnRed.TLabel",font=("Arial", 20, "bold")).grid(row=0, column=1, columnspan=3)
+    ttk.Label(box6, text="Pintura", style="WhiteOnRed.TLabel",font=("Arial", 20, "bold")).grid(row=0, column=1, columnspan=1)
 
     ttk.Button(
         box6,
         text="Stock en fabrica",
         style="Estilo2.TButton",
-        command=lambda: mostrar(arbol, "piezas_del_fundicion", "pintor"),
+        command=lambda: mostrar(arbol, "piezas_del_fundicion", "pintor", info),
     ).grid(row=1, column=0)
     ttk.Button(
         box6,
         text="Stock Terminado",
         style="Estilo2.TButton",
-        command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "pintor"),
+        command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "pintor", info),
     ).grid(row=1, column=1)
     ttk.Button(
         box6,
         text="Stock en Pintura",
         style="Estilo2.TButton",
+        command=lambda: mostrar(arbol, "pieza_retocadas", "pintor", info),
     ).grid(row=1, column=2)
 
     ttk.Separator(box6, orient="horizontal", style="Separador2.TSeparator").grid(
         row=2, column=0, columnspan=3, sticky="ew", padx=5, pady=5
     )
-    ttk.Label(box6, text="Envios A Pintura",font=("Arial", 12, "bold"), style="WhiteOnRed.TLabel",).grid(row=3, column=1, sticky="w")
+    ttk.Label(box6, text="Envios A Pintura",font=("Arial", 12, "bold"), style="WhiteOnRed.TLabel").grid(row=3, column=0, columnspan=2)
 
-    ttk.Label(box6, text="Tipo", style="WhiteOnRed.TLabel",).grid(row=4, column=0, sticky="w")
-    modelo = ttk.Combobox(box6, values=modelo_piezas)
-    modelo.grid(row=5, column=0, sticky="w")
+    ttk.Label(box6, text="Tipo", style="WhiteOnRed.TLabel",).grid(row=4, column=0, sticky="ew")
+    modelo = ttk.Combobox(box6, values=modelo_piezas,state="readonly")
+    modelo.grid(row=4, column=1, sticky="w")
 
-    ttk.Label(box6, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=4, column=1, sticky="w")
+    ttk.Label(box6, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=5, column=0, sticky="ew")
     enviar_a_pintura = ttk.Entry(box6, width=10, style='WhiteOnRed.TEntry', )
-    enviar_a_pintura.grid(row=5, column=1, sticky="we")
+    enviar_a_pintura.grid(row=5, column=1, sticky="ew", pady=2)
 
     tk.Button(
         box6,
@@ -587,7 +595,7 @@ def ventana_provedores(notebook):
         ),
     ).grid(row=6, column=1)
     
-    ttk.Label(box6, text="Envios de cabezales",font=("Arial", 9, "bold"), style="WhiteOnRed.TLabel",).grid(row=7, column=2)
+    ttk.Label(box6, text="Envios de cabezales",font=("Arial", 11, "bold"), style="WhiteOnRed.TLabel",).grid(row=7, column=0)
 
     cantidad_cabezales = ttk.Entry(box6, width=10,style='WhiteOnRed.TEntry')
     cantidad_cabezales.grid(row=7, column=1, pady=5, sticky="s")
@@ -599,23 +607,22 @@ def ventana_provedores(notebook):
         foreground="white",
         padx=10,
         pady=4,
-        font=('Helvetica', 8, "bold"),
-        command=lambda: envios_de_bruto_a_pulido(
-            "cabezal_pintura", cantidad_cabezales, result, arbol, "pintor")).grid(row=9, column=1, columnspan=1)
+        command=lambda: envios_de_bruto_cabezal("cabezal_pintura", cantidad_cabezales, result, arbol, "pintor"),
+        font=('Helvetica', 8, "bold")).grid(row=9, column=1, columnspan=1)
 
     ttk.Separator(box6, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, columnspan=2, sticky="ew", padx=5, pady=5
     )
 
-    ttk.Label(box6, text="Bases Resibidas",font=("Arial", 12, "bold"), style="WhiteOnRed.TLabel",).grid(row=11, column=1, sticky="w")
+    ttk.Label(box6, text="Bases Resibidas",font=("Arial", 12, "bold"), style="WhiteOnRed.TLabel",).grid(row=11, column=0, columnspan=2)
 
-    ttk.Label(box6, text="Tipo", style="WhiteOnRed.TLabel",).grid(row=12, column=0, sticky="w")
-    modelo = ttk.Combobox(box6, values=modelo_piezas)
-    modelo.grid(row=13, column=0, sticky="w")
+    ttk.Label(box6, text="Tipo", style="WhiteOnRed.TLabel",).grid(row=12, column=0)
+    modelo_pintur = ttk.Combobox(box6, values=modelo_piezas, state="readonly")
+    modelo_pintur.grid(row=12, column=1)
 
-    ttk.Label(box6, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=12, column=1, sticky="w")
-    enviar_a_pintura = ttk.Entry(box6, width=10, style='WhiteOnRed.TEntry')
-    enviar_a_pintura.grid(row=13, column=1, sticky="we")
+    ttk.Label(box6, text="Cantidad", style="WhiteOnRed.TLabel",).grid(row=13, column=0)
+    resibe_a_pintura = ttk.Entry(box6, width=10, style='WhiteOnRed.TEntry')
+    resibe_a_pintura.grid(row=13, column=1, sticky="ew", pady=3)
 
     tk.Button(
         box6,
@@ -625,9 +632,10 @@ def ventana_provedores(notebook):
         padx=10,
         pady=4,
         font=('Helvetica', 8, "bold"),
-    ).grid(row=14, column=1)
+        command=lambda: envios_pulido_a_fabrica(modelo_pintur.get(),resibe_a_pintura, result, arbol, "pintor" )
+    ).grid(row=14, column=1, pady=2)
 
-    ttk.Label(box6, text="Cabezales Resividos", style="WhiteOnRed.TLabel",).grid(row=15, column=2, sticky="s")
+    ttk.Label(box6, text="Cabezales Resividos", style="WhiteOnRed.TLabel",).grid(row=15, column=0, sticky="s")
 
     cantidad_resibida_cabezales = ttk.Entry(box6, width=10,style='WhiteOnRed.TEntry')
     cantidad_resibida_cabezales.grid(row=15, column=1, pady=5)
@@ -640,6 +648,7 @@ def ventana_provedores(notebook):
         padx=10,
         pady=4,
         font=('Helvetica', 8, "bold"),
+        command=lambda: envios_pulido_a_fabrica_cabezal("cabezal_pintura", cantidad_resibida_cabezales, result, arbol, "pintor")
     ).grid(row=16, column=1)
 
     ttk.Separator(box6, orient="horizontal", style="Separador2.TSeparator").grid(
@@ -655,25 +664,25 @@ def ventana_provedores(notebook):
     botonera2 = ttk.Frame(box4, style='Color.TFrame')
     botonera2.grid(row=0, column=0, columnspan=2)
 
-    ttk.Label(botonera2, text="Stock en Fabrica",font=("Arial", 10, "bold"), style="WhiteOnRed.TLabel").grid(row=0, column=0)
+    ttk.Label(botonera2, text="Stock en Fabrica",font=("Arial", 18, "bold"), style="WhiteOnRed.TLabel").grid(row=0, column=0,columnspan=2)
     ttk.Button(
         botonera2,
         style="Estilo5.TButton",
         text="Stock Total Bruto",
-        command=lambda: mostrar_datos(arbol, "piezas_del_fundicion"),
+        command=lambda: mostrar_datos(arbol, "piezas_del_fundicion", info),
     ).grid(row=1, column=0, padx=3, pady=5)
     ttk.Button(
         botonera2,
         style="Estilo5.TButton",
         text="Stock Total Pulido",
-        command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "pulido"),
+        command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "pulido", info),
     ).grid(row=1, column=1, padx=3, pady=5)
 
     ttk.Separator(botonera2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=3, column=0, columnspan=2, sticky="ew", padx=5, pady=5
     )
 
-#99999999999999999999999999999999999Observaciones 
+#99999999999999999999999999999999999Observaciones ###############################################
 
     box7 = ttk.Frame(box1, style='Color.TFrame')
     box7.grid(row=17, column=0, columnspan=2)

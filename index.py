@@ -57,7 +57,6 @@ def inicio(notebook):
     titulo.grid(row=0 ,column=0 , sticky="esw")
     
 
-    # Insertar una imagen en lugar de texto
     image_path2 = "img/Cortadora.png"  # Reemplaza con la ruta real de tu imagen en formato PNG
     image2 = tk.PhotoImage(file=image_path2)
     label_image2 = tk.Label(box2, image=image2, bg='#192965')  # Cambiar el color de fondo de la imagen

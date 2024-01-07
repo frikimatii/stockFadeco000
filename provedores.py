@@ -133,10 +133,14 @@ def ventana_provedores(notebook):
     )
     arbol.column("#0", width=0, stretch=tk.NO)
     arbol.column("Pieza", anchor=tk.W, width=170)
-    arbol.column("Cantidad", anchor=tk.W, width=90)
+    arbol.column("Cantidad", anchor=tk.W, width=90, command=lambda: sort_column(arbol, "Cantidad", False))
     arbol.config(height=20)
     arbol.grid(row=2, column=0, pady=5, padx=5, sticky="nsew")
 
+    arbol.tag_configure("#ff6868", background="#ff6868")
+    arbol.tag_configure("#87ff79", background="#87ff79")
+
+    
     result = tk.Listbox(caja1, width=60)
     result.grid(row=3, column=0, padx=3, pady=3)
 

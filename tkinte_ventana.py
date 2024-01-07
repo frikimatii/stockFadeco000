@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 from stock_chapa import crear_pestana_chapa
-#from fundidor import ventana_fundidor
 from provedores_fadeco import ventana_provedores
 from mecanizado import mecanizado
 from session_stock import stock
@@ -28,7 +27,6 @@ notebook = ttk.Notebook(root)
 inicio(notebook)
 stock(notebook)
 
-#ventana_fundidor(notebook)
 crear_pestana_chapa(notebook)
 ventana_provedores(notebook)
 mecanizado(notebook)

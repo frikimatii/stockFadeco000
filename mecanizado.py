@@ -13,7 +13,10 @@ from funciones import (
     stock_prearmado,
     actualizar_inventario,
     stock_prebases,
-    varilla_para_soldar
+    varilla_para_soldar,
+    mostrar_datos_mecanizado,
+    varilla_soldador,
+    sort_column,
 )
 
 tipo = ["330", "300", "250"]
@@ -96,6 +99,7 @@ modelo250 = {
     "sinfin": 1,
     "motores250_220w": 1,
 }
+
 piezas_a_augeriar_lista = ["cuadrado_regulador"]
 piezas_lijadas = ["base_afilador_300", "base_afilador_330", "base_afilador_250", "carcaza_afilador" ]
 piezas_prenza = ["guia_U", "eje_corto", "eje_largo"]
@@ -130,11 +134,12 @@ def mecanizado(notebook):
     caja1 = ttk.Frame(pestania, style='Color.TFrame')
     caja1.grid(row=2, column=0, sticky="n")
 
-    ttk.Label(caja1, text="Mostrar Datos",style='WhiteOnRed.TLabel', font=("Arial", 12, "bold")).grid(row=1, column=0, sticky="w")
+    info = ttk.Label(caja1, text="Mostrar Datos",style='WhiteOnRed.TLabel', font=("Arial", 12, "bold"))
+    info.grid(row=1, column=0, sticky="w")
 
     arbol = ttk.Treeview(caja1, columns=("Pieza", "Cantidad"))
     arbol.heading("Pieza", text="Pieza")
-    arbol.heading("Cantidad", text="Cantidad")
+    arbol.heading("Cantidad", text="Cantidad", command=lambda: sort_column(arbol, "Cantidad", False),)
     arbol.column("#0", width=0, stretch=tk.NO)
     arbol.column("Pieza", anchor=tk.W, width=170)
     arbol.column("Cantidad", anchor=tk.W, width=90)
@@ -173,7 +178,7 @@ def mecanizado(notebook):
             cantidad_torneada,
             result,
             "piezas_finales_defenitivas",
-            arbol,
+            arbol,info
         ),
     ).grid(row=3, column=1, padx=5, pady=5)
 
@@ -188,13 +193,13 @@ def mecanizado(notebook):
         stock_torno,
         text="Stock Bruto",
         style="Estilo4.TButton",
-        command=lambda: mostrar_datos_torno(arbol, "piezas_del_fundicion"),
+        command=lambda: mostrar_datos_torno(arbol, "piezas_del_fundicion", info),
     ).grid(row=1, column=0, pady=5, padx=3)
     ttk.Button(
         stock_torno,
         text="Stock Terminado",
         style="Estilo4.TButton",
-        command=lambda: mostrar_piezas_torno_terminado(arbol),
+        command=lambda: mostrar_piezas_torno_terminado(arbol, info),
     ).grid(row=1, column=1, pady=5, padx=3)
 
     ttk.Separator(torno, orient="horizontal", style="Separador2.TSeparator").grid(
@@ -294,11 +299,13 @@ def mecanizado(notebook):
         stock_aujeriado,
         text="Stock Bruto",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, piezas_a_augeriar_lista, "Agujeriado", "piezas_del_fundicion")
     ).grid(row=1, column=0, pady=5, padx=3)
     ttk.Button(
         stock_aujeriado,
         text="Stock Terminado",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, piezas_a_augeriar_lista, "Agujeriado", "piezas_finales_defenitivas")
     ).grid(row=1, column=1, pady=5, padx=3)
 
     ttk.Separator(caja2, orient="horizontal", style="Separador1.TSeparator").grid(
@@ -346,11 +353,13 @@ def mecanizado(notebook):
         stock_lijado,
         text="Stock Bruto",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, piezas_lijadas, "Lijado","piezas_del_fundicion")
     ).grid(row=1, column=0, pady=5, padx=3)
     ttk.Button(
         stock_lijado,
         text="Stock Terminado",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, piezas_lijadas, "Lijado", "piezas_finales_defenitivas")
     ).grid(row=1, column=1, pady=5, padx=3)
 
 
@@ -398,11 +407,13 @@ def mecanizado(notebook):
         stock_balancin,
         text="Stock Bruto",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, piezas_prenza, "Balancin", "piezas_del_fundicion")
     ).grid(row=1, column=0, pady=5, padx=3)
     ttk.Button(
         stock_balancin,
         text="Stock Terminado",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, piezas_prenza, "Balancin", "piezas_finales_defenitivas")
     ).grid(row=1, column=1, pady=5, padx=3)
 
     ttk.Separator(caja4, orient="horizontal", style="Separador1.TSeparator").grid(
@@ -450,11 +461,13 @@ def mecanizado(notebook):
         stock_pulido,
         text="Stock Bruto",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, cabezal_inox, "Pulido", "piezas_del_fundicion")
     ).grid(row=1, column=0, pady=5, padx=3)
     ttk.Button(
         stock_pulido,
         text="Stock Terminado",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, cabezal_inox, "Pulido", "piezas_finales_defenitivas")
     ).grid(row=1, column=1, pady=5, padx=3)
 
     ttk.Separator(caja5, orient="horizontal", style="Separador1.TSeparator").grid(
@@ -498,11 +511,13 @@ def mecanizado(notebook):
         stock_soldado,
         text="Stock Bruto",
         style="Estilo4.TButton",
+        command= lambda:mostrar_datos_mecanizado(arbol, info, varillas_soldar, "Solador", "chapa")
     ).grid(row=1, column=0, pady=5, padx=3)
     ttk.Button(
         stock_soldado,
         text="Stock Terminado",
         style="Estilo4.TButton",
+        command= lambda:varilla_soldador(arbol, info, varillas_soldar, "Solador")
     ).grid(row=1, column=1, pady=5, padx=3)
 
     ttk.Separator(caja6, orient="horizontal", style="Separador1.TSeparator").grid(
@@ -513,3 +528,13 @@ def mecanizado(notebook):
 )
 
 #-------------------------------------------
+
+    box7 = ttk.Frame(mecanizado_de_piezas, style='Color.TFrame')
+    box7.grid(row=4, column=3, columnspan=2)
+    
+    ttk.Label(box7, text="Observaciones", style="WhiteOnRed.TLabel",font=("Arial", 15, "bold")).grid(row=0, column=1, sticky="w")
+    caja_texto = tk.Text(box7, height=6, width=30,)
+    caja_texto.grid(row=1, column=1, columnspan=1)
+    ttk.Button(
+        box7, text="Enviar", style="Estilo4.TButton", command=lambda: agregar_a_lista_tarea(caja_texto, result)
+    ).grid(row=2, column=1, sticky="e", pady=5, padx=5)

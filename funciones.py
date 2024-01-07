@@ -2,15 +2,15 @@ import sqlite3
 import tkinter as tk
 
 def obtener_color_fondo(cantidad):
-    if cantidad < 5:
-        return "red"
+    if cantidad < 10:
+        return "#ff6868"
     elif cantidad > 50:
-        return "green"
+        return "#87ff79"
     else:
         return ""
     
 
-def mostrar_datos(treeview, table):
+def mostrar_datos(treeview, table, info):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(f"SELECT piezas, cantidad FROM {table}")
@@ -25,6 +25,26 @@ def mostrar_datos(treeview, table):
     for pieza, cantidad in datos:
         color_fondo = obtener_color_fondo(cantidad)
         treeview.insert("", tk.END, values=(pieza, cantidad), tags=(color_fondo,))
+        
+    tabla_personalizada = {
+    "armado_final": "Armado Final",
+    "buen_hombre_pulido": "Stock Buen Hombre",
+    "carmelo_pulido": "Stock Carmelo",
+    "chapa": "Chapa",
+    "maxi_pulido": "Stock Maxi",
+    "pieza_retocadas": "Piezas Retocadas",
+    "piezas_del_fundicion": "Piezas del Fundición",
+    "piezas_del_motor_final": "Piezas del Motor Final",
+    "piezas_finales_defenitivas": "Piezas Terminadas",
+    "producto_final": "Producto Final",
+    "soldador_stock": "Soldador Stock",
+}
+    table_seleccionada = ["armado_final", "buen_hombre_pulido", "carmelo_pulido", "chapa", "maxi_pulido", "pieza_retocadas", "piezas_del_fundicion", "piezas_del_motor_final", "piezas_finales_defenitivas", "producto_final", "soldador_stock"]
+    for tabla in table_seleccionada:
+    # Obtén el texto personalizado correspondiente al nombre original de la tabla
+        texto_personalizado = tabla_personalizada.get(table, tabla)
+        txt = texto_personalizado
+        info.config(text=txt) 
 
 
 def sort_column(tree, col, reverse):
@@ -53,7 +73,7 @@ def sort_column_numeric(tree, col, reverse):
         tree, col, not reverse))
 
 
-def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, tree):
+def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, tree, info):
     actualizar_pieza = lista_predefinida.get()
     entrada_actualizar = entrada_cantidad.get()
 
@@ -81,7 +101,7 @@ def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, t
                 conn.commit()
                 conn.close()
                 mostrar_datos(
-                    tree, table
+                    tree, table, info
                 )  # Llama a la función para mostrar los datos actualizados
                 res.insert(
                     0,
@@ -97,7 +117,7 @@ def actualizar_pieza(lista_predefinida, entrada_cantidad, res, table, funcion, t
 #eliminar_piez(combox, cantida list tabla , funcion , arbol)
     
 def eliminar_pieza(
-    lista_predefinida_eliminar, entrada_cantidad_eliminar, res, table, funcion, tree
+    lista_predefinida_eliminar, entrada_cantidad_eliminar, res, table, funcion, tree, info
 ):
     pieza_eliminar = lista_predefinida_eliminar.get()
     cantidad_eliminar = entrada_cantidad_eliminar.get()
@@ -105,42 +125,45 @@ def eliminar_pieza(
     try:
         cantidad_eliminar = int(cantidad_eliminar)
         if cantidad_eliminar < 0:
-            res.config(text="La cantidad no puede ser Negativa")
-            return
-    except ValueError:
-        res.config(text="La cantidad debe ser un número entero positivo")
+            raise ValueError("La cantidad no puede ser negativa.")
+    except :
+        res.insert(0, f"Error Ingrese un numero")
+        return
 
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
-    cursor.execute(
-        f"SELECT cantidad FROM {table} WHERE piezas=?", (pieza_eliminar,))
-    cantidad_actual = cursor.fetchone()
 
-    if cantidad_actual is not None:
-        cantidad_actual = cantidad_actual[0]
-        if cantidad_eliminar <= cantidad_actual:
-            nueva_cantidad = cantidad_actual - cantidad_eliminar
-            if nueva_cantidad >= 0:
-                cursor.execute(
-                    f"UPDATE {table} SET cantidad=? WHERE piezas=?",
-                    (nueva_cantidad, pieza_eliminar),
-                )
-                res.insert(
-                    0,
-                    f" Descarga exitosa: se elimino {pieza_eliminar}, Cant: {cantidad_eliminar}",
-                )
+    try:
+        cursor.execute(
+            f"SELECT cantidad FROM {table} WHERE piezas=?", (pieza_eliminar,)
+        )
+        cantidad_actual = cursor.fetchone()
 
+        if cantidad_actual is not None:
+            cantidad_actual = cantidad_actual[0]
+            if cantidad_eliminar <= cantidad_actual:
+                nueva_cantidad = cantidad_actual - cantidad_eliminar
+                if nueva_cantidad >= 0:
+                    cursor.execute(
+                        f"UPDATE {table} SET cantidad=? WHERE piezas=?",
+                        (nueva_cantidad, pieza_eliminar),
+                    )
+                    res.insert(
+                        0,
+                        f" Descarga exitosa: se eliminaron {cantidad_eliminar} unidades de {pieza_eliminar}.",
+                    )
+                else:
+                    res.insert(0, f"No se puede eliminar la cantidad especificada de {pieza_eliminar}.")
             else:
-                res.insert(
-                    0, f"No se puede eliminar la pieza {pieza_eliminar}")
+                res.insert(0, f"No hay suficientes unidades de {pieza_eliminar} en el stock.")
         else:
-            res.insert(0, f"No hay suficiente {pieza_eliminar} en el stock")
-    else:
-        res.insert(0, f"La pieza {pieza_eliminar} no se puede eliminar")
-
-    conn.commit()
-    conn.close()
-    mostrar_datos(tree, table)
+            res.insert(0, f"La pieza {pieza_eliminar} no se puede encontrar en la tabla {table}.")
+    except sqlite3.Error as e:
+        res.insert(0, f"Error en la base de datos: {e}")
+    finally:
+        conn.commit()
+        conn.close()
+        mostrar_datos(tree, table, info)
 
     
 # ---------------funciones de stock de chapas _________________________________________________
@@ -216,7 +239,7 @@ def stock_chapa(tabla, tipo_de_base, subtitulo):
 
 
 def agregar_pieza_chapas(
-    tipo_var, lista_agregar_chapa, cantidad_agregar, arbol, tabla, lista_acciones
+    tipo_var, lista_agregar_chapa, cantidad_agregar, arbol, tabla, lista_acciones, info
 ):
     tipo = tipo_var.get()
     if tipo == 1:
@@ -257,14 +280,14 @@ def agregar_pieza_chapas(
         finally:
             if conn:
                 conn.close()
-            mostrar_datos(arbol, tabla)
+            mostrar_datos(arbol, tabla, info)
             lista_acciones.insert(
                 0, f"Carga exitosa: Agregó {cantidad} de {pieza}, de {tipo}"
             )
 
 
 def eliminar_pieza_chapas(
-    tipo_var, lista_eliminar_chapa, cantidad_eliminar, arbol, tabla, lista_acciones
+    tipo_var, lista_eliminar_chapa, cantidad_eliminar, arbol, tabla, lista_acciones, info
 ):
     tipo = tipo_var.get()
     if tipo == 1:
@@ -308,7 +331,7 @@ def eliminar_pieza_chapas(
         finally:
             if conn:
                 conn.close()
-            mostrar_datos(arbol, tabla)
+            mostrar_datos(arbol, tabla, info)
             lista_acciones.insert(
                 0, f"Eliminación exitosa: Eliminó {cantidad} de {pieza} de {tipo}"
             )
@@ -416,7 +439,7 @@ def calcular_maquinas(maquina, lista_acciones):
 
 
 def agregar_piezas_faltantes(
-    lista_agregar_v_p, cantidad_agregar_v_p, arbol, lista_acciones, tabla
+    lista_agregar_v_p, cantidad_agregar_v_p, arbol, lista_acciones, tabla, info
 ):
     pieza_seleccionada = lista_agregar_v_p.get()
     cantidad_ingregas = cantidad_agregar_v_p.get()
@@ -444,7 +467,7 @@ def agregar_piezas_faltantes(
                 )
                 conn.commit()
                 conn.close()
-                mostrar_datos(arbol, tabla)
+                mostrar_datos(arbol, tabla, info)
                 lista_acciones.insert(
                     0,
                     f"Carga exitosa: Usted cargó {cantidad_ingregas} {pieza_seleccionada}:",
@@ -459,7 +482,7 @@ def agregar_piezas_faltantes(
 
 
 def eliminar_piezas_faltante(
-    pieza_seleccionada, cantidad_eliminar, arbol, lista_acciones, tabla
+    pieza_seleccionada, cantidad_eliminar, arbol, lista_acciones, tabla, info
 ):
     if cantidad_eliminar.strip().isdigit():
         cantidad_eliminar = int(cantidad_eliminar)
@@ -489,7 +512,7 @@ def eliminar_piezas_faltante(
                     )
                     conn.commit()
                     conn.close()
-                    mostrar_datos(arbol, tabla)
+                    mostrar_datos(arbol, tabla, info)
                     lista_acciones.insert(
                         0,
                         f"Eliminación exitosa: Usted eliminó {cantidad_eliminar} de {pieza_seleccionada}",
@@ -562,7 +585,6 @@ def calcular_maquinas_posibles(base_modelo, tipo_base, modelo, lista_acciones):
         conn.close()
 
     except sqlite3.Error as e:
-        print(f"Error en la base de datos: {e}")
         lista_acciones.insert(0, "Error en la base de datos.")
 
 
@@ -982,6 +1004,103 @@ def eliminar_cantidad_de_piezas(
         lista_acciones.insert(0, f"Se envio {cantidad} bases al soldador de pintada 300")
         conn.commit()
         consulta_de_piezas(tabla, "pintura", "300", subtitulo)
+    
+    elif tipo == "Inox 250":
+        lista_1 = ["chapa_principal_250", "lateral_L_250", "lateral_R_250"]
+        lista_2 = ["planchuela_250", "varilla_250"]
+        lista_3 = ["arandela", "portaeje"]
+
+        for pieza in lista_1:
+            cursor.execute(
+                """
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero' AND modelo = 250 AND piezas = ?
+            """,
+                (pieza,),
+            )
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_2:
+            cursor.execute(
+                """
+            SELECT cantidad FROM chapa
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 250 AND piezas = ?
+            """,
+                (pieza,),
+            )
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        for pieza in lista_3:
+            cursor.execute(
+                """
+            SELECT cantidad FROM chapa
+            WHERE modelo = 'pieza' AND piezas = ?
+            """,
+                (pieza,),
+            )
+            cantidad_actual = cursor.fetchone()
+            if cantidad_actual:
+                cantidad_actual_por_pieza[pieza] = cantidad_actual[0]
+
+        # Verifica si es posible eliminar la cantidad deseada de todas las piezas
+        eliminacion_posible = all(
+            cantidad_actual_por_pieza[pieza] >= cantidad
+            for pieza in lista_1 + lista_2 + lista_3
+        )
+
+        if not eliminacion_posible:
+            mensaje_error = (
+                "Error: No es posible eliminar la cantidad deseada de piezas."
+            )
+            print(mensaje_error)
+            lista_acciones.insert(0, mensaje_error)
+            return
+
+        # Si la eliminación es posible, procede con la actualización
+        for pieza in lista_1:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute(
+                """
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero' AND modelo = 250 AND piezas = ?
+            """,
+                (cantidad_restante, pieza),
+            )
+
+        for pieza in lista_2:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute(
+                """
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE tipo_de_base = 'acero_dulce' AND modelo = 250 AND piezas = ?
+            """,
+                (cantidad_restante, pieza),
+            )
+
+        for pieza in lista_3:
+            cantidad_restante = cantidad_actual_por_pieza[pieza] - cantidad
+            cursor.execute(
+                """
+            UPDATE chapa
+            SET cantidad = ?
+            WHERE modelo = 'pieza' AND piezas = ?
+            """,
+                (cantidad_restante, pieza),
+            )
+
+        cursor.execute(
+            "UPDATE soldador_stock SET cantidad = cantidad + ? WHERE modelo = '250' AND tipo = 'inox'",
+            (cantidad,),
+        )
+        lista_acciones.insert(0, f"Se envio {cantidad} bases al soldador de Inox 250")
+        conn.commit()
+        consulta_de_piezas(tabla, "acero", "250", subtitulo)
 
     conn.close()
 
@@ -1102,6 +1221,7 @@ def bases_soldador_terminadas(
             print(mensaje_exito)
             lista_acciones.insert(0, mensaje_exito)
             mostrar_stock_soldador(tabla_chapa)
+            
         elif tipo == "Pintada 330":
             # Obtén la cantidad actual de la base de datos para Inox 330
             cursor.execute(
@@ -1151,6 +1271,7 @@ def bases_soldador_terminadas(
             lista_acciones.insert(0, mensaje_exito)
             mostrar_stock_soldador(tabla_chapa)
 
+
         elif tipo == "Pintada 300":
             # Obtén la cantidad actual de la base de datos para Inox 300
             cursor.execute(
@@ -1199,6 +1320,56 @@ def bases_soldador_terminadas(
             print(mensaje_exito)
             lista_acciones.insert(0, mensaje_exito)
             mostrar_stock_soldador(tabla_chapa)
+            
+        elif tipo == "Inox 250":
+            # Obtén la cantidad actual de la base de datos para Inox 300
+            cursor.execute(
+                "SELECT cantidad FROM soldador_stock WHERE tipo = 'inox' AND modelo = '250'"
+            )
+            cantidad_actual = cursor.fetchone()
+
+            # Verifica si hay suficientes bases disponibles
+            if cantidad_actual is None:
+                mensaje_error = "No hay registros para acero 250 en la base de datos."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            cantidad_actual = cantidad_actual[0]
+
+            if cantidad_actual < cantidad:
+                mensaje_error = f"No hay suficientes bases de acero 250 disponibles. Cantidad actual: {cantidad_actual}."
+                print(mensaje_error)
+                lista_acciones.insert(0, mensaje_error)
+                return
+
+            # Actualiza la cantidad en la base de datos soldador_stock
+            nueva_cantidad_soldador = max(0, cantidad_actual - cantidad)
+            cursor.execute(
+                """
+                UPDATE soldador_stock
+                SET cantidad = ?
+                WHERE tipo = 'inox' AND modelo = '250'
+            """,
+                (nueva_cantidad_soldador,),
+            )
+
+            # Actualiza la cantidad en la tabla piezas_del_fundicion
+            cursor.execute(
+                """
+                UPDATE piezas_del_fundicion
+                SET cantidad = cantidad + ?
+                WHERE piezas = 'inox_250'
+            """,
+                (cantidad,),
+            )
+
+            # Muestra un mensaje de éxito y agrega la acción a la lista
+            mensaje_exito = f"Se han terminado {cantidad} bases de Pintada 250."
+            print(mensaje_exito)
+            lista_acciones.insert(0, mensaje_exito)
+            mostrar_stock_soldador(tabla_chapa)
+            
 
         # Guarda los cambios en la base de datos
         conn.commit()
@@ -1214,16 +1385,11 @@ def bases_soldador_terminadas(
         conn.close()
 
 
-def armado_de_cabezales(
-    opcion_seleccionada, entrada_cantidad, lista_acciones, subtitulo, tabla_chapa
-):
+def armado_de_cabezales(opcion_seleccionada, entrada_cantidad, lista_acciones, subtitulo, tabla_chapa):
     def verificar_suficientes_piezas(cursor, pieza, tipo_material, cantidad_eliminar):
         cursor.execute(
             "SELECT cantidad FROM chapa WHERE piezas = ? AND tipo_de_base = ?",
-            (
-                pieza,
-                tipo_material,
-            ),
+            (pieza, tipo_material,),
         )
         cantidad_actual = cursor.fetchone()
 
@@ -1240,15 +1406,31 @@ def armado_de_cabezales(
         tipo_material = "acero"
     elif tipo_material == 2:
         tipo_material = "pintura"
+    elif tipo_material == 3:
+        tipo_material = "acero"  # Corrección aquí
     else:
-        # Maneja el caso en que el valor no sea 1 ni 2
+        # Maneja el caso en que el valor no sea 1, 2 ni 3
         mensaje_error = "Error: Tipo de material no válido."
         print(mensaje_error)
         lista_acciones.insert(0, mensaje_error)
         return
 
     # Lista de piezas necesarias para el armado de cabezales
-    piezas = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
+    if tipo_material == "acero":
+        piezas = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
+    elif tipo_material == "pintura":
+        piezas = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
+    elif tipo_material == "cabezal_250":
+        piezas = ["chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"]
+    else:
+        # Maneja el caso en que el tipo de material no sea "acero", "pintura" ni "cabezal_250"
+        mensaje_error = "Error: Tipo de material no válido."
+        print(mensaje_error)
+        lista_acciones.insert(0, mensaje_error)
+        return
+
+    # Resto del código sigue igual...
+    # ... (copiar el resto del código desde aquí)
 
     # Verifica si la cantidad ingresada es un número
     cantidad_str = entrada_cantidad.get()
@@ -1265,9 +1447,7 @@ def armado_de_cabezales(
     try:
         # Verifica si hay suficientes piezas en el stock
         suficientes_piezas = all(
-            verificar_suficientes_piezas(
-                cursor, pieza, tipo_material, cantidad_eliminar
-            )
+            verificar_suficientes_piezas(cursor, pieza, tipo_material, cantidad_eliminar)
             for pieza in piezas
         )
 
@@ -1281,10 +1461,7 @@ def armado_de_cabezales(
         for pieza in piezas:
             cursor.execute(
                 "SELECT cantidad FROM chapa WHERE piezas = ? AND tipo_de_base = ?",
-                (
-                    pieza,
-                    tipo_material,
-                ),
+                (pieza, tipo_material,),
             )
             cantidad_actual = cursor.fetchone()
 
@@ -1293,11 +1470,7 @@ def armado_de_cabezales(
                 nueva_cantidad = cantidad_actual - cantidad_eliminar
                 cursor.execute(
                     "UPDATE chapa SET cantidad=? WHERE piezas=? AND tipo_de_base = ?",
-                    (
-                        nueva_cantidad,
-                        pieza,
-                        tipo_material,
-                    ),
+                    (nueva_cantidad, pieza, tipo_material,),
                 )
                 conn.commit()
             else:
@@ -1307,7 +1480,7 @@ def armado_de_cabezales(
 
         cursor.execute(
             "UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE modelo = 'cabezal' AND material = ? ",
-            (cantidad_str, tipo_material),
+            (cantidad_str, tipo_material,),
         )
         conn.commit()
 
@@ -1334,7 +1507,7 @@ def mostrar_bases_en_bruto(tree1, subtitulo):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT piezas, cantidad, modelo FROM piezas_del_fundicion WHERE modelo = '330' OR modelo = '300' "
+        "SELECT piezas, cantidad, modelo FROM piezas_del_fundicion WHERE modelo = '330' OR modelo = '300' OR modelo = '250' "
     )
     datos = cursor.fetchall()
     conn.close()
@@ -1502,12 +1675,17 @@ def enviar_piezas_a_pulido(
     tabla,
     tree,
     lista_acciones,
+    info,
 ):
     pieza_seleccionada = pieza.get()
     cantidad_ingresada = cantidad.get()
 
     if not cantidad_ingresada.isdigit() or int(cantidad_ingresada) < 0:
         lista_acciones.insert(0, "Ingrese una Cantidad Válida")
+        return
+
+    if int(cantidad_ingresada) == 0:
+        lista_acciones.insert(0, "No hay piezas para enviar a pulido.")
         return
 
     conn = None
@@ -1543,10 +1721,14 @@ def enviar_piezas_a_pulido(
         resultado_stock_bruto = cursor.fetchone()
         cantidad_stock_bruto = resultado_stock_bruto[0] if resultado_stock_bruto else 0
 
-        nueva_cantidad_stock_bruto = cantidad_stock_bruto - \
-            int(cantidad_ingresada)
+        if int(cantidad_ingresada) > cantidad_stock_bruto:
+            lista_acciones.insert(0, "No hay suficientes piezas en stock para enviar la cantidad especificada a pulido.")
+            conn.rollback()
+            return
+
+        nueva_cantidad_stock_bruto = cantidad_stock_bruto - int(cantidad_ingresada)
         cursor.execute(
-            f"UPDATE piezas_del_fundicion SET cantidad = cantidad = ? WHERE piezas = ?",
+            f"UPDATE piezas_del_fundicion SET cantidad = ? WHERE piezas = ?",
             (nueva_cantidad_stock_bruto, pieza_seleccionada),
         )
 
@@ -1565,16 +1747,12 @@ def enviar_piezas_a_pulido(
         if conn:
             conn.close()
 
-    mostrar_datos(tree, tabla)
+    mostrar_datos(tree, tabla, info)
 
-    lista_acciones.insert(
-        0,
-        f"{cantidad_ingresada} piezas de {pieza_seleccionada} han sido enviadas a pulido.",
-    )
-
+    lista_acciones.insert(0, f"{cantidad_ingresada} piezas de {pieza_seleccionada} han sido enviadas a pulido.")
 
 def mover_piezas_a_stock_pulidas(
-    pieza, cantidad, tabla_carmelo, tabla_stock_pulidas, arbol, lista_acciones
+    pieza, cantidad, tabla_carmelo, tabla_stock_pulidas, arbol, lista_acciones,info
 ):
     pieza_seleccionada = pieza.get()
     cantidad_ingresada = cantidad.get()
@@ -1645,7 +1823,7 @@ def mover_piezas_a_stock_pulidas(
         if conn:
             conn.close()
 
-    mostrar_datos(arbol, tabla_carmelo)
+    mostrar_datos(arbol, tabla_carmelo, info)
 
     lista_acciones.insert(
         0,
@@ -1653,7 +1831,7 @@ def mover_piezas_a_stock_pulidas(
     )
 
 
-def mostrar_datos_especifico(tabla, modelo, arbol):
+def mostrar_datos_especifico(tabla, modelo, arbol, info):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(
@@ -1664,6 +1842,9 @@ def mostrar_datos_especifico(tabla, modelo, arbol):
         arbol.delete(item)
     for dato in datos:
         arbol.insert("", "end", values=dato)
+        
+    text = f"Mostrando Lista {modelo}"
+    info.config(text=text)
 
 
 def agregar_a_lista_tarea(caja_texto, lista_tarea):
@@ -1679,7 +1860,7 @@ def agregar_a_lista_tarea(caja_texto, lista_tarea):
         caja_texto.delete("1.0", tk.END)
 
 
-def mostrar(tree1, tabla, mecanizado):
+def mostrar(tree1, tabla, mecanizado, info):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.execute(
         f"SELECT piezas, cantidad FROM {tabla} WHERE mecanizado = ?", (
@@ -1691,9 +1872,25 @@ def mostrar(tree1, tabla, mecanizado):
         tree1.delete(item)
     for dato in datos:
         tree1.insert("", "end", values=dato)
+    
+    if tabla == "piezas_del_fundicion":
+        text = "Stock en Bruto"
+    elif tabla == "piezas_finales_defenitivas":
+        text = "Stock en Fabrica"
+    elif tabla == "pieza_retocadas":
+        if mecanizado == "niquelado":
+            text= "Stock En Niquelado"
+        elif mecanizado == "pintor":
+            text= "Stock En Pintura"
+    
+    info.config(text=text)
+    
 
+
+#pintura 
 
 def envios_de_bruto_a_pulido(
+    #yo, se 
     lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado
 ):
     pieza = lista_piezas
@@ -1731,6 +1928,304 @@ def envios_de_bruto_a_pulido(
 
                 # Nueva consulta para actualizar otra tabla
                 cursor.execute(
+                    "UPDATE pieza_retocadas SET cantidad = cantidad + ? WHERE mecanizado = ? AND piezas = ?",
+                    (
+                        cantidad,
+                        mecanizado,
+                        pieza,
+                    ),
+                )
+
+                conn.commit()
+                conn.close()
+                lista_acciones.insert(0, f"Carga {pieza}: {cantidad} unidades")
+            else:
+                lista_acciones.insert(0, "Cantidad ingresada inválida")
+    else:
+        lista_acciones.insert(0, "Ingrese un número válido")
+
+
+def envios_pulido_a_fabrica(
+    #yo, se 
+    lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado
+):
+    pieza = lista_piezas
+    cantidad = cantidad_a_niquelar.get()
+
+    if cantidad.strip().isdigit():
+        cantidad = int(cantidad)
+
+        if cantidad < 0:
+            lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+        else:
+            conn = sqlite3.connect("basedatospiezas.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT cantidad FROM pieza_retocadas WHERE mecanizado = ? AND piezas = ?",
+                (
+                    mecanizado,
+                    pieza,
+                ),
+            )
+            cantidad_actual = cursor.fetchone()
+
+            if cantidad_actual is not None:
+                cantidad_actual = cantidad_actual[0]
+                nueva_cantidad = cantidad_actual - cantidad
+                cursor.execute(
+                    "UPDATE pieza_retocadas SET cantidad=? WHERE mecanizado = ? AND piezas = ?",
+                    (
+                        nueva_cantidad,
+                        mecanizado,
+                        pieza,
+                    ),
+                )
+                conn.commit()
+
+                # Nueva consulta para actualizar otra tabla
+                cursor.execute(
+                    "UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE mecanizado = ? AND piezas = ?",
+                    (
+                        cantidad,
+                        mecanizado,
+                        pieza,
+                    ),
+                )
+
+                conn.commit()
+                conn.close()
+                lista_acciones.insert(0, f"Carga {pieza}: {cantidad} unidades")
+            else:
+                lista_acciones.insert(0, "Cantidad ingresada inválida")
+    else:
+        lista_acciones.insert(0, "Ingrese un número válido")
+
+
+#niquelado
+
+def envios_de_bruto_a_niquelar(
+    lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado
+):
+    pieza = lista_piezas
+    cantidad = cantidad_a_niquelar.get()
+
+    if not cantidad.strip().isdigit():
+        lista_acciones.insert(0, "Ingrese una cantidad válida.")
+        return
+
+    cantidad = int(cantidad)
+
+    if cantidad < 0:
+        lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+        return
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT cantidad FROM piezas_del_fundicion WHERE mecanizado = ? AND piezas = ?",
+            (mecanizado, pieza,),
+        )
+        cantidad_actual = cursor.fetchone()
+
+        if cantidad_actual is not None:
+            cantidad_actual = cantidad_actual[0]
+            nueva_cantidad = cantidad_actual - cantidad
+
+            if nueva_cantidad < 0:
+                lista_acciones.insert(0, "No se pueden enviar más piezas de las disponibles en stock.")
+                return
+
+            # Actualizar la tabla de piezas_del_fundicion
+            cursor.execute(
+                "UPDATE piezas_del_fundicion SET cantidad=? WHERE mecanizado = ? AND piezas = ?",
+                (nueva_cantidad, mecanizado, pieza,),
+            )
+            conn.commit()
+
+            # Actualizar la tabla de piezas_retocadas
+            cursor.execute(
+                 "UPDATE pieza_retocadas SET cantidad = cantidad + ? WHERE mecanizado = ?  AND piezas = ?",
+                (cantidad, mecanizado, pieza,),
+            )
+            conn.commit()
+
+            lista_acciones.insert(0, f"Carga {pieza}: {cantidad} unidades")
+        else:
+            lista_acciones.insert(0, "Cantidad ingresada inválida")
+    except sqlite3.Error as e:
+        lista_acciones.insert(0, f"Error en la base de datos: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def envios_de_niquelado_a_fabrica(
+    lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado
+):
+    pieza = lista_piezas
+    cantidad = cantidad_a_niquelar.get()
+
+    if not cantidad.strip().isdigit():
+        lista_acciones.insert(0, "Ingrese una cantidad válida.")
+        return
+
+    cantidad = int(cantidad)
+
+    if cantidad < 0:
+        lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+        return
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT cantidad FROM pieza_retocadas WHERE mecanizado = ? AND piezas = ?",
+            (mecanizado, pieza,),
+        )
+        cantidad_actual = cursor.fetchone()
+
+        if cantidad_actual is not None:
+            cantidad_actual = cantidad_actual[0]
+            nueva_cantidad = cantidad_actual - cantidad
+
+            if nueva_cantidad < 0:
+                lista_acciones.insert(0, "No se pueden enviar más piezas de las disponibles en stock.")
+                return
+
+            # Actualizar la tabla de piezas_del_fundicion
+            cursor.execute(
+                "UPDATE pieza_retocadas SET cantidad=? WHERE mecanizado = ? AND piezas = ?",
+                (nueva_cantidad, mecanizado, pieza,),
+            )
+            conn.commit()
+
+            # Actualizar la tabla de piezas_retocadas
+            cursor.execute(
+                 "UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE mecanizado = ?  AND piezas = ?",
+                (cantidad, mecanizado, pieza,),
+            )
+            conn.commit()
+
+            lista_acciones.insert(0, f"Carga {pieza}: {cantidad} unidades")
+        else:
+            lista_acciones.insert(0, "Cantidad ingresada inválida")
+    except sqlite3.Error as e:
+        lista_acciones.insert(0, f"Error en la base de datos: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+#cabezales
+
+def envios_de_bruto_cabezal(
+    #yo, se 
+    lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado
+):
+    pieza = lista_piezas
+    cantidad = cantidad_a_niquelar.get()
+
+    if cantidad.strip().isdigit():
+        cantidad = int(cantidad)
+
+        if cantidad < 0:
+            lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+        else:
+            conn = sqlite3.connect("basedatospiezas.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT cantidad FROM piezas_del_fundicion WHERE mecanizado = ? AND piezas = ?",
+                (
+                    mecanizado,
+                    pieza,
+                ),
+            )
+            cantidad_actual = cursor.fetchone()
+
+            if cantidad_actual is not None:
+                cantidad_actual = cantidad_actual[0]
+                nueva_cantidad = cantidad_actual - cantidad
+                cursor.execute(
+                    "UPDATE piezas_del_fundicion SET cantidad=? WHERE mecanizado = ? AND piezas = ?",
+                    (
+                        nueva_cantidad,
+                        mecanizado,
+                        pieza,
+                    ),
+                )
+                conn.commit()
+
+                # Nueva consulta para actualizar otra tabla
+                cursor.execute(
+                    "UPDATE pieza_retocadas SET cantidad = cantidad + ? WHERE mecanizado = ? AND piezas = ?",
+                    (
+                        cantidad,
+                        mecanizado,
+                        pieza,
+                    ),
+                )
+
+                conn.commit()
+                conn.close()
+                lista_acciones.insert(0, f"Carga {pieza}: {cantidad} unidades")
+            else:
+                lista_acciones.insert(0, "Cantidad ingresada inválida")
+    else:
+        lista_acciones.insert(0, "Ingrese un número válido")
+
+
+def envios_pulido_a_fabrica_cabezal(
+    #yo, se 
+    lista_piezas, cantidad_a_niquelar, lista_acciones, arbol, mecanizado
+):
+    pieza = lista_piezas
+    cantidad = cantidad_a_niquelar.get()
+
+    if cantidad.strip().isdigit():
+        cantidad = int(cantidad)
+
+        if cantidad < 0:
+            lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+        else:
+            conn = sqlite3.connect("basedatospiezas.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT cantidad FROM pieza_retocadas WHERE mecanizado = ? AND piezas = ?",
+                (
+                    mecanizado,
+                    pieza,
+                ),
+            )
+            cantidad_actual = cursor.fetchone()
+
+            if cantidad_actual is not None:
+                cantidad_actual = cantidad_actual[0]
+                nueva_cantidad = cantidad_actual - cantidad
+                cursor.execute(
+                    "UPDATE pieza_retocadas SET cantidad=? WHERE mecanizado = ? AND piezas = ?",
+                    (
+                        nueva_cantidad,
+                        mecanizado,
+                        pieza,
+                    ),
+                )
+                conn.commit()
+
+                # Nueva consulta para actualizar otra tabla
+                cursor.execute(
                     "UPDATE piezas_finales_defenitivas SET cantidad = cantidad + ? WHERE mecanizado = ? AND piezas = ?",
                     (
                         cantidad,
@@ -1751,7 +2246,7 @@ def envios_de_bruto_a_pulido(
 # -------------------------------------Funciones Mecanizado------------------------------------------------------------
 
 
-def mostrar_datos_torno(arbol, tabla):
+def mostrar_datos_torno(arbol, tabla, info):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(
@@ -1763,8 +2258,15 @@ def mostrar_datos_torno(arbol, tabla):
         arbol.delete(item)
     for dato in datos:
         arbol.insert("", "end", values=dato)
-
-
+        
+    if tabla == "piezas_del_fundicion":
+        txt = "Mostrar Datos: Pieza en Bruto "
+    elif tabla == "piezas_finales_defenitivas":
+        txt = "Mostrar Datos: Piezas Terminadas"
+    
+    info.config(text=txt)
+        
+        
 def mostrar_datos_(arbol):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
@@ -1779,7 +2281,7 @@ def mostrar_datos_(arbol):
         arbol.insert("", "end", values=dato)
 
 
-def actualizar_pieza_torno(lista_predefinida, entrada_cantidad, res, table, tree):
+def actualizar_pieza_torno(lista_predefinida, entrada_cantidad, res, table, tree, info):
     actualizar_pieza = lista_predefinida.get()
     entrada_actualizar = entrada_cantidad.get()
 
@@ -1819,7 +2321,7 @@ def actualizar_pieza_torno(lista_predefinida, entrada_cantidad, res, table, tree
                     conn.commit()
                     conn.close()
                     mostrar_datos(
-                        tree, table
+                        tree, table, info
                     )  # Llama a la función para mostrar los datos actualizados
                     res.insert(
                         0,
@@ -1902,7 +2404,7 @@ def actualizar_caja_torno(lista_predefinida, entrada_cantidad, res, tree):
         res.insert(0, f"Error: {e}")
 
 
-def mostrar_piezas_torno_terminado(arbol):
+def mostrar_piezas_torno_terminado(arbol, info):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute(
@@ -1914,6 +2416,8 @@ def mostrar_piezas_torno_terminado(arbol):
         arbol.delete(item)
     for dato in datos:
         arbol.insert("", "end", values=dato)
+        
+    info.config(text="Mostar Datos: Piezas Terminadas")
 
 
 def pulido_cabezal(entrada_agregar_porta_eje, lista_acciones):
@@ -1971,139 +2475,78 @@ def de_enbruto_a_torneado(piezas, cantidad, lista_acciones):
     pieza = piezas.get()
     cantidad = cantidad.get()
 
-    if cantidad.strip().isdigit():
-        cantidad = int(cantidad)
+    if not cantidad.isdigit():
+        lista_acciones.insert(0, "Ingrese una cantidad válida (número entero positivo).")
+        return
 
-        if cantidad < 0:
-            lista_acciones.insert(0, "La Cantidad NO puede ser Negativa")
+    cantidad = int(cantidad)
+
+    if cantidad <= 0:
+        lista_acciones.insert(0, "La cantidad debe ser un número entero positivo.")
+        return
+
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    try:
+        # Definir un diccionario para mapear piezas a las correspondientes en bruto
+        piezas_enbruto = {
+            "caja_torneado_330": "caja_330",
+            "caja_torneado_300": "caja_300",
+            "caja_torneado_250": "caja_250",
+        }
+
+        if pieza in piezas_enbruto:
+            pieza_enbruto = piezas_enbruto[pieza]
+
+            # Obtener la cantidad actual de piezas en bruto
+            cursor.execute(
+                f"SELECT cantidad FROM piezas_del_fundicion WHERE piezas = ?",
+                (pieza_enbruto,),
+            )
+            cantidad_actual_enbruto = cursor.fetchone()
+
+            if cantidad_actual_enbruto is not None:
+                cantidad_actual_enbruto = cantidad_actual_enbruto[0]
+
+                # Verificar si hay suficientes piezas en bruto disponibles
+                if cantidad_actual_enbruto >= cantidad:
+                    # Actualizar la cantidad de cajas en bruto
+                    nueva_cantidad_enbruto = max(
+                        0, cantidad_actual_enbruto - cantidad)
+                    cursor.execute(
+                        f"UPDATE piezas_del_fundicion SET cantidad = ? WHERE piezas = ?",
+                        (nueva_cantidad_enbruto, pieza_enbruto),
+                    )
+
+                    # Actualizar la cantidad de cajas tornadas
+                    cursor.execute(
+                        f"UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE piezas = ?",
+                        (cantidad, pieza),
+                    )
+
+                    lista_acciones.insert(
+                        0, f"Se han Torneado {cantidad} {pieza_enbruto}.")
+                    lista_acciones.insert(0, f"Se agregaron {cantidad} {pieza}")
+                else:
+                    lista_acciones.insert(
+                        0, f"No hay suficientes piezas de {pieza_enbruto} en bruto disponibles.")
+            else:
+                lista_acciones.insert(
+                    0, f"No se encontró la pieza en bruto correspondiente para {pieza}.")
         else:
-            conn = sqlite3.connect("basedatospiezas.db")
-            cursor = conn.cursor()
+            lista_acciones.insert(
+                0, f"No se encontró la correspondencia en bruto para {pieza}.")
 
-            try:
-                if pieza == "caja_torneado_330":
-                    cursor.execute(
-                        "SELECT cantidad FROM piezas_del_fundicion WHERE piezas = 'caja_330'"
-                    )
-                    cantidad_actual = cursor.fetchone()
+        conn.commit()
 
-                    if cantidad_actual is not None:
-                        cantidad_actual = cantidad_actual[0]
+    except sqlite3.Error as e:
+        # Manejo de errores y rollback en caso de error
+        lista_acciones.insert(0, f"Error en la base de datos: {e}")
+        conn.rollback()
 
-                        # Verifica si hay suficientes piezas disponibles
-                        if cantidad_actual >= cantidad:
-                            nueva_cantidad_enbruto = max(
-                                0, cantidad_actual - cantidad)
-
-                            # Actualiza la cantidad de cajas en bruto
-                            cursor.execute(
-                                f"UPDATE piezas_del_fundicion SET cantidad = ? WHERE piezas = 'caja_330'",
-                                (nueva_cantidad_enbruto,),
-                            )
-
-                            # Actualiza la cantidad de cajas tornadas
-                            cursor.execute(
-                                f"UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE piezas = 'caja_torneado_330'",
-                                (cantidad,),
-                            )
-                        else:
-                            lista_acciones.insert(
-                                0,
-                                f"No hay suficientes piezas de {pieza} en bruto disponibles.",
-                            )
-                    else:
-                        lista_acciones.insert(
-                            0, f"No se encontró la pieza {pieza}.")
-
-                    lista_acciones.insert(
-                        0, f"Se han Torneado {cantidad} caja_330.")
-                    lista_acciones.insert(0, f"se agrego {cantidad} {pieza}")
-
-                elif pieza == "caja_torneado_300":
-                    cursor.execute(
-                        "SELECT cantidad FROM piezas_del_fundicion WHERE piezas = 'caja_300'"
-                    )
-                    cantidad_actual = cursor.fetchone()
-
-                    if cantidad_actual is not None:
-                        cantidad_actual = cantidad_actual[0]
-
-                        # Verifica si hay suficientes piezas disponibles
-                        if cantidad_actual >= cantidad:
-                            nueva_cantidad_enbruto = max(
-                                0, cantidad_actual - cantidad)
-
-                            # Actualiza la cantidad de cajas en bruto
-                            cursor.execute(
-                                f"UPDATE piezas_del_fundicion SET cantidad = ? WHERE piezas = 'caja_300'",
-                                (nueva_cantidad_enbruto,),
-                            )
-
-                            # Actualiza la cantidad de cajas tornadas
-                            cursor.execute(
-                                f"UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE piezas = 'caja_torneado_300'",
-                                (cantidad,),
-                            )
-                        else:
-                            lista_acciones.insert(
-                                0,
-                                f"No hay suficientes piezas de {pieza} en bruto disponibles.",
-                            )
-                    else:
-                        lista_acciones.insert(
-                            0, f"No se encontró la pieza {pieza}.")
-
-                    lista_acciones.insert(
-                        0, f"Se han Torneado {cantidad} caja_300.")
-                    lista_acciones.insert(0, f"se agrego {cantidad} {pieza}")
-
-                elif pieza == "caja_torneado_250":
-                    cursor.execute(
-                        "SELECT cantidad FROM piezas_del_fundicion WHERE piezas = 'caja_250'"
-                    )
-                    cantidad_actual = cursor.fetchone()
-
-                    if cantidad_actual is not None:
-                        cantidad_actual = cantidad_actual[0]
-
-                        # Verifica si hay suficientes piezas disponibles
-                        if cantidad_actual >= cantidad:
-                            nueva_cantidad_enbruto = max(
-                                0, cantidad_actual - cantidad)
-
-                            # Actualiza la cantidad de cajas en bruto
-                            cursor.execute(
-                                f"UPDATE piezas_del_fundicion SET cantidad = ? WHERE piezas = 'caja_250'",
-                                (nueva_cantidad_enbruto,),
-                            )
-
-                            # Actualiza la cantidad de cajas tornadas
-                            cursor.execute(
-                                f"UPDATE piezas_del_fundicion SET cantidad = cantidad + ? WHERE piezas = 'caja_torneado_250'",
-                                (cantidad,),
-                            )
-                        else:
-                            lista_acciones.insert(
-                                0,
-                                f"No hay suficientes piezas de {pieza} en bruto disponibles.",
-                            )
-                    else:
-                        lista_acciones.insert(
-                            0, f"No se encontró la pieza {pieza}.")
-
-                    lista_acciones.insert(
-                        0, f"Se han Torneado {cantidad} caja_250.")
-                    lista_acciones.insert(0, f"se agrego {cantidad} {pieza}")
-
-                conn.commit()
-
-            except Exception as e:
-                # Manejo de errores
-                mensaje_error = f"Error: {e}"
-                lista_acciones.insert(0, mensaje_error)
-
-            finally:
-                conn.close()
+    finally:
+        conn.close()
 
 
 def mostrar_cajas_bruto(arbol):
@@ -2178,6 +2621,48 @@ def varilla_para_soldar(entrada_cantidad, varilla_tipo , lista_acciones):
         lista_acciones.insert(0, "Ingrese un número válido")
     pass 
 
+def mostrar_datos_mecanizado(arbol, info, piezas, tipo, tabla):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    # Utiliza marcadores de posición para evitar problemas de sintaxis y seguridad
+    placeholders = ",".join(["?" for _ in piezas])
+    
+    # Consulta SQL con marcadores de posición
+    query = f"SELECT piezas, cantidad FROM {tabla} WHERE piezas IN ({placeholders})"
+    
+    cursor.execute(query, piezas)
+    datos = cursor.fetchall()
+    conn.close()
+
+    for item in arbol.get_children():
+        arbol.delete(item)
+
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+        
+    txt = f"Mostrar Datos: {tipo}"
+    info.config(text=txt)
+    piezas_a_augeriar_lista = ["cuadrado_regulador"]
+
+
+def varilla_soldador(arbol, info, piezas, tipo):
+    conn = sqlite3.connect("basedatospiezas.db")
+    cursor = conn.cursor()
+
+    
+    cursor.execute(f"SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE piezas IN ('varilla_carro_330', 'varilla_carro_300', 'varilla_carro_250')")
+    datos = cursor.fetchall()
+    conn.close()
+
+    for item in arbol.get_children():
+        arbol.delete(item)
+
+    for dato in datos:
+        arbol.insert("", "end", values=dato)
+        
+    txt = f"Mostrar Datos: {tipo}"
+    info.config(text=txt)
 
 
 # --------------------------------------Armado de motores-----------------------------------------------------------

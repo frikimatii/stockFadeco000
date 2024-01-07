@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from funciones import mostrar_piezas_armados, mostrar_pieza, mostrar_piezas_modelo, ensamblar_motor_terminado,mostrar_datos, eliminar_pieza, stock_prearmado,  actualizar_inventario, mostrar_pieza_afilador, mostrar_afilador_final, motores_terminados,armado_final_afiladores_y_agregar_cantidad,  mostrar_por_pieza, bases_terminados, mostrar_piezas_finales, mostrar_piezas_i330, armado_de_maquinas, mostrar_maquinas_teminadas
+from funciones import mostrar_piezas_armados, mostrar_pieza, mostrar_piezas_modelo, ensamblar_motor_terminado,mostrar_datos, eliminar_pieza, stock_prearmado,  actualizar_inventario, mostrar_pieza_afilador, mostrar_afilador_final, motores_terminados,armado_final_afiladores_y_agregar_cantidad,  mostrar_por_pieza, bases_terminados, mostrar_piezas_finales, mostrar_piezas_i330, armado_de_maquinas, mostrar_maquinas_teminadas, agregar_a_lista_tarea,sort_column
 
 tipo = ["330", "300", "250"]
 
@@ -296,10 +296,13 @@ def seccion_armado(notebook):
     notebook.style.configure("Separador2.TSeparator", background="blue")
     notebook.style.configure("Estilo2.TButton", background="green", padding=7)
     notebook.style.configure("Estilo5.TButton", font=("Courier", 7, "italic"))
-    notebook.style.configure("Estilo4.TButton", background="yellow", padding=7)
+    notebook.style.configure("Estilo4.TButton", background="yellow", padding=7)    
+    notebook.style.configure("Gradient.TButton", padding=2, relief="flat", font=("Arial", 9, "bold"))
+
+
     
     ttk.Label(pestania, text="Zona De Armado", style="WhiteOnRed.TLabel", font=("Arial", 26, "bold")).grid(
-        row=1, column=0, columnspan=4)
+        row=1, column=0, columnspan=5)
     caja1 = ttk.Frame(pestania, style='Color.TFrame')
     caja1.grid(row=2, column=0)
 
@@ -308,7 +311,7 @@ def seccion_armado(notebook):
 
     arbol = ttk.Treeview(caja1, columns=("Pieza", "Cantidad"))
     arbol.heading("Pieza", text="Pieza")
-    arbol.heading("Cantidad", text="Cantidad")
+    arbol.heading("Cantidad", text="Cantidad", command=lambda: sort_column(arbol, "Cantidad", False))
     arbol.column("#0", width=0, stretch=tk.NO)
     arbol.column("Pieza", anchor=tk.W, width=170)
     arbol.column("Cantidad", anchor=tk.W, width=90)
@@ -319,7 +322,7 @@ def seccion_armado(notebook):
     result.grid(row=3, column=0, padx=3, pady=3)
 
     caja2 = ttk.Frame(pestania, style='Color.TFrame')
-    caja2.grid(row=2, column=1, padx=20, pady=10)
+    caja2.grid(row=2, column=1, padx=10)
 
     ttk.Label(caja2, text="Armado de Cajas", style="WhiteOnRed.TLabel", font=("Arial", 20, "bold")).grid(row=0, column=0, columnspan=2)
 
@@ -334,7 +337,7 @@ def seccion_armado(notebook):
         pady=4,
         command=lambda: mostrar_pieza(arbol, "motores_220w", res)).grid(row=1, column=1)
 
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=2, column=0, sticky="ew", columnspan=2, padx=5, pady=5
     )
 
@@ -349,7 +352,7 @@ def seccion_armado(notebook):
         pady=4,
         command=lambda:mostrar_piezas_armados(arbol, "armado_de_caja", res)).grid(row=3, column=1)
 
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=4, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
     
 
@@ -357,11 +360,11 @@ def seccion_armado(notebook):
     botonera_cajas.grid(row=5, column=0, columnspan=2)
 
     ttk.Label(botonera_cajas, text="Piezas por modelo", style="WhiteOnRed.TLabel").grid(row=0, column=0, columnspan=3)
-    tk.Button(botonera_cajas, text="330", command=lambda: mostrar_piezas_modelo(arbol, motores_330, res, "330")).grid(row=1, column=0)
-    tk.Button(botonera_cajas, text="300", command=lambda: mostrar_piezas_modelo(arbol, motores_300, res, "300")).grid(row=1, column=1)
-    tk.Button(botonera_cajas, text="250", command=lambda: mostrar_piezas_modelo(arbol, motores_250, res, "250")).grid(row=1, column=2)
+    ttk.Button(botonera_cajas,style="Gradient.TButton" ,text="330", command=lambda: mostrar_piezas_modelo(arbol, motores_330, res, "330")).grid(row=1, column=0, pady=5, padx=5)
+    ttk.Button(botonera_cajas,style="Gradient.TButton", text="300", command=lambda: mostrar_piezas_modelo(arbol, motores_300, res, "300")).grid(row=1, column=1, pady=5, padx=5)
+    ttk.Button(botonera_cajas,style="Gradient.TButton", text="250", command=lambda: mostrar_piezas_modelo(arbol, motores_250, res, "250")).grid(row=1, column=2, pady=5, padx=5)
 
-    ttk.Separator(botonera_cajas, orient="horizontal").grid(
+    ttk.Separator(botonera_cajas, orient="horizontal", style="Separador2.TSeparator").grid(
         row=2, column=0, sticky="ew", columnspan=3, pady=5, padx=5)
 
     ttk.Label(caja2, text="Motores Armados", style="WhiteOnRed.TLabel", font=("Arial", 15, "bold")).grid(row=7, column=0, sticky="we", columnspan=2)
@@ -400,7 +403,7 @@ def seccion_armado(notebook):
         font=('Helvetica', 8, "bold"),
         command=enviar).grid(row=11, column=0, columnspan=2)
 
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=12, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
 
@@ -439,10 +442,10 @@ def seccion_armado(notebook):
         padx=10,
         pady=4,
         font=('Helvetica', 8, "bold"),
-        command=lambda: eliminar_pieza(pieza_del, cantidad_delete, result, "piezas_finales_defenitivas", mostrar_datos, arbol)).grid(row=20, column=1)
+        command=lambda: eliminar_pieza(pieza_del, cantidad_delete, result, "piezas_finales_defenitivas", mostrar_datos, arbol ,info="")).grid(row=20, column=1)
 
 
-    ttk.Separator(caja2, orient="horizontal").grid(
+    ttk.Separator(caja2, orient="horizontal", style="Separador2.TSeparator").grid(
         row=21, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
     
     #------------------------Afilador ----------------------------
@@ -462,7 +465,7 @@ def seccion_armado(notebook):
         pady=4,
         command=lambda: mostrar_pieza_afilador(arbol, res)).grid(row=1, column=1)
 
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=2, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
     ttk.Label(caja3, text="Afiladores Terminadas", style="WhiteOnRed.TLabel").grid(row=3, column=0)
@@ -476,12 +479,12 @@ def seccion_armado(notebook):
         pady=4, 
         command=lambda: mostrar_afilador_final(arbol, res)).grid(row=3, column=1)
 
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador2.TSeparator").grid(
         row=4, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
-    ttk.Label(caja3, text="Cantidad Agregada", style="WhiteOnRed.TLabel").grid(row=5, column=0)
+    ttk.Label(caja3, text="Cantidad Agregada", style="WhiteOnRed.TLabel").grid(row=5, column=0, columnspan=2)
     cantidad_afilador = tk.Entry(caja3)
-    cantidad_afilador.grid(row=6, column=0, pady=5)
+    cantidad_afilador.grid(row=6, column=0, pady=5, columnspan=2)
     tk.Button(
         caja3, 
         text="Agregar",
@@ -490,15 +493,15 @@ def seccion_armado(notebook):
         padx=10,
         pady=4,
         font=('Helvetica', 8, "bold"),
-        command=lambda:  armado_final_afiladores_y_agregar_cantidad(int(cantidad_afilador.get()), result)).grid(row=7, column=0)
+        command=lambda:  armado_final_afiladores_y_agregar_cantidad(int(cantidad_afilador.get()), result)).grid(row=7, column=0, columnspan=2)
 
-    ttk.Separator(caja3, orient="horizontal").grid(
+    ttk.Separator(caja3, orient="horizontal", style="Separador1.TSeparator").grid(
         row=8, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
      #=================================PRe Armado ==================+++++=====
     
-    caja4 = ttk.Frame(pestania, style='Color.TFrame')
-    caja4.grid(row=2, column=3,padx=15)
+    caja4 = ttk.Frame(caja3, style='Color.TFrame')
+    caja4.grid(row=9, column=0,padx=15, columnspan=2)
 
     ttk.Label(caja4, text="Pre Armado", style="WhiteOnRed.TLabel", font=("Arial", 18, "bold")).grid(row=0, column=0, columnspan=2)
 
@@ -513,18 +516,18 @@ def seccion_armado(notebook):
         text="Mostrar",
         command=lambda: stock_prearmado(arbol, res)).grid(row=1, column=1)
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=2, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
     ttk.Label(caja4, text="Piezas De Modelos", style="WhiteOnRed.TLabel").grid(row=3, column=0, columnspan=2)
 
-    botonera_prearmado = tk.Frame(caja4)
+    botonera_prearmado = ttk.Frame(caja4, style='Color.TFrame')
     botonera_prearmado.grid(row=4, column=0, columnspan=2)
-    tk.Button(botonera_prearmado, text="330", command=lambda: mostrar_por_pieza(arbol,"330",res)).grid(row=0, column=0)
-    tk.Button(botonera_prearmado, text="300", command=lambda: mostrar_por_pieza(arbol,"300", res)).grid(row=0, column=1)
-    tk.Button(botonera_prearmado, text="250", command=lambda: mostrar_por_pieza(arbol,"250", res)).grid(row=0, column=3)
+    ttk.Button(botonera_prearmado,style="Gradient.TButton", text="330", command=lambda: mostrar_por_pieza(arbol,"330",res)).grid(row=0, column=0, pady=5,padx=5)
+    ttk.Button(botonera_prearmado,style="Gradient.TButton", text="300", command=lambda: mostrar_por_pieza(arbol,"300", res)).grid(row=0, column=1, pady=5,padx=5)
+    ttk.Button(botonera_prearmado,style="Gradient.TButton", text="250", command=lambda: mostrar_por_pieza(arbol,"250", res)).grid(row=0, column=2, pady=5,padx=5)
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=5, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
     ttk.Label(caja4, text="Maquinas pre-armadas", style="WhiteOnRed.TLabel", font=("Arial", 15, "bold")).grid(row=6, column=0, columnspan=2)
@@ -547,7 +550,7 @@ def seccion_armado(notebook):
         font=('Helvetica', 8, "bold"),
         command=lambda: actualizar_inventario(result, int(cantidad_prearmada.get()),tipo_prearmada.get()),).grid(row=9, column=1, padx=5, pady=5)
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
     ttk.Label(caja4, text="Consulta", style="WhiteOnRed.TLabel", font=("Arial", 15, "bold")).grid(row=11, column=0, columnspan=2)
@@ -562,7 +565,7 @@ def seccion_armado(notebook):
         pady=4,
         command=lambda: bases_terminados(arbol, res)).grid(row=13, column=0, columnspan=2)
     
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=14, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
     ttk.Label(caja4, text="Piezas Rotas o Defectuosa", style="WhiteOnRed.TLabel").grid(row=15, column=0)
@@ -583,78 +586,129 @@ def seccion_armado(notebook):
         padx=10,
         pady=4,
         font=('Helvetica', 8, "bold"),
-        command=lambda: eliminar_pieza(prearmadolo_delete, cantidad_prearmado_delete, result, "piezas_finales_defenitivas", mostrar_datos, arbol)).grid(row=18, column=1, padx=5,pady=5)
+        command=lambda: eliminar_pieza(prearmadolo_delete, cantidad_prearmado_delete, result, "piezas_finales_defenitivas", mostrar_datos, arbol,info="")).grid(row=18, column=1, padx=5,pady=5)
 
-    ttk.Separator(caja4, orient="horizontal").grid(
+    ttk.Separator(caja4, orient="horizontal", style="Separador2.TSeparator").grid(
         row=19, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
  #----------====armado======---------
     caja5 = ttk.Frame(pestania, style='Color.TFrame')
-    caja5.grid(row=2, column=4)
+    caja5.grid(row=2, column=4, sticky="n", padx=15 )
 
-    tk.Label(caja5, text="Armado Final").grid(row=0, column=0)
+    ttk.Label(caja5, text="Armado Final", style="WhiteOnRed.TLabel", font=("Arial", 18, "bold")).grid(row=0, column=0, columnspan=2)
 
-    tk.Label(caja5, text="Piezas Totales").grid(row=1, column=0)
-    tk.Button(caja5, text="Mostrar", command=lambda: mostrar_piezas_finales(arbol, res)).grid(row=1, column=1)
+    ttk.Label(caja5, text="Piezas Totales", style="WhiteOnRed.TLabel").grid(row=1, column=0)
+    tk.Button(
+        caja5,
+        font=('Arial', 10, "italic"),
+        background= "gray", 
+        foreground= "white",
+        padx=10,
+        pady=4,
+        text="Mostrar", command=lambda: mostrar_piezas_finales(arbol, res)).grid(row=1, column=1)
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=2, column=0, sticky="ew", columnspan=2, padx=5, pady=5
     )
 
-    tk.Label(caja5, text="Mostrar Base Pre_armadas").grid(row=3, column=0)
-    tk.Button(caja5, text="Ver", command=lambda: bases_terminados(arbol, res)).grid(row=3, column=1)
+    ttk.Label(caja5, text="Mostrar Base Pre_armadas", style="WhiteOnRed.TLabel").grid(row=3, column=0)
+    tk.Button(
+        caja5,
+        text="Ver", 
+        font=('Arial', 10, "italic"),
+        background= "gray", 
+        foreground= "white",
+        padx=10,
+        pady=4,
+        command=lambda: bases_terminados(arbol, res)).grid(row=3, column=1)
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=4, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
     botonera_armadofinal = ttk.Frame(caja5, style='Color.TFrame')
-    botonera_armadofinal.grid(row=5, column=0)
+    botonera_armadofinal.grid(row=5, column=0 , columnspan=2)
 
-    tk.Label(botonera_armadofinal, text="Piezas por modelo").grid(row=0, column=0, columnspan=3)
+    ttk.Label(botonera_armadofinal, style="WhiteOnRed.TLabel",font=("Arial",12,"bold"), text="Piezas por modelo").grid(row=0, column=0, columnspan=3)
     
-    tk.Button(botonera_armadofinal, text="Inox 330", command=lambda: mostrar_piezas_i330(arbol, res, i330pieza, "Inox 330")).grid(row=1, column=0)
-    tk.Button(botonera_armadofinal, text="Inox 300", command=lambda: mostrar_piezas_i330(arbol, res, i300pieza, "Inox 300")).grid(row=1, column=1)
-    tk.Button(botonera_armadofinal, text="Inox 250", command=lambda: mostrar_piezas_i330(arbol, res, i250pieza, "Inox 250")).grid(row=1, column=2)
+    ttk.Button(botonera_armadofinal,style="Gradient.TButton", text="Inox 330", command=lambda: mostrar_piezas_i330(arbol, res, i330pieza, "Inox 330")).grid(row=1, column=0, pady=5, padx=5)
+    ttk.Button(botonera_armadofinal,style="Gradient.TButton", text="Inox 300", command=lambda: mostrar_piezas_i330(arbol, res, i300pieza, "Inox 300")).grid(row=1, column=1, pady=5, padx=5)
+    ttk.Button(botonera_armadofinal,style="Gradient.TButton", text="Inox 250", command=lambda: mostrar_piezas_i330(arbol, res, i250pieza, "Inox 250")).grid(row=1, column=2, pady=5, padx=5)
 
-    tk.Button(botonera_armadofinal, text="Pintada 330", command=lambda: mostrar_piezas_i330(arbol, res, p330pieza, "Pint 330")).grid(row=2, column=0)
-    tk.Button(botonera_armadofinal, text="Pintada 300", command=lambda: mostrar_piezas_i330(arbol, res, p300pieza, "Pint 300")).grid(row=2, column=1)
+    ttk.Button(botonera_armadofinal,style="Gradient.TButton", text="Pintada 330", command=lambda: mostrar_piezas_i330(arbol, res, p330pieza, "Pint 330")).grid(row=2, column=0, pady=5, padx=5)
+    ttk.Button(botonera_armadofinal,style="Gradient.TButton", text="Pintada 300", command=lambda: mostrar_piezas_i330(arbol, res, p300pieza, "Pint 300")).grid(row=2, column=2, pady=5, padx=5)
 
-    ttk.Separator(botonera_armadofinal, orient="horizontal").grid(
-        row=3, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
+    ttk.Separator(botonera_armadofinal, orient="horizontal", style="Separador2.TSeparator").grid(
+        row=3, column=0, sticky="ew", columnspan=4, pady=5, padx=5)
 
-    tk.Label(caja5, text="Maquinas Teminadas").grid(row=6, column=0)
+    ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Maquinas Teminadas", font=("Arial", 12, "bold")).grid(row=6, column=0, columnspan=2)
 
-    tk.Label(caja5, text="Modelo").grid(row=7, column=0)
+    ttk.Label(caja5, text="Modelo", style="WhiteOnRed.TLabel").grid(row=7, column=0)
     modele_final = ttk.Combobox(caja5, values=tipos_de_maquinas)
     modele_final.grid(row=7, column=1)
 
-    tk.Label(caja5, text="Cantidad").grid(row=8, column=0)
+    ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Cantidad").grid(row=8, column=0)
     cantidad_final = tk.Entry(caja5)
-    cantidad_final.grid(row=8, column=1)
+    cantidad_final.grid(row=8, column=1, pady=5)
 
-    tk.Button(caja5, text="Enviar", command=lambda: armado_de_maquinas(cantidad_final.get() ,modele_final.get(), result)).grid(row=9, column=1)
+    tk.Button(
+        caja5, 
+        text="Confirmar",
+        background="green",
+        foreground="white",
+        padx=10,
+        pady=4,
+        font=('Helvetica', 8, "bold"),
+        command=lambda: armado_de_maquinas(cantidad_final.get() ,modele_final.get(), result)).grid(row=9, column=1)
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=10, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
-    tk.Label(caja5, text="Piezas Rotas o Defectuosa").grid(row=11, column=0)
+    ttk.Label(caja5, style="WhiteOnRed.TLabel", font=("Arial", 12, "bold"), text="Piezas Rotas o Defectuosa").grid(row=11, column=0)
 
-    tk.Label(caja5, text="Seleccionar Piezas").grid(row=12, column=0)
+    ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Seleccionar Piezas").grid(row=12, column=0)
     armadolo_delete = ttk.Combobox(caja5, values=piezas_armado_final_delete)
     armadolo_delete.grid(row=12, column=1)
 
-    tk.Label(caja5, text="Cantidad").grid(row=13, column=0)
+    ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Cantidad").grid(row=13, column=0)
     cantidad_delete_final = tk.Entry(caja5)
-    cantidad_delete_final.grid(row=13, column=1)
+    cantidad_delete_final.grid(row=13, column=1, pady=5)
 
-    tk.Button(caja5, text="Ver", command=lambda: eliminar_pieza(armadolo_delete, cantidad_delete_final, result, "piezas_finales_defenitivas", mostrar_datos, arbol)).grid(row=14, column=1)
+    tk.Button(
+        caja5, 
+        text="Delete",
+        background="red",
+        foreground="white",
+        padx=10,
+        pady=4,
+        font=('Helvetica', 8, "bold"),
+        command=lambda: eliminar_pieza(armadolo_delete, cantidad_delete_final, result, "piezas_finales_defenitivas", mostrar_datos, arbol,info="")).grid(row=14, column=1)
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=15, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
 
-    tk.Label(caja5, text="listado de maquinas terminadas").grid(
-        row=16, column=0)
-    tk.Button(caja5, text="Ver", command=lambda: mostrar_maquinas_teminadas(arbol, res)).grid(row=17, column=1)
+    ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Listado De Maquinas Terminadas", font=("Arial", 12, "bold") ).grid(
+        row=16, column=0, columnspan=2)
+    tk.Button(
+        caja5, 
+        text="Mostrar Maquinas",
+        bg= "#00d0ff",  # Color de fondo
+        fg="white",    # Color del texto
+        padx=10,
+        pady=5,
+        font=('Helvetica', 10, 'bold'),
+        command=lambda: mostrar_maquinas_teminadas(arbol, res)).grid(row=17, column=0, columnspan=2)
 
-    ttk.Separator(caja5, orient="horizontal").grid(
+    ttk.Separator(caja5, orient="horizontal", style="Separador2.TSeparator").grid(
         row=18, column=0, sticky="ew", columnspan=2, pady=5, padx=5)
+
+#-------------------------------------------------------------------------------
+
+    box7 = ttk.Frame(caja5, style='Color.TFrame')
+    box7.grid(row=19, column=0, columnspan=2)
+    
+    ttk.Label(box7, text="Observaciones", style="WhiteOnRed.TLabel",font=("Arial", 15, "bold")).grid(row=0, column=1, sticky="w")
+    caja_texto = tk.Text(box7, height=6, width=30,)
+    caja_texto.grid(row=1, column=1, columnspan=1)
+    ttk.Button(
+        box7, text="Enviar", style="Estilo4.TButton", command=lambda: agregar_a_lista_tarea(caja_texto, result)
+    ).grid(row=2, column=1, sticky="e", pady=5, padx=5)

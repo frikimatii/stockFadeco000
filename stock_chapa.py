@@ -1,8 +1,6 @@
 
 import tkinter as tk
-
 from tkinter import ttk
-
 from funciones import (
     actualizar_pieza,
     eliminar_pieza,
@@ -23,7 +21,8 @@ from funciones import (
     armado_de_cabezales,
     mostrar_cabezales_en_bruto,
     mostrar_bases_en_bruto,
-     agregar_a_lista_tarea
+    agregar_a_lista_tarea,
+    mostrar_datos_mecanizado
 )
 
 
@@ -34,7 +33,11 @@ piezas_pedefinida_chapas_base = [
     "chapa_principal_300",
     "lateral_L_300",
     "lateral_R_300",
+    "chapa_principal_250",
+    "lateral_L_250",
+    "lateral_R_250"
 ]
+
 base_inox_330 = {"chapa_principal_330": 1, "lateral_L_330": 1, "lateral_R_330": 1}
 
 base_inox_300 = {"chapa_principal_300": 1, "lateral_L_300": 1, "lateral_R_300": 1}
@@ -43,21 +46,25 @@ base_pintada_330 = {"chapa_principal_330": 1, "lateral_L_330": 1, "lateral_R_330
 
 base_pintada_300 = {"chapa_principal_300": 1, "lateral_L_300": 1, "lateral_R_300": 1}
 
+base_inox_250 = {"chapa_principal_250": 1, "lateral_L_250": 1, "lateral_R_250": 1}
 
 piezas_faltante_330 = {"planchuela_330", "varilla_330", "portaeje", "arandela"}
 
+piezas_faltante_250 = {"planchuela_250", "varilla_250", "portaeje", "arandela"}
 
 piezas_faltante_300 = {"planchuela_300", "varilla_300", "portaeje", "arandela"}
 
-tipos_de_bases = ["Inox 330", "Inox 300", "Pintada 330", "Pintada 300"]
+tipos_de_bases = ["Inox 330", "Inox 300", "Inox_250", "Pintada 330", "Pintada 300"]
 
-cabezal_final = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"]
+cabezal_final = ["chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal" ,"chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"]
 
 piezas_restante = [
     "planchuela_330",
     "varilla_330",
     "planchuela_300",
     "varilla_300",
+    "varilla_250",
+    "planchuela_250",
     "portaeje",
     "arandela",
 ]
@@ -99,11 +106,24 @@ bases_dict = {
         "portaeje": "portaeje",
         "arandela": "arandela",
     },
+    "Inox 250": {
+        "chapa_principal": "chapa_principal_250",
+        "lateral_L": "lateral_L_250",
+        "lateral_R": "lateral_R_250",
+        "planchuela": "planchuela_250",
+        "varilla": "varilla_250",
+        "portaeje": "portaeje",
+        "arandela": "arandela",
+    }
 }
 
 cabezales_inox = {"chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"}
 
 cabezales_pintada = {"chapa_U_cabezal", "tapa_cabezal", "bandeja_cabezal"}
+
+cabezal_250 = ["chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"]
+
+cabezal_250_ = {"chapa_U_cabezal_250", "tapa_cabezal_250", "bandeja_cabezal_250"}
 
 color1 = "#1016cf"
 
@@ -246,7 +266,7 @@ def crear_pestana_chapa(notebook):
             cantidad_agregar,
             tabla_chapa,
             "chapa",
-            lista_acciones,
+            lista_acciones, subtitulo
         ),
     )
     btn_agregar.grid(row=4, column=1, sticky="ne", pady=5, padx=5)
@@ -300,7 +320,7 @@ def crear_pestana_chapa(notebook):
             cantidad_elimimar,
             tabla_chapa,
             "chapa",
-            lista_acciones,
+            lista_acciones, subtitulo
         ),
     )
     btn_eliminar.grid(row=4, column=1, sticky="ne", pady=5)
@@ -336,11 +356,16 @@ def crear_pestana_chapa(notebook):
     style12.configure("3D.TButton", padding=8, relief="flat", background="#009688", font=("Arial", 8, "bold"))
     style12.map("3D.TButton", relief=[("pressed", "sunken"), ("!pressed", "ridge")])
     
-    ttk.Button(box2,text="Inox 330", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "acero", "330", subtitulo)).grid(row=9, column=0, padx=5, pady=5, sticky="e")
-    ttk.Button(box2,text="Pintura 330", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "pintura", "330", subtitulo)).grid(row=9, column=1, padx=5, pady=5, sticky="w")
+    botonera_consulta = ttk.Frame(box2, style='Color.TFrame')
+    botonera_consulta.grid(row=9, column=0 , columnspan=3)    
+
+    ttk.Button(botonera_consulta,text="Inox 330", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "acero", "330", subtitulo)).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+    ttk.Button(botonera_consulta,text="Pintura 330", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "pintura", "330", subtitulo)).grid(row=1, column=0, padx=5, pady=5, sticky="w")
     
-    ttk.Button(box2, text="Inox 300", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "acero", "300", subtitulo)).grid(row=10, column=0, padx=5, pady=5, sticky="e")
-    ttk.Button(box2,text="Pintura 300", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "pintura", "300", subtitulo)).grid(row=10, column=1, padx=5, pady=5, sticky="w")
+    ttk.Button(botonera_consulta, text="Inox 300", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "acero", "300", subtitulo)).grid(row=0, column=1, padx=5, pady=5, sticky="e")
+    ttk.Button(botonera_consulta,text="Pintura 300", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "pintura", "300", subtitulo)).grid(row=1, column=2, padx=5, pady=5, sticky="w")
+
+    ttk.Button(botonera_consulta, text="Inox 250", style="3D.TButton",command=lambda: consulta_de_piezas(tabla_chapa, "acero", "250", subtitulo)).grid(row=0, column=2, padx=5, pady=5, sticky="e")
 
     ttk.Separator(box2, orient="horizontal").grid(
         row=11, column=0, columnspan=2, sticky="ew", padx=10, pady=10
@@ -350,8 +375,11 @@ def crear_pestana_chapa(notebook):
         row=12, column=1, pady=5, padx=5, sticky="e"
     )
 
-    ttk.Button(box2,text="Cabezales Chapa negra", style="3D.TButton", command=lambda: consulta_cabezales(tabla_chapa, "pintura", "cabezal", subtitulo)).grid(row=17, column=1, padx=5, pady=5, sticky="w")
-    ttk.Button(box2,text="Cabezales Inox", style="3D.TButton",command=lambda: consulta_cabezales(tabla_chapa, "acero", "cabezal", subtitulo)).grid(row=17, column=0, padx=5, pady=5, sticky="e")
+    consulta_cabezales_pieza = ttk.Frame(box2, style='Color.TFrame')
+    consulta_cabezales_pieza.grid(row=13,column=0, columnspan=2)
+    ttk.Button(consulta_cabezales_pieza,text="Cabezales Chapa negra", style="3D.TButton", command=lambda: consulta_cabezales(tabla_chapa, "pintura", "cabezal", subtitulo)).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    ttk.Button(consulta_cabezales_pieza,text="Cabezales Inox", style="3D.TButton",command=lambda: consulta_cabezales(tabla_chapa, "acero", "cabezal", subtitulo)).grid(row=0, column=1, padx=5, pady=5, sticky="e")
+    ttk.Button(consulta_cabezales_pieza,text="Cabezales Inox", style="3D.TButton",command=lambda: mostrar_datos_mecanizado(tabla_chapa, subtitulo, cabezal_250, "Cabezal 250", "chapa")).grid(row=0, column=2, padx=5, pady=5, sticky="e")
 
     pieza_agregar_cabezal = ttk.Frame(box2, style='Color.TFrame')
     pieza_agregar_cabezal.grid(row=18, column=0, padx=7)
@@ -399,7 +427,7 @@ def crear_pestana_chapa(notebook):
             cantidad_agregar_cabezal,
             tabla_chapa,
             "chapa",
-            lista_acciones,
+            lista_acciones,subtitulo
         ),
     )
     btn_agregar_cabezal.grid(row=4, column=1, sticky="ne", pady=5)
@@ -456,7 +484,7 @@ def crear_pestana_chapa(notebook):
             cantidad_elimimar_cabezal,
             tabla_chapa,
             "chapa",
-            lista_acciones,
+            lista_acciones,subtitulo
         ),
     )
     btn_eliminar_cabezal.grid(row=4, column=1, sticky="ne", pady=5)
@@ -509,6 +537,7 @@ def crear_pestana_chapa(notebook):
             tabla_chapa,
             lista_acciones,
             "chapa",
+            subtitulo
         ),
     )
     btn_agregar_v_p.grid(row=4, column=1, sticky="ne", pady=5)
@@ -549,6 +578,7 @@ def crear_pestana_chapa(notebook):
             tabla_chapa,
             lista_acciones,
             "chapa",
+            subtitulo
         ),
     )
     btn_eliminar_v_p.grid(row=4, column=1, sticky="ne", pady=5)
@@ -578,10 +608,9 @@ def crear_pestana_chapa(notebook):
         row=7, column=0, columnspan=2, sticky="ew", padx=10, pady=10
     )
 
-    ttk.Label(box3, text="Cantidad de maquina posibles", style='WhiteOnRed.TLabel').grid(row=9, column=1)
-
     caja_botones = ttk.Frame(box3, style='Pestania.TFrame')
-    caja_botones.grid(row=9, column=0)
+    caja_botones.grid(row=9, column=0, columnspan=2)
+    ttk.Label(caja_botones, text="Cantidad de maquina posibles", style='WhiteOnRed.TLabel', font=("Arial", 12, "bold")).grid(row=0, column=0, columnspan=5)
 
     # Botones para calcular máquinas posibles
     btn_i_330 = ttk.Button(
@@ -619,6 +648,16 @@ def crear_pestana_chapa(notebook):
         ),
     )
     btn_p_300.grid(row=1, column=3, padx=5)
+    
+    btn_i_250 = ttk.Button(
+        caja_botones,
+        text="Inox 250",
+        command=lambda: calcular_maquinas_posibles(
+            base_inox_250, "acero", "250", lista_acciones
+        ),
+    )
+    btn_i_250.grid(row=1, column=4, padx=5)
+
 
     ttk.Separator(box3, orient="horizontal").grid(
         row=10, column=0, columnspan=2, sticky="ew", padx=10, pady=10
@@ -741,6 +780,8 @@ def crear_pestana_chapa(notebook):
     )
     btn_agregar_cabezal_inox.grid(row=3, column=0, padx=3, pady=3)
 
+
+
     boton_radius_pintura = tk.Radiobutton(
         cabezales_terminados, text="Pintura", variable=tipo_var_cabezal, value=2 , background='#192965', foreground='#9fa0a5'
     )
@@ -762,7 +803,31 @@ def crear_pestana_chapa(notebook):
         ),
     )
     btn_agregar_cabezal_pintada.grid(row=3, column=1, padx=3, pady=3)
+    
+    boton_radius_250 = tk.Radiobutton(
+    cabezales_terminados, text="250", variable=tipo_var_cabezal, value=3 , background='#192965', foreground='#9fa0a5'
+    )
+    boton_radius_250.grid(row=1, column=2)
 
+    entrada_cantidad_250 = ttk.Entry(cabezales_terminados, width=10, style='WhiteOnRed.TEntry')
+    entrada_cantidad_250.grid(row=2, column=2)
+
+    btn_agregar_cabezal_pintada = ttk.Button(
+        cabezales_terminados,
+        text="Agregar",
+        style="TButton",
+        command=lambda: armado_de_cabezales(
+        tipo_var_cabezal,
+        entrada_cantidad_250,
+        lista_acciones,
+        subtitulo,
+        tabla_chapa,
+        ),
+
+    )
+    btn_agregar_cabezal_pintada.grid(row=3, column=2, padx=3, pady=3)
+#---------------------------------------------------------------\
+    
     obseraciones = ttk.Frame(box3, style='Pestania.TFrame')
     obseraciones.grid(row=15, column=0 , columnspan=1, sticky="ne", pady=15)
     ttk.Label(obseraciones, text="Observaciones", style='WhiteOnRed.TLabel', font=("Arial", 13, "bold")).grid(row=16, column=0, sticky="w")
