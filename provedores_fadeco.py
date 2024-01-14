@@ -17,7 +17,7 @@ from funciones import (
     envios_de_bruto_cabezal,
     
 )
-
+ 
 modelo_piezas = ["base_pintada_330", "base_pintada_300"]  
 niquelado = [
     "eje_rectificado",

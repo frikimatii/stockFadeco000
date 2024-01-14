@@ -1,5 +1,7 @@
 import sqlite3
 import tkinter as tk
+import subprocess
+import os
 
 def obtener_color_fondo(cantidad):
     if cantidad < 10:
@@ -42,7 +44,7 @@ def mostrar_datos(treeview, table, info):
     table_seleccionada = ["armado_final", "buen_hombre_pulido", "carmelo_pulido", "chapa", "maxi_pulido", "pieza_retocadas", "piezas_del_fundicion", "piezas_del_motor_final", "piezas_finales_defenitivas", "producto_final", "soldador_stock"]
     for tabla in table_seleccionada:
     # Obtén el texto personalizado correspondiente al nombre original de la tabla
-        texto_personalizado = tabla_personalizada.get(table, tabla)
+        texto_personalizado = tabla_personalizada.get(tabla, table)
         txt = texto_personalizado
         info.config(text=txt) 
 
@@ -164,9 +166,8 @@ def eliminar_pieza(
         conn.commit()
         conn.close()
         mostrar_datos(tree, table, info)
-
     
-# ---------------funciones de stock de chapas _________________________________________________
+    # ---------------funciones de stock de chapas _________________________________________________
     
 def mostrar_datos_chapa(tree1, table, subtitulo):
     conn = sqlite3.connect("basedatospiezas.db")
@@ -3184,7 +3185,6 @@ def ensamblar_motor_terminado(modelo_seleccionado, cantidad_motores, res):
         except ValueError as ve:
             print(ve)
 
-
 def motores_terminados(arbol, res):
     conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
@@ -3571,7 +3571,7 @@ def ensamblar_maquinas(cantidad_ensamblar_entry, lista_acciones):
         lista_acciones.insert(0, "Ingrese una Cantidad Válida")
         return
 
-    conn = sqlite3.connect("Stock_Fadeco.db")
+    conn = sqlite3.connect("basedatospiezas.db")
     cursor = conn.cursor()
     cursor.execute("SELECT Pieza, Cantidad FROM piezas_de_330")
     stock = cursor.fetchall()
@@ -3618,8 +3618,7 @@ def ensamblar_maquinas(cantidad_ensamblar_entry, lista_acciones):
     lista_acciones.insert(0, "Maquinas Terminadas en el mes: {maquinas_mes}")
 
     # Mostrar la cantidad total de máquinas ensambladas
-    lista_acciones.insert(
-        0, "Se Armaron {cantidad_ensamblada} máquinas \h Total del mes: {maquinas_mes}")
+    lista_acciones.insert( 0, "Se Armaron {cantidad_ensamblada} máquinas \h Total del mes: {maquinas_mes}")
 
     conn.commit()
     conn.close()
@@ -3790,12 +3789,7 @@ def mostrar_piezas_i330(arbol, res, modelo, tipo):
     res.config(text=text)
 
 
-
-
-
 #'''''''''''''''''''armado'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-
 
 def consulta_bases_terminadas(arbol, mostrar):
     conn = sqlite3.connect("basedatospiezas.db")
@@ -4090,4 +4084,708 @@ def mostrar_maquinas_teminadas(arbol,res):
     subtitulo_text = "Mostrar Datos: Maquinas Terminadas"
     res.config(text=subtitulo_text)
 
-#999999999999999999969699999999999999999999
+
+
+
+#999999999999999999posivilidades969699999999999999999999
+
+
+###############################################Armado FInal ########################################
+
+
+def maquinas_dis(modelo_maquina):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_final'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return -1
+    finally:
+        conn.close()
+
+    if modelo_maquina == "inox 330":
+        piezas_necesarias = i330
+    elif modelo_maquina == "inox 300":
+        piezas_necesarias = i300
+    elif modelo_maquina == "inox 250":
+        piezas_necesarias = i250
+    elif modelo_maquina == "pint 330":
+        piezas_necesarias = p330
+    elif modelo_maquina == "pint 300":
+        piezas_necesarias = p300
+    
+    cantidad_minima = float('inf')
+    for pieza, cantidad_necesaria in piezas_necesarias.items():
+        for dato in datos:
+            if dato[0] == pieza:
+                cantidad_disponible = dato[1]
+                cantidad_posible = cantidad_disponible // cantidad_necesaria
+                cantidad_minima = min(cantidad_minima, cantidad_posible)
+
+    return cantidad_minima
+
+def mostrar_maquinas_disponibles(modelo_maquina, label_muestra):
+    total_maquinas = maquinas_dis(modelo_maquina)
+    label_muestra.config(text=f"{total_maquinas}")
+
+def obtener_maquina_final():
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_final'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return {}
+    finally:
+        conn.close()
+
+    cantidades_disponibles = {}
+    for pieza, cantidad in datos:
+        cantidades_disponibles[pieza] = cantidad
+
+    return cantidades_disponibles
+
+
+def verificar_posibilidad_maquina_teminada(cantidad_deseada, modelo_seleccionado):
+    # Obtener la base según el modelo
+    maquina_final = {
+        "inoxidable 330": i330,
+        "inoxidable 300": i300,
+        "inoxidable 250": i250,
+        "pintada 330": p330,
+        "pintada 300": p300
+    }
+
+    tipo_de_modelo = maquina_final.get(modelo_seleccionado)
+
+    if tipo_de_modelo is None:
+        print(f"Modelo '{modelo_seleccionado}' no reconocido.")
+        return False, {}
+
+    # Obtener las cantidades de piezas disponibles desde la base de datos
+    cantidades_disponibles = obtener_maquina_final()
+
+    # Verificar si es posible armar la cantidad deseada
+    cantidad_minima = float('inf')
+    piezas_faltantes = {}
+
+    for pieza, cantidad_necesaria in tipo_de_modelo.items():
+        cantidad_disponible = cantidades_disponibles.get(pieza, 0)
+
+        # Calcular la cantidad máxima que se puede armar sin exceder las cantidades disponibles
+        cantidad_maxima_posible = cantidad_disponible // cantidad_necesaria
+
+        cantidad_minima = min(cantidad_minima, cantidad_maxima_posible)
+
+        # Calcular la cantidad faltante y actualizar el diccionario piezas_faltantes
+        cantidad_faltante = max(0, cantidad_deseada * cantidad_necesaria - cantidad_disponible)
+        if cantidad_faltante > 0:
+            piezas_faltantes[pieza] = cantidad_faltante
+
+    # Verificar si la cantidad deseada es alcanzable
+    if cantidad_minima >= cantidad_deseada:
+        return True, piezas_faltantes
+    else:
+        return False, piezas_faltantes
+
+
+def consultar_maquinas_final(entry_cantidad, tabla_consultas, lista_acciones, tipo_pre_combox):
+    # Esta función realiza la consulta y actualiza la interfaz gráfica
+    for item in tabla_consultas.get_children():
+        tabla_consultas.delete(item)
+
+    cantidad_deseada = int(entry_cantidad.get())
+    modelo_seleccionado = tipo_pre_combox.get()
+
+    se_puede_armar, piezas_faltantes = verificar_posibilidad_maquina_teminada(cantidad_deseada, modelo_seleccionado)
+
+    if se_puede_armar:
+        mensaje = f"Se pueden armar {cantidad_deseada} Motores {modelo_seleccionado}."
+        lista_acciones.insert(0, mensaje)
+    else:
+        mensaje = f"No se pueden armar {cantidad_deseada} Motores {modelo_seleccionado}. Piezas faltantes en la tabla:"
+        lista_acciones.insert(0, mensaje)
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+            # Agregar las filas al treeview
+            tabla_consultas.insert("", tk.END, values=(pieza, cantidad_faltante), tags=("blue",))
+
+
+
+ 
+#-==============================funciones de los motores ==============================================
+
+motor_330 = {
+    "caja_torneado_330": 1,
+    "eje": 1,
+    "manchon": 1,
+    "ruleman_1": 1,
+    "ruleman_2": 2,
+    "corona_330": 1,
+    "seguer": 1,
+    "sinfin": 1,
+    "motores_220w": 1,
+}
+motor_300 =  {
+    "caja_torneado_300": 1,
+    "eje": 1,
+    "manchon": 1,
+    "ruleman_1": 1,
+    "ruleman_2": 2,
+    "corona_300": 1,
+    "seguer": 1,
+    "sinfin": 1,
+    "motores_220w": 1,
+}
+motor_250 = {
+    "caja_torneado_250": 1,
+    "eje_250": 1,
+    "manchon_250": 1,
+    "ruleman_1": 1,
+    "ruleman_2": 2,
+    "corona_250": 1,
+    "seguer": 1,
+    "sinfin": 1,
+    "motores250_220w": 1,
+}
+
+
+   
+def contar_motores_disponibles(modelo_motor):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_de_caja'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        # Manejo de errores, puedes adaptarlo según tus necesidades
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return -1  # Indicador de error
+    finally:
+        conn.close()
+
+
+    if modelo_motor == "330":
+        piezas_necesarias = motor_330
+    elif modelo_motor == "300":
+        piezas_necesarias = motor_300
+    elif modelo_motor == "250":
+        piezas_necesarias = motor_250
+
+    
+    # Verificar la cantidad mínima de piezas necesarias para un afilador
+
+    # Calcular la cantidad máxima de afiladores que se pueden armar
+    cantidad_minima = float('inf')
+    for pieza, cantidad_necesaria in piezas_necesarias.items():
+        for dato in datos:
+            if dato[0] == pieza:
+                cantidad_disponible = dato[1]
+                cantidad_posible = cantidad_disponible // cantidad_necesaria
+                cantidad_minima = min(cantidad_minima, cantidad_posible)
+
+    return cantidad_minima
+
+def actualizar_muestra_motores(modelo_motor, label_muestra):
+    total_motores = contar_motores_disponibles(modelo_motor)
+    label_muestra.config(text=f"{total_motores}")
+
+
+
+def obtener_cantidad_piezas_motor():
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'armado_de_caja'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return {}
+    finally:
+        conn.close()
+
+    cantidades_disponibles = {}
+    for pieza, cantidad in datos:
+        cantidades_disponibles[pieza] = cantidad
+
+    return cantidades_disponibles
+
+
+def verificar_posibilidad_construccion_motor(cantidad_deseada, modelo_seleccionado):
+    # Obtener la base según el modelo
+    bases_prearmadas = {
+        "330": motor_330,
+        "300": motor_300,
+        "250": motor_250
+    }
+
+    tipo_de_modelo = bases_prearmadas.get(modelo_seleccionado)
+
+    if tipo_de_modelo is None:
+        print(f"Modelo '{modelo_seleccionado}' no reconocido.")
+        return False, {}
+
+    # Obtener las cantidades de piezas disponibles desde la base de datos
+    cantidades_disponibles = obtener_cantidad_piezas_motor()
+
+    # Verificar si es posible armar la cantidad deseada
+    cantidad_minima = float('inf')
+    piezas_faltantes = {}
+
+    for pieza, cantidad_necesaria in tipo_de_modelo.items():
+        cantidad_disponible = cantidades_disponibles.get(pieza, 0)
+
+        # Calcular la cantidad máxima que se puede armar sin exceder las cantidades disponibles
+        cantidad_maxima_posible = cantidad_disponible // cantidad_necesaria
+
+        cantidad_minima = min(cantidad_minima, cantidad_maxima_posible)
+
+        # Calcular la cantidad faltante y actualizar el diccionario piezas_faltantes
+        cantidad_faltante = max(0, cantidad_deseada * cantidad_necesaria - cantidad_disponible)
+        if cantidad_faltante > 0:
+            piezas_faltantes[pieza] = cantidad_faltante
+
+    # Verificar si la cantidad deseada es alcanzable
+    if cantidad_minima >= cantidad_deseada:
+        return True, piezas_faltantes
+    else:
+        return False, piezas_faltantes
+
+  
+def consultar_piezas_sector_motor(entry_cantidad, tabla_consultas, lista_acciones, tipo_pre_combox):
+    # Esta función realiza la consulta y actualiza la interfaz gráfica
+    for item in tabla_consultas.get_children():
+        tabla_consultas.delete(item)
+
+    cantidad_deseada = int(entry_cantidad.get())
+    modelo_seleccionado = tipo_pre_combox.get()
+
+    se_puede_armar, piezas_faltantes = verificar_posibilidad_construccion_motor(cantidad_deseada, modelo_seleccionado)
+
+    if se_puede_armar:
+        mensaje = f"Se pueden armar {cantidad_deseada} Motores {modelo_seleccionado}."
+        lista_acciones.insert(0, mensaje)
+    else:
+        mensaje = f"No se pueden armar {cantidad_deseada} Motores {modelo_seleccionado}. Piezas faltantes en la tabla:"
+        lista_acciones.insert(0, mensaje)
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+            # Agregar las filas al treeview
+            tabla_consultas.insert("", tk.END, values=(pieza, cantidad_faltante), tags=("blue",))
+
+
+
+
+#-------------------------------Funciones pre armado------------------------------------------------
+
+
+def stock_de_prearmado(modelo):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'pre_armado'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return -1
+    finally:
+        conn.close()
+
+    # Obtener la base según el modelo
+    if modelo == "inoxidable 330":
+        tipo_de_modelo = base_pre_inox_armada330
+    elif modelo == "inoxidable 300":
+        tipo_de_modelo = base_pre_inox_armada300
+    elif modelo == "inoxidable 250":
+        tipo_de_modelo = base_pre_inox_armada250
+    elif modelo == "pintada 330":
+        tipo_de_modelo = base_pre_pintada_armada330
+    elif modelo == "pintada 300":
+        tipo_de_modelo = base_pre_pintada_armada300
+
+    cantidad_minima = float('inf')
+    for pieza, cantidad_necesaria in tipo_de_modelo.items():
+        for dato in datos:
+            if dato[0] == pieza:
+                cantidad_disponible = dato[1]
+                cantidad_posible = cantidad_disponible // cantidad_necesaria
+                cantidad_minima = min(cantidad_minima, cantidad_posible)
+
+    return cantidad_minima
+
+def actualizar_muestra_prearmado(modelo, label_muestra):
+    total_piezas = stock_de_prearmado(modelo)
+    label_muestra.config(text=f"{total_piezas}")
+
+def obtener_cantidad_piezas_prearmado():
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'pre_armado'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return {}
+    finally:
+        conn.close()
+
+    cantidades_disponibles = {}
+    for pieza, cantidad in datos:
+        cantidades_disponibles[pieza] = cantidad
+
+    return cantidades_disponibles
+
+def verificar_posibilidad_construccion(cantidad_deseada, modelo_seleccionado):
+    # Obtener la base según el modelo
+    bases_prearmadas = {
+        "inoxidable 330": base_pre_inox_armada330,
+        "inoxidable 300": base_pre_inox_armada300,
+        "inoxidable 250": base_pre_inox_armada250,
+        "pintada 330": base_pre_pintada_armada330,
+        "pintada 300": base_pre_pintada_armada300,
+    }
+
+    tipo_de_modelo = bases_prearmadas.get(modelo_seleccionado)
+
+    if tipo_de_modelo is None:
+        print(f"Modelo '{modelo_seleccionado}' no reconocido.")
+        return False, {}
+
+    # Obtener las cantidades de piezas disponibles desde la base de datos
+    cantidades_disponibles = obtener_cantidad_piezas_prearmado()
+
+    # Verificar si es posible armar la cantidad deseada
+    cantidad_minima = float('inf')
+    piezas_faltantes = {}
+
+    for pieza, cantidad_necesaria in tipo_de_modelo.items():
+        cantidad_disponible = cantidades_disponibles.get(pieza, 0)
+
+        # Calcular la cantidad máxima que se puede armar sin exceder las cantidades disponibles
+        cantidad_maxima_posible = cantidad_disponible // cantidad_necesaria
+
+        cantidad_minima = min(cantidad_minima, cantidad_maxima_posible)
+
+        # Calcular la cantidad faltante y actualizar el diccionario piezas_faltantes
+        cantidad_faltante = max(0, cantidad_deseada * cantidad_necesaria - cantidad_disponible)
+        if cantidad_faltante > 0:
+            piezas_faltantes[pieza] = cantidad_faltante
+
+    # Verificar si la cantidad deseada es alcanzable
+    if cantidad_minima >= cantidad_deseada:
+        return True, piezas_faltantes
+    else:
+        return False, piezas_faltantes
+
+def consultar_piezas_sector(entry_cantidad, tabla_consultas, lista_acciones, tipo_pre_combox):
+    # Esta función realiza la consulta y actualiza la interfaz gráfica
+    for item in tabla_consultas.get_children():
+        tabla_consultas.delete(item)
+
+    cantidad_deseada = int(entry_cantidad.get())
+    modelo_seleccionado = tipo_pre_combox.get()
+
+    se_puede_armar, piezas_faltantes = verificar_posibilidad_construccion(cantidad_deseada, modelo_seleccionado)
+
+    if se_puede_armar:
+        mensaje = f"Se pueden armar {cantidad_deseada} {modelo_seleccionado}."
+        lista_acciones.insert(0, mensaje)
+    else:
+        mensaje = f"No se pueden armar {cantidad_deseada} {modelo_seleccionado}. Piezas faltantes en la tabla:"
+        lista_acciones.insert(0, mensaje)
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+            # Agregar las filas al treeview
+            tabla_consultas.insert("", tk.END, values=(pieza, cantidad_faltante), tags=("blue",))
+
+
+
+#=============================Funciiones de afiladores==============================
+
+def contar_afiladores_disponibles():
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'afilador'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        # Manejo de errores, puedes adaptarlo según tus necesidades
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return -1  # Indicador de error
+    finally:
+        conn.close()
+
+    # Verificar la cantidad mínima de piezas necesarias para un afilador
+    piezas_necesarias = {
+        "capuchon_afilador": 2,
+        "carcaza_afilador": 1,
+        "eje_corto": 1,
+        "eje_largo": 1,
+        "ruleman_afilador": 2,
+        "palanca_afilador": 1
+    }
+
+    # Calcular la cantidad máxima de afiladores que se pueden armar
+    cantidad_minima = float('inf')
+    for pieza, cantidad_necesaria in piezas_necesarias.items():
+        for dato in datos:
+            if dato[0] == pieza:
+                cantidad_disponible = dato[1]
+                cantidad_posible = cantidad_disponible // cantidad_necesaria
+                cantidad_minima = min(cantidad_minima, cantidad_posible)
+
+    return cantidad_minima
+
+def actualizar_muestra(label_muestra):
+    total_afialdores = contar_afiladores_disponibles()
+    label_muestra.config(text=f"Muestra total de piezas que se pueden armar {total_afialdores}")
+
+def preguntar_por_afiladores(cantidad_deseada , pieza):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'afilador'"
+        )
+        datos = cursor.fetchall()
+    except sqlite3.Error as e:
+        # Manejo de errores, puedes adaptarlo según tus necesidades
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return -1, {}  # Indicador de error y diccionario vacío
+    finally:
+        conn.close()
+
+    # Verificar la cantidad mínima de piezas necesarias para un afilador
+
+    # Calcular la cantidad máxima de afiladores que se pueden armar
+    cantidad_minima = float('inf')
+    piezas_faltantes = {}
+
+    for pieza, cantidad_necesaria in pieza.items():
+        for dato in datos:
+            if dato[0] == pieza:
+                cantidad_disponible = dato[1]
+                cantidad_posible = cantidad_disponible // cantidad_necesaria
+                cantidad_minima = min(cantidad_minima, cantidad_posible)
+
+                # Verificar si la cantidad deseada es alcanzable
+                if cantidad_minima < cantidad_deseada:
+                    cantidad_faltante = cantidad_deseada - cantidad_minima
+                    piezas_faltantes[pieza] = cantidad_faltante
+
+    return cantidad_minima, piezas_faltantes
+
+def consultar_afiladores(entry_cantidad, tabla_consultas, lista_acciones, piezas):
+    
+    for item in tabla_consultas.get_children():
+        tabla_consultas.delete(item)
+        
+    cantidad_deseada = int(entry_cantidad.get())
+
+    cantidad_posible, piezas_faltantes = preguntar_por_afiladores(cantidad_deseada, piezas)
+    
+    if cantidad_posible >= cantidad_deseada:
+        mensaje = f"Se pueden armar {cantidad_deseada} afiladores."
+        lista_acciones.insert(0, mensaje)
+    else:
+        mensaje = f"No se pueden armar {cantidad_deseada} afiladores. Piezas faltantes en la tabla "
+        lista_acciones.insert(0, mensaje)
+        for pieza, cantidad_faltante in piezas_faltantes.items():
+            # Agregar las filas al treeview
+            tabla_consultas.insert("", tk.END, values=(pieza, cantidad_faltante, "Modelo", "Tipo"), tags=("blue",))
+
+
+#def preguntar_por_afiladores(cantidad_deseada):
+#    try:
+#        conn = sqlite3.connect("basedatospiezas.db")
+#        cursor = conn.cursor()
+#        cursor.execute(
+#            "SELECT piezas, cantidad FROM piezas_finales_defenitivas WHERE sector = 'afilador'"
+#        )
+#        datos = cursor.fetchall()
+#    except sqlite3.Error as e:
+#        # Manejo de errores, puedes adaptarlo según tus necesidades
+#        print(f"Error al obtener datos de la base de datos: {e}")
+#        return -1  # Indicador de error
+#    finally:
+#        conn.close()
+#
+#    # Verificar la cantidad mínima de piezas necesarias para un afilador
+#    piezas_necesarias = {
+#        "capuchon_afilador": 2,
+#        "carcaza_afilador": 1,
+#        "eje_corto": 1,
+#        "eje_largo": 1,
+#        "ruleman_afilador": 2,
+#        "palanca_afilador": 1
+#    }
+#
+#    # Calcular la cantidad máxima de afiladores que se pueden armar
+#    cantidad_minima = float('inf')
+#    piezas_faltantes = {}
+#
+#    for pieza, cantidad_necesaria in piezas_necesarias.items():
+#        for dato in datos:
+#            if dato[0] == pieza:
+#                cantidad_disponible = dato[1]
+#                cantidad_posible = cantidad_disponible // cantidad_necesaria
+#                cantidad_minima = min(cantidad_minima, cantidad_posible)
+#
+#                # Verificar si la cantidad deseada es alcanzable
+#                if cantidad_minima < cantidad_deseada:
+#                    cantidad_faltante = cantidad_deseada - cantidad_minima
+#                    piezas_faltantes[pieza] = cantidad_faltante
+#
+#    return cantidad_minima, piezas_faltantes
+#
+# Ejemplo de uso
+#cantidad_deseada = int(input("Ingrese la cantidad deseada de afiladores: "))
+#cantidad_posible, piezas_faltantes = preguntar_por_afiladores(cantidad_deseada)
+#
+#if cantidad_posible >= cantidad_deseada:
+#    print(f"Se pueden armar {cantidad_deseada} afiladores.")
+#else:
+#    print(f"No se pueden armar {cantidad_deseada} afiladores.")
+#    print("Piezas faltantes:")
+#    for pieza, cantidad_faltante in piezas_faltantes.items():
+#        print(f"{pieza}: {cantidad_faltante}")
+        
+
+
+#&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ suma total de mquinas @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@###@#@#@##
+#lo que me va a dar de comer 
+def verificar_disponibilidad_pedido(pedido):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+
+        # Consulta SQL para obtener las cantidades disponibles de las piezas
+        cursor.execute("""
+            SELECT piezas, cantidad
+            FROM piezas_finales_defenitivas
+            WHERE sector = 'armado_final'
+        """)
+
+        datos_piezas = dict(cursor.fetchall())
+
+    except sqlite3.Error as e:
+        print(f"Error al obtener datos de la base de datos: {e}")
+        return False, {}
+
+    finally:
+        conn.close()
+
+    piezas_faltantes = {}
+    for modelo, cantidad in pedido.items():
+        # Obtener la base de piezas según el modelo
+        base_piezas_modelo = obtener_base_piezas_modelo(modelo)
+
+        if base_piezas_modelo is None:
+            print(f"Modelo '{modelo}' no reconocido.")
+            return False, {}
+
+        # Verificar si hay suficientes piezas disponibles para el pedido
+        for pieza, cantidad_necesaria in base_piezas_modelo.items():
+            cantidad_disponible = int(datos_piezas.get(pieza, 0))
+            cantidad_necesaria = int(cantidad_necesaria) if cantidad_necesaria else 0
+            cantidad = int(cantidad) if cantidad else 0
+            cantidad_requerida = cantidad_necesaria * cantidad
+            if cantidad_disponible < cantidad_requerida:
+                cantidad_faltante = cantidad_requerida - cantidad_disponible
+                piezas_faltantes[(modelo, pieza)] = cantidad_faltante
+
+    if not piezas_faltantes:
+        return True, {}
+    else:
+        return False, piezas_faltantes
+
+def obtener_base_piezas_modelo(modelo):
+    # Define la relación entre modelos y sus piezas correspondientes
+    bases_prearmadas = {
+        "inoxidable 330": i330,
+        "inoxidable 300": i300,
+        "inoxidable 250": i250,
+        "pintada 330": p330,
+        "pintada 300": p300,
+    }
+
+    return bases_prearmadas.get(modelo)
+
+
+def on_averiguar_click(entry_i330, entry_i300, entry_i250, entry_p330, entry_p300, tree, listbox):
+    for item in tree.get_children():
+        tree.delete(item)
+        
+    # Función que se ejecuta al hacer clic en el botón "Averiguar"
+    pedido_maquinas = {
+        "inoxidable 330": entry_i330.get(),
+        "inoxidable 300": entry_i300.get(),
+        "inoxidable 250": entry_i250.get(),
+        "pintada 330": entry_p330.get(),
+        "pintada 300": entry_p300.get(),
+    }
+
+    se_puede_armar, piezas_faltantes = verificar_disponibilidad_pedido(pedido_maquinas)
+    
+    if se_puede_armar:
+        listbox.insert(0, "El pedido se puede armar.")
+    else:
+        listbox.insert(0,"No hay suficientes piezas para armar el pedido. Piezas faltantes:")
+        for (modelo, pieza), cantidad_faltante in piezas_faltantes.items():
+            tree.insert('', 'end', values=(pieza, cantidad_faltante, modelo))
+
+
+#)))))))))))))))))))))))))))))))))))) fin de mes )))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+
+def actualizar_cantidad_a_cero(label, meses_opcional, listbox):
+    try:
+        conn = sqlite3.connect("basedatospiezas.db")
+        cursor = conn.cursor()
+
+        # Obtener el total de la cantidad antes de la actualización
+        cursor.execute("SELECT SUM(cantidad) FROM producto_final")
+        total_anterior = cursor.fetchone()[0]
+
+        # Actualizar el texto del label
+        nuevo_texto = f"En {meses_opcional.get()} Se armo: {total_anterior} maquinas"
+        label.config(text=nuevo_texto)
+        listbox.insert(0, "Base de Datos Actualiza... ")
+
+        # Guardar el texto en un archivo de texto
+        with open("registro_maquinas.txt", "a") as archivo:
+            archivo.write(nuevo_texto + "\n")
+
+        # Actualizar todas las filas de la tabla producto_final estableciendo la cantidad a cero
+        cursor.execute("UPDATE producto_final SET cantidad = 0")
+
+        # Confirmar los cambios
+        conn.commit()
+        print("Cantidad actualizada a cero correctamente.")
+
+    except sqlite3.Error as e:
+        print(f"Error al actualizar la cantidad a cero: {e}")
+
+    finally:
+        conn.close()
+        
+def abrir_archivo_registro():
+    try:
+        # Abrir el archivo de registro con el programa predeterminado
+        subprocess.run(["notepad.exe", "registro_maquinas.txt"])
+    except Exception as e:
+        print(f"Error al abrir el archivo de registro: {e}")

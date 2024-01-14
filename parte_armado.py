@@ -425,7 +425,7 @@ def seccion_armado(notebook):
     ttk.Label(caja2, text="Piezas Rotas o Defectuosa", style="WhiteOnRed.TLabel", font=("Arial", 15, "bold")).grid(row=17, column=0, columnspan=2)
 
     ttk.Label(caja2, text="Seleccionar Piezas", style="WhiteOnRed.TLabel").grid(row=18, column=0)
-    pieza_del = ttk.Combobox(caja2, values=piezas_delete_armadocaja)
+    pieza_del = ttk.Combobox(caja2, values=piezas_delete_armadocaja, state="readonly")
     pieza_del.grid(row=18, column=1)
 
     ttk.Label(caja2, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=19, column=0)
@@ -533,7 +533,7 @@ def seccion_armado(notebook):
     ttk.Label(caja4, text="Maquinas pre-armadas", style="WhiteOnRed.TLabel", font=("Arial", 15, "bold")).grid(row=6, column=0, columnspan=2)
 
     ttk.Label(caja4, text="Modelo de Maquina", style="WhiteOnRed.TLabel").grid(row=7, column=0)
-    tipo_prearmada = ttk.Combobox(caja4, values=tipos_de_maquinas)
+    tipo_prearmada = ttk.Combobox(caja4, values=tipos_de_maquinas, state="readonly")
     tipo_prearmada.grid(row=7, column=1)
 
     ttk.Label(caja4, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=8, column=0)
@@ -571,7 +571,7 @@ def seccion_armado(notebook):
     ttk.Label(caja4, text="Piezas Rotas o Defectuosa", style="WhiteOnRed.TLabel").grid(row=15, column=0)
 
     ttk.Label(caja4, text="Seleccionar Piezas", style="WhiteOnRed.TLabel").grid(row=16, column=0)
-    prearmadolo_delete = ttk.Combobox(caja4, values=piezas_delete_prearmado)
+    prearmadolo_delete = ttk.Combobox(caja4, values=piezas_delete_prearmado, state="readonly")
     prearmadolo_delete.grid(row=16, column=1)
 
     ttk.Label(caja4, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=17, column=0)
@@ -643,7 +643,7 @@ def seccion_armado(notebook):
     ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Maquinas Teminadas", font=("Arial", 12, "bold")).grid(row=6, column=0, columnspan=2)
 
     ttk.Label(caja5, text="Modelo", style="WhiteOnRed.TLabel").grid(row=7, column=0)
-    modele_final = ttk.Combobox(caja5, values=tipos_de_maquinas)
+    modele_final = ttk.Combobox(caja5, values=tipos_de_maquinas, state="readonly")
     modele_final.grid(row=7, column=1)
 
     ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Cantidad").grid(row=8, column=0)
@@ -666,7 +666,7 @@ def seccion_armado(notebook):
     ttk.Label(caja5, style="WhiteOnRed.TLabel", font=("Arial", 12, "bold"), text="Piezas Rotas o Defectuosa").grid(row=11, column=0)
 
     ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Seleccionar Piezas").grid(row=12, column=0)
-    armadolo_delete = ttk.Combobox(caja5, values=piezas_armado_final_delete)
+    armadolo_delete = ttk.Combobox(caja5, values=piezas_armado_final_delete, state="readonly")
     armadolo_delete.grid(row=12, column=1)
 
     ttk.Label(caja5, style="WhiteOnRed.TLabel", text="Cantidad").grid(row=13, column=0)

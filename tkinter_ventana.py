@@ -1,0 +1,29 @@
+import tkinter as tk
+from tkinter import ttk
+
+from stock_chapa import crear_pestana_chapa
+from provedores_fadeco import ventana_provedores
+from mecanizado import mecanizado
+from session_stock import stock
+from index import inicio
+from parte_armado import seccion_armado
+from consultas import consultorio
+
+
+root = tk.Tk()
+root.title("Mostrar Datos de la Base De Datos")
+root.iconbitmap("D:/base_datos_fadeco1_pyinstall/img/FLogo.ico")
+notebook = ttk.Notebook(root)
+
+
+inicio(notebook)
+stock(notebook)
+crear_pestana_chapa(notebook)
+ventana_provedores(notebook)
+mecanizado(notebook)
+seccion_armado(notebook)
+consultorio(notebook)
+
+notebook.grid(row=0, column=0, sticky="nsew")
+
+root.mainloop() 

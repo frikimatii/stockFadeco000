@@ -153,7 +153,7 @@ def ventana_provedores(notebook):
     tk.Label(caja2, text="Pieza").grid(row=2, column=0, sticky="w")
     tk.Label(caja2, text="Cantidad").grid(row=2, column=1)
 
-    pieza_predeterminadas = ttk.Combobox(caja2, values=piezas_carmelo)
+    pieza_predeterminadas = ttk.Combobox(caja2, values=piezas_carmelo, state="readonly")
     pieza_predeterminadas.grid(row=3, column=0)
 
     cantidad_agregar_carmelo = tk.Entry(caja2, width=10)
@@ -204,7 +204,7 @@ def ventana_provedores(notebook):
     tk.Label(caja2, text="Pieza").grid(row=9, column=0, sticky="w")
     tk.Label(caja2, text="Cantidad").grid(row=9, column=1)
 
-    pieza_predeterminadas1 = ttk.Combobox(caja2, values=piezas_carmelo)
+    pieza_predeterminadas1 = ttk.Combobox(caja2, values=piezas_carmelo, state="readonly")
     pieza_predeterminadas1.grid(row=10, column=0)
 
     cantidad_piezas_terminadas_carmelo = tk.Entry(caja2, width=10)
@@ -232,7 +232,7 @@ def ventana_provedores(notebook):
     tk.Label(caja2, text="Pieza").grid(row=14, column=0, sticky="w")
     tk.Label(caja2, text="Cantidad").grid(row=14, column=1)
 
-    pieza_predeterminadas2 = ttk.Combobox(caja2, values=piezas_maxi)
+    pieza_predeterminadas2 = ttk.Combobox(caja2, values=piezas_maxi, state="readonly")
     pieza_predeterminadas2.grid(row=15, column=0)
 
     cantidad_agregar_maxi = tk.Entry(caja2, width=10)
@@ -277,7 +277,7 @@ def ventana_provedores(notebook):
     tk.Label(caja2, text="Pieza").grid(row=21, column=0, sticky="w")
     tk.Label(caja2, text="Cantidad").grid(row=21, column=1)
 
-    pieza_predeterminadas4 = ttk.Combobox(caja2, values=piezas_maxi)
+    pieza_predeterminadas4 = ttk.Combobox(caja2, values=piezas_maxi, state="readonly")
     pieza_predeterminadas4.grid(row=22, column=0)
 
     cantidad_piezas_terminadas_maxi = tk.Entry(caja2, width=10)
@@ -309,7 +309,7 @@ def ventana_provedores(notebook):
     tk.Label(caja3, text="Pieza").grid(row=2, column=0, sticky="w")
     tk.Label(caja3, text="Cantidad").grid(row=2, column=1)
 
-    pieza_predeterminadas5 = ttk.Combobox(caja3, values=pieza_buen_hombre)
+    pieza_predeterminadas5 = ttk.Combobox(caja3, values=pieza_buen_hombre, state="readonly")
     pieza_predeterminadas5.grid(row=3, column=0)
 
     cantidad_agregar_buen_hombre = tk.Entry(caja3, width=10)
@@ -355,7 +355,7 @@ def ventana_provedores(notebook):
     tk.Label(caja3, text="Pieza").grid(row=9, column=0, sticky="w")
     tk.Label(caja3, text="Cantidad").grid(row=9, column=1)
 
-    pieza_predeterminadas6 = ttk.Combobox(caja3, values=pieza_buen_hombre)
+    pieza_predeterminadas6 = ttk.Combobox(caja3, values=pieza_buen_hombre, state="readonly")
     pieza_predeterminadas6.grid(row=10, column=0)
 
     cantidad_piezas_terminadas_buen_hombre = tk.Entry(caja3, width=10)
@@ -410,7 +410,7 @@ def ventana_provedores(notebook):
         command=lambda: mostrar(arbol, "piezas_finales_defenitivas", "niquelado"),
     ).grid(row=15, column=1)
     tk.Label(caja3, text="Piezas").grid(row=16, column=0)
-    lista_piezas = ttk.Combobox(caja3, values=niquelado)
+    lista_piezas = ttk.Combobox(caja3, values=niquelado, state="readonly")
     lista_piezas.grid(row=16, column=1)
     tk.Label(caja3, text="Cantidad").grid(row=17, column=0)
     cantidad_a_niquelar = tk.Entry(caja3)
@@ -447,7 +447,7 @@ def ventana_provedores(notebook):
     tk.Label(caja4, text="envios de base").grid(row=2, column=1)
 
     tk.Label(caja4, text="Tipo").grid(row=3, column=0)
-    modelo = ttk.Combobox(caja4, values=modelo_piezas)
+    modelo = ttk.Combobox(caja4, values=modelo_piezas, state="readonly")
     modelo.grid(row=4, column=0)
 
     tk.Label(caja4, text="Cantidad").grid(row=3, column=1)

@@ -35,7 +35,7 @@ def inicio(notebook):
 
 
     # Insertar una imagen en lugar de texto
-    image_path1 = "img/fadeco_logo.png"  # Reemplaza con la ruta real de tu imagen en formato PNG
+    image_path1 = "D:/base_datos_fadeco1_pyinstall/img/fadeco_logo.png"  # Reemplaza con la ruta real de tu imagen en formato PNG
     image1 = tk.PhotoImage(file=image_path1)
     label_image1 = tk.Label(box1, image=image1, bg='#192965')  # Cambiar el color de fondo de la imagen
     label_image1.image = image1  # Para evitar que la imagen sea eliminada por el recolector de basura
@@ -57,7 +57,7 @@ def inicio(notebook):
     titulo.grid(row=0 ,column=0 , sticky="esw")
     
 
-    image_path2 = "img/Cortadora.png"  # Reemplaza con la ruta real de tu imagen en formato PNG
+    image_path2 = "D:/base_datos_fadeco1_pyinstall/img/Cortadora.png"  # Reemplaza con la ruta real de tu imagen en formato PNG
     image2 = tk.PhotoImage(file=image_path2)
     label_image2 = tk.Label(box2, image=image2, bg='#192965')  # Cambiar el color de fondo de la imagen
     label_image2.image = image2  # Para evitar que la imagen sea eliminada por el recolector de basura

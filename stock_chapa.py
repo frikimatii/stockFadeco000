@@ -27,7 +27,7 @@ from funciones import (
     armar_cabezales_pint
 )
 
-
+ 
 piezas_pedefinida_chapas_base = [
     "chapa_principal_330",
     "lateral_L_330",

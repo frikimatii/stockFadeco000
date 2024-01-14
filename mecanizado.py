@@ -158,7 +158,7 @@ def mecanizado(notebook):
     ttk.Label(torno, text="Torno", style="WhiteOnRed.TLabel", font=("Verdana", 25, "bold")).grid(row=0, column=0, columnspan=2)
 
     ttk.Label(torno, text="Piezas A Tornear",style='WhiteOnRed.TLabel').grid(row=1, column=0)
-    piezas_a_torner = ttk.Combobox(torno, values=piezas_a_torner_lista)
+    piezas_a_torner = ttk.Combobox(torno, values=piezas_a_torner_lista, state="readonly")
     piezas_a_torner.grid(row=2, column=0)
 
     ttk.Label(torno, text="Cantidad",style='WhiteOnRed.TLabel').grid(row=1, column=1)
@@ -208,7 +208,7 @@ def mecanizado(notebook):
 
     ttk.Label(torno, text="Torneado de cajas", style="WhiteOnRed.TLabel", font=("Arial", 10, "bold")).grid(row=7, column=0, columnspan=2)
     ttk.Label(torno, text="Cajas Terminadas", style="WhiteOnRed.TLabel").grid(row=8, column=0)
-    caja_a_torner = ttk.Combobox(torno, values=cajas_torono)
+    caja_a_torner = ttk.Combobox(torno, values=cajas_torono, state="readonly")
     caja_a_torner.grid(row=9, column=0)
 
     ttk.Label(torno, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=8, column=1)
@@ -268,7 +268,7 @@ def mecanizado(notebook):
     ttk.Label(caja2, text="Aujugeriado de Piezas", style="WhiteOnRed.TLabel", font=("Times New Roman", 18, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
     
     ttk.Label(caja2, text="Piezas Augeriadas", style="WhiteOnRed.TLabel").grid(row=1, column=0)
-    piezas_a_augerias = ttk.Combobox(caja2, values=piezas_a_augeriar_lista)
+    piezas_a_augerias = ttk.Combobox(caja2, values=piezas_a_augeriar_lista, state="readonly")
     piezas_a_augerias.grid(row=2, column=0)
 
     ttk.Label(caja2, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=1, column=1)
@@ -322,7 +322,7 @@ def mecanizado(notebook):
     ttk.Label(caja3, text="Lijado de Piezas", style="WhiteOnRed.TLabel", font=("Times New Roman", 18, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
     
     ttk.Label(caja3, text="Piezas lijada", style="WhiteOnRed.TLabel").grid(row=1, column=0)
-    piezas_a_lijada = ttk.Combobox(caja3, values=piezas_lijadas)
+    piezas_a_lijada = ttk.Combobox(caja3, values=piezas_lijadas, state="readonly")
     piezas_a_lijada.grid(row=2, column=0)
 
     ttk.Label(caja3, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=1, column=1)
@@ -376,7 +376,7 @@ def mecanizado(notebook):
     ttk.Label(caja4, text="Balancin", style="WhiteOnRed.TLabel", font=("Times New Roman", 18, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
     
     ttk.Label(caja4, text="Piezas Balancin", style="WhiteOnRed.TLabel").grid(row=1, column=0)
-    piezas_a_prenza = ttk.Combobox(caja4, values=piezas_prenza)
+    piezas_a_prenza = ttk.Combobox(caja4, values=piezas_prenza, state="readonly")
     piezas_a_prenza.grid(row=2, column=0)
 
     ttk.Label(caja4, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=1, column=1)
@@ -430,7 +430,7 @@ def mecanizado(notebook):
     ttk.Label(caja5, text="Pulido en fabrica", style="WhiteOnRed.TLabel", font=("Times New Roman", 18, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
     
     ttk.Label(caja5, text="Piezas a Pulir", style="WhiteOnRed.TLabel").grid(row=1, column=0)
-    piezas_a_pulir = ttk.Combobox(caja5, values=cabezal_inox)
+    piezas_a_pulir = ttk.Combobox(caja5, values=cabezal_inox, state="readonly")
     piezas_a_pulir.grid(row=2, column=0)
 
     ttk.Label(caja5, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=1, column=1)
@@ -485,7 +485,7 @@ def mecanizado(notebook):
     ttk.Label(caja6, text="Soldado en fabrica", style="WhiteOnRed.TLabel", font=("Times New Roman", 18, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
     
     ttk.Label(caja6, text="Piezas a soldar", style="WhiteOnRed.TLabel").grid(row=1, column=0)
-    piezas_a_varilla = ttk.Combobox(caja6, values=varillas_soldar)
+    piezas_a_varilla = ttk.Combobox(caja6, values=varillas_soldar, state="readonly")
     piezas_a_varilla.grid(row=2, column=0)
 
     ttk.Label(caja6, text="Cantidad", style="WhiteOnRed.TLabel").grid(row=1, column=1)
